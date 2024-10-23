@@ -1,0 +1,17 @@
+asgiref==3.8.1
+automium==0.2.6
+automium-web==0.1.1
+blinker==1.8.2
+click==8.1.7
+colorama==0.4.6
+Django==5.1.2
+Flask==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+legacy==0.1.7
+MarkupSafe==3.0.2
+sqlparse==0.5.1
+typing_extensions==4.12.2
+tzdata==2024.2
+views==0.3
+Werkzeug==3.0.4
