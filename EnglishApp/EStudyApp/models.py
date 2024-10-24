@@ -7,13 +7,12 @@ from datetime import datetime, timedelta
 # Create your models here.
 
 
-class TypeTestEnum(Enum):
-    READING = 'Reading',
-    LISTENING = 'Listening'
-
-
-class Test(models):
-    TYPE_TEST_CHOICES = [(type.name, type.value) for type in TypeTestEnum]
+class Test(models.Model):
+    TYPE_TEST_CHOICES = [
+        ('READING', 'Reading'),
+        ('LISTENING', 'Listening'),
+    ]
+    
     test_name = models.CharField(
         max_length=255,
         blank=True,
@@ -48,28 +47,24 @@ class Test(models):
         return self.test_name
 
 
-class DifficultyEnum(Enum):
-    BASIC = 'Basic'
-    MEDIUM = 'Medium'
-    DIFFICULTY = 'Difficulty'
-    VERY_DIFFICULTY = 'Very Difficulty'
-
-
-class CorrectAnswerEnum(Enum):
-    A = 'A'
-    B = 'B'
-    C = 'C'
-    D = 'D'
-
-
 class Question(models.Model):
-    DIFFICULTY_LEVEL_CHOICES = [(level.name, level.value) for level in DifficultyEnum]
-    CORRECT_ANSWER_CHOICES = [(answer.name, answer.value) for answer in CorrectAnswerEnum]
+    DIFFICULTY_LEVEL_CHOICES = [
+        ('BASIC', 'Basic'),
+        ('MEDIUM', 'Medium'),
+        ('DIFFICULTY', 'Difficulty'),
+        ('VERY_DIFFICULTY', 'Very Difficulty')
+    ]
+    CORRECT_ANSWER_CHOICES = [
+        ("A", "A"),
+        ("B", "B"),
+        ("C", "C"),
+        ("D", "D")
+    ]
     question_text = models.TextField()
     difficulty_level = models.CharField(
         max_length=30,
         choices=DIFFICULTY_LEVEL_CHOICES,
-        default=DifficultyEnum.BASIC.name
+        default=('BASIC', 'Basic'),
     )
     correct_answer = models.CharField(
         max_length=10,
@@ -79,7 +74,6 @@ class Question(models.Model):
         null=True
     )
     question_number = models.IntegerField(
-        max_length=20,
         null=True,
         blank=True
     )
@@ -108,7 +102,6 @@ class QuestionType(models.Model):
         null=True
     )
     count = models.IntegerField(
-        max_length=20,
         blank=True,
         null=True
     )
@@ -128,13 +121,11 @@ class QuestionType(models.Model):
         return self.type_name
 
 
-class SkillEnum(Enum):
-    READING = 'Reading'
-    LISTENING = 'Listening'
-
-
 class Part(models.Model):
-    SKILL_CHOICES = [(skill.name, skill.value) for skill in SkillEnum]
+    SKILL_CHOICES = [
+        ('READING', 'Reading'),
+        ('LISTENING', 'Listening'),
+    ]
     part_name = models.CharField(
         max_length=20,
         null=True,
@@ -156,7 +147,7 @@ class Part(models.Model):
         return self.part_name
 
 
-class QuestionSet(models):
+class QuestionSet(models.Model):
     audio = models.CharField(
         max_length=255,
         blank=True,
