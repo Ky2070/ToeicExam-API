@@ -41,10 +41,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLES, default='user')
     text = models.TextField(blank=True, null=True)
 
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.email
-
