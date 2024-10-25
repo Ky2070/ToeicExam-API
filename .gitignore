@@ -84,8 +84,10 @@ ENV/
 env/
 venv.bak/
 venv.bak2/
+.venv/
 
 migrations/
 __pycache__/
+__init__.py
 
 
