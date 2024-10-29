@@ -16,10 +16,10 @@ from rest_framework.permissions import IsAuthenticated
 class UserRegistrationView(APIView):
     def post(self, request):
         user = User.objects.filter(email=request.data.get('email'))
-        
+
         if user.exists():
             return Response({"message": "Email đã tồn tại"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             serializer = UserRegistrationSerializer(data=request.data)
             if serializer.is_valid():
@@ -40,7 +40,7 @@ class UserLoginView(APIView):
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 return Response({'error': 'Invalid email or password'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             user = authenticate(request, email=user.email, password=password)
             print(user)
             if user is not None:
@@ -54,12 +54,14 @@ class UserLoginView(APIView):
         except Exception as e:
             print(e)
             return Response({"message": "Lỗi server"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+
 class UserProfileView(APIView):
     Model = User
     serializer = UserSerializer
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         user = request.user
         serializer = UserSerializer(user)
-        return Response(serializer.data)   
+        return Response(serializer.data)
