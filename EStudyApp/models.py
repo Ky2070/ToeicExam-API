@@ -3,7 +3,7 @@ from enum import Enum
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-from Authentication.models import User # type: ignore
+from Authentication.models import User  # type: ignore
 
 
 # Create your models here.
@@ -137,7 +137,8 @@ class PartDescription(models.Model):
 class Part(models.Model):
     part_description = models.ForeignKey(
         PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING)
-    test = models.ForeignKey(Test, related_name='part_test', on_delete=models.DO_NOTHING)
+    test = models.ForeignKey(
+        Test, related_name='part_test', on_delete=models.DO_NOTHING)
     pass
 
 
@@ -162,7 +163,10 @@ class QuestionSet(models.Model):
 
 
 class Question(models.Model):
-    question_set = models.ForeignKey(QuestionSet, related_name='question_question_set', on_delete=models.DO_NOTHING)
+    question_set = models.ForeignKey(
+        QuestionSet, related_name='question_question_set', on_delete=models.DO_NOTHING)
+    question_type = models.ForeignKey(QuestionType, related_name='question_question_type', on_delete=models.DO_NOTHING, null=True,
+                                      blank=True)
 
     DIFFICULTY_LEVEL_CHOICES = [
         ('BASIC', 'Basic'),
@@ -212,13 +216,17 @@ class Question(models.Model):
 
 
 class PartQuestionSet(models.Model):
-    part = models.ForeignKey(Part, related_name='partquestionset_part', on_delete=models.DO_NOTHING)
-    question_set = models.ForeignKey(QuestionSet, related_name='partquestionset_question_set', on_delete=models.DO_NOTHING)
+    part = models.ForeignKey(
+        Part, related_name='partquestionset_part', on_delete=models.DO_NOTHING)
+    question_set = models.ForeignKey(
+        QuestionSet, related_name='partquestionset_question_set', on_delete=models.DO_NOTHING)
 
 
 class History(models.Model):
-    user = models.ForeignKey(User, related_name='history_user', on_delete=models.DO_NOTHING)
-    test = models.ForeignKey(Test, related_name='history_test', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(
+        User, related_name='history_user', on_delete=models.DO_NOTHING)
+    test = models.ForeignKey(
+        Test, related_name='history_test', on_delete=models.DO_NOTHING)
     score = models.DecimalField(
         max_digits=3, decimal_places=0, blank=True, null=True)
     start_time = models.DateTimeField(blank=True, null=True)
