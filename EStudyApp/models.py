@@ -142,6 +142,18 @@ class Part(models.Model):
 
 
 class QuestionSet(models.Model):
+    test = models.ForeignKey(Test,
+                             related_name='question_set_test',
+                             on_delete=models.DO_NOTHING,
+                             null=True,
+                             blank=True
+                             )
+    part = models.ForeignKey(Part,
+                             related_name='question_set_part',
+                             on_delete=models.DO_NOTHING,
+                             null=True,
+                             blank=True
+                             )
     audio = models.CharField(
         max_length=255,
         blank=True,
@@ -162,14 +174,28 @@ class QuestionSet(models.Model):
 
 
 class Question(models.Model):
-    question_set = models.ForeignKey(
-        QuestionSet, related_name='question_question_set', on_delete=models.DO_NOTHING)
+    test = models.ForeignKey(Test,
+                             related_name='question_test',
+                             on_delete=models.DO_NOTHING,
+                             null=True,
+                             blank=True
+                             )
+    question_set = models.ForeignKey(QuestionSet,
+                                     related_name='question_question_set',
+                                     on_delete=models.DO_NOTHING,
+                                     null=True,
+                                     blank=True)
     question_type = models.ForeignKey(QuestionType,
                                       related_name='question_question_type',
                                       on_delete=models.DO_NOTHING,
                                       null=True,
                                       blank=True)
-
+    part = models.ForeignKey(Part,
+                             related_name='question_part',
+                             on_delete=models.DO_NOTHING,
+                             null=True,
+                             blank=True
+                             )
     DIFFICULTY_LEVEL_CHOICES = [
         ('BASIC', 'Basic'),
         ('MEDIUM', 'Medium'),
@@ -186,7 +212,7 @@ class Question(models.Model):
     difficulty_level = models.CharField(
         max_length=30,
         choices=DIFFICULTY_LEVEL_CHOICES,
-        default=('BASIC', 'Basic'),
+        default='BASIC',  # Sử dụng giá trị đầu tiên trong tuple
     )
     correct_answer = models.CharField(
         max_length=10,
@@ -244,3 +270,124 @@ class History(models.Model):
         max_digits=3, decimal_places=0, blank=True, null=True)
     complete = models.BooleanField(default=False)
     test_result = models.JSONField(blank=True, null=True)
+
+
+class Flashcard(models.Model):
+    user = models.ForeignKey(User,
+                             related_name='flashcard_user',
+                             on_delete=models.DO_NOTHING)
+    term = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    definition = models.TextField()
+    FLASHCARD_LEVEL_CHOICES = [
+        ('BASIC', 'Basic'),
+        ('MEDIUM', 'Medium'),
+        ('DIFFICULTY', 'Difficulty')
+    ]
+    level = models.CharField(
+        max_length=30,
+        choices=FLASHCARD_LEVEL_CHOICES,
+        default=('BASIC', 'Basic'),
+    )
+    example = models.TextField()
+
+
+class Course(models.Model):
+    user = models.ForeignKey(User,
+                             related_name='course_user',
+                             on_delete=models.DO_NOTHING)
+    title = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+    description = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+    COURSE_LEVEL_CHOICES = [
+        ('BASIC', 'Basic'),
+        ('ADVANCED', 'Advanced'),
+        ('PRO', 'Pro')
+    ]
+    level = models.CharField(
+        max_length=30,
+        choices=COURSE_LEVEL_CHOICES,
+        default=('BASIC', 'Basic'),
+    )
+    duration = models.DateTimeField(blank=True, null=True)
+
+
+class Lesson(models.Model):
+    course = models.ForeignKey(Course,
+                               related_name='lesson_course',
+                               on_delete=models.DO_NOTHING)
+    title = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+    content = models.TextField()
+    quiz = models.TextField()
+
+
+class CommentLesson(models.Model):
+    user = models.ForeignKey(
+        User,
+        related_name='commentlesson_user',
+        on_delete=models.DO_NOTHING
+    )  # Người dùng bình luận
+    lesson = models.ForeignKey(
+        Lesson,
+        related_name='commentlesson_lesson',
+        on_delete=models.DO_NOTHING
+    )  # Liên kết đến bài học (Lesson)
+    parent = models.ForeignKey(
+        'self',
+        related_name='replies',
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True
+    )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
+    content = models.TextField()  # Nội dung bình luận
+    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+
+    def __str__(self):
+        return f'Comment by {self.user} on {self.lesson}'
+
+
+class Blog(models.Model):
+    title = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True
+    )
+    content = models.TextField()
+    author = models.ForeignKey(User,
+                               related_name='blog_user',
+                               on_delete=models.DO_NOTHING)
+    publish_date = models.DateTimeField(blank=True, null=True)
+
+
+class CommentBlog(models.Model):
+    user = models.ForeignKey(User,
+                             related_name='commentblog_user',
+                             on_delete=models.DO_NOTHING)
+    blog = models.ForeignKey(Blog,
+                             related_name='commentblog_blog',
+                             on_delete=models.DO_NOTHING)
+    parent = models.ForeignKey('self',
+                               related_name='replies',
+                               on_delete=models.DO_NOTHING,
+                               blank=True,
+                               null=True
+                               )
+    content = models.TextField()
+    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+
+    def __str__(self):
+        return f'Comment by {self.user} on {self.blog}'
