@@ -1,5 +1,4 @@
 from django.db import models
-from enum import Enum
 from django.utils import timezone
 from datetime import datetime, timedelta
 
@@ -165,7 +164,10 @@ class QuestionSet(models.Model):
 class Question(models.Model):
     question_set = models.ForeignKey(
         QuestionSet, related_name='question_question_set', on_delete=models.DO_NOTHING)
-    question_type = models.ForeignKey(QuestionType, related_name='question_question_type', on_delete=models.DO_NOTHING, null=True,
+    question_type = models.ForeignKey(QuestionType,
+                                      related_name='question_question_type',
+                                      on_delete=models.DO_NOTHING,
+                                      null=True,
                                       blank=True)
 
     DIFFICULTY_LEVEL_CHOICES = [
