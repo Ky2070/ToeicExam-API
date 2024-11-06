@@ -49,6 +49,17 @@ class Test(models.Model):
         return self.test_name
 
 
+# class UserTestResult(models.Model):
+#     user = models.ForeignKey(User,
+#                              related_name='usertestresult_user',
+#                              on_delete=models.DO_NOTHING)
+#     test = models.ForeignKey(Test,
+#                              related_name='usertestresult_test',
+#                              on_delete=models.DO_NOTHING)
+#     test_date = models.DateTimeField()
+#     time_taken = models.TimeField()
+
+
 class QuestionType(models.Model):
     type_name = models.CharField(
         max_length=100,
@@ -140,6 +151,9 @@ class Part(models.Model):
         Test, related_name='part_test', on_delete=models.DO_NOTHING)
     pass
 
+    def __str__(self):
+        return f'{self.part_description} - {self.test}'
+
 
 class QuestionSet(models.Model):
     test = models.ForeignKey(Test,
@@ -163,6 +177,7 @@ class QuestionSet(models.Model):
         blank=True,  # Cho phép trường này để trống
         null=True  # Cho phép lưu giá trị NULL
     )
+
     image = models.CharField(
         max_length=255,
         blank=True,
@@ -212,7 +227,10 @@ class Question(models.Model):
     difficulty_level = models.CharField(
         max_length=30,
         choices=DIFFICULTY_LEVEL_CHOICES,
-        default='BASIC',  # Sử dụng giá trị đầu tiên trong tuple
+        default='',  # Sử dụng giá trị đầu tiên trong tuple
+        blank=True,
+        null=True
+
     )
     correct_answer = models.CharField(
         max_length=10,
