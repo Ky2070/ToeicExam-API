@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import Test, Part, QuestionSet, Question
 
+
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'question_text', 'difficulty_level', 'correct_answer', 'answers']
+
 
 class QuestionSetSerializer(serializers.ModelSerializer):
     question_question_set = QuestionSerializer(many=True, read_only=True)  # Liên kết đến các câu hỏi
@@ -12,6 +14,7 @@ class QuestionSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionSet
         fields = ['id', 'audio', 'page', 'image', 'question_question_set']
+
 
 class PartSerializer(serializers.ModelSerializer):
     question_set_part = QuestionSetSerializer(many=True, read_only=True)  # Liên kết đến các QuestionSet trong Part
@@ -21,9 +24,17 @@ class PartSerializer(serializers.ModelSerializer):
         fields = ['id', 'part_description', 'question_set_part']
 
 
-class TestSerializer(serializers.ModelSerializer):
+class TestDetailSerializer(serializers.ModelSerializer):
     part_test = PartSerializer(many=True, read_only=True)  # Liên kết đến các Part trong Test
 
     class Meta:
         model = Test
         fields = ['id', 'test_name', 'description', 'test_date', 'duration', 'part_test']
+
+
+class TestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = ['id', 'test_name', 'description', 'test_date', 'duration']
+
+

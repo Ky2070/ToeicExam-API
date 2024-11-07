@@ -267,6 +267,8 @@ class PartQuestionSet(models.Model):
     question_set = models.ForeignKey(
         QuestionSet, related_name='partquestionset_question_set', on_delete=models.DO_NOTHING)
 
+    def __str__(self):
+        return f"{self.part} - {self.question_set}"
 
 class History(models.Model):
     user = models.ForeignKey(
