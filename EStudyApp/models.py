@@ -14,7 +14,7 @@ class Test(models.Model):
         ('LISTENING', 'Listening'),
     ]
 
-    test_name = models.CharField(
+    name = models.CharField(
         max_length=255,
         blank=True,
         null=True
@@ -24,7 +24,7 @@ class Test(models.Model):
         blank=True,
         null=True
     )
-    type_test = models.CharField(
+    type = models.CharField(
         max_length=30,
         choices=TYPE_TEST_CHOICES,
         null=True,
@@ -46,7 +46,7 @@ class Test(models.Model):
     )
 
     def __str__(self):
-        return self.test_name
+        return self.name
 
 
 # class UserTestResult(models.Model):
@@ -61,7 +61,7 @@ class Test(models.Model):
 
 
 class QuestionType(models.Model):
-    type_name = models.CharField(
+    name = models.CharField(
         max_length=100,
         blank=True,
         null=True

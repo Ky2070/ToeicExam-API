@@ -29,7 +29,7 @@ class TestDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'test_name', 'description', 'test_date', 'duration', 'part_test']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'part_test']
 
 
 class TestSerializer(serializers.ModelSerializer):
