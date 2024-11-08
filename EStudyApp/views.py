@@ -54,13 +54,13 @@ class TestPartDetailView(APIView):
             "test": test_serializer.data,
             "part": part_serializer.data
         }, status=status.HTTP_200_OK)
-    
+
+
 class CourseListView(APIView):
     def get(self, request):
         courses = Course.objects.all()
-        serializer = CourseSerializer(courses, many = True)
+        serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data)
-    
-# class CourseDetailView(APIView):
-    # def get(self, request, id):
 
+# class CourseDetailView(APIView):
+# def get(self, request, id):

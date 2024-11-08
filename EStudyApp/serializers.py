@@ -5,7 +5,7 @@ from .models import Test, Part, QuestionSet, Question, Course, Lesson
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ['id', 'question_text', 'difficulty_level', 'correct_answer', 'answers']
+        fields = ['id', 'question_number', 'question_text', 'difficulty_level', 'correct_answer', 'answers']
 
 
 class QuestionSetSerializer(serializers.ModelSerializer):
@@ -35,16 +35,18 @@ class TestDetailSerializer(serializers.ModelSerializer):
 class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = ['id', 'test_name', 'description', 'test_date', 'duration']
+        fields = ['id', 'name', 'description', 'test_date', 'duration']
+
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['id', 'title', 'description', 'level', 'duration']
 
+
 class LessonSerializer(serializers.ModelSerializer):
     lesson_course = CourseSerializer(many=True, read_only=True)
+
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'content', 'quiz']
-

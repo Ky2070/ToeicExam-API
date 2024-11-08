@@ -83,7 +83,7 @@ class QuestionType(models.Model):
     )
 
     def __str__(self):
-        return self.type_name
+        return self.name
 
 
 # class Part(models.Model):
@@ -185,7 +185,7 @@ class QuestionSet(models.Model):
     )
 
     def __str__(self):
-        return self.page
+        return f'{self.page} - {self.test} - {self.part}'
 
 
 class Question(models.Model):
@@ -258,7 +258,7 @@ class Question(models.Model):
         self.soft_delete()
 
     def __str__(self):
-        return self.question_text
+        return f'{self.question_number} - {self.question_text} - {self.question_set}'
 
 
 class PartQuestionSet(models.Model):
@@ -269,6 +269,7 @@ class PartQuestionSet(models.Model):
 
     def __str__(self):
         return f"{self.part} - {self.question_set}"
+
 
 class History(models.Model):
     user = models.ForeignKey(
