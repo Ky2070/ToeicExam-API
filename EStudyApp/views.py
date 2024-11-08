@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Test, Part
-from .serializers import TestDetailSerializer, TestSerializer, PartSerializer
+from .models import Test, Part, Course
+from .serializers import TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
 
 
 class TestDetailView(APIView):
@@ -54,3 +54,13 @@ class TestPartDetailView(APIView):
             "test": test_serializer.data,
             "part": part_serializer.data
         }, status=status.HTTP_200_OK)
+    
+class CourseListView(APIView):
+    def get(self, request):
+        courses = Course.objects.all()
+        serializer = CourseSerializer(courses, many = True)
+        return Response(serializer.data)
+    
+# class CourseDetailView(APIView):
+    # def get(self, request, id):
+

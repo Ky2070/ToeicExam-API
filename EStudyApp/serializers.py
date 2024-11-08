@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Test, Part, QuestionSet, Question
+from .models import Test, Part, QuestionSet, Question, Course, Lesson
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -37,4 +37,14 @@ class TestSerializer(serializers.ModelSerializer):
         model = Test
         fields = ['id', 'test_name', 'description', 'test_date', 'duration']
 
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'title', 'description', 'level', 'duration']
+
+class LessonSerializer(serializers.ModelSerializer):
+    lesson_course = CourseSerializer(many=True, read_only=True)
+    class Meta:
+        model = Lesson
+        fields = ['id', 'title', 'content', 'quiz']
 
