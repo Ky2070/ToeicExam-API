@@ -7,5 +7,5 @@ urlpatterns = [
     path('tests/<int:test_id>/parts/<int:part_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
     # API lấy chi tiết test và part
 
-    path('courses/', CourseListView.as_view(), name='couse-list'),
+    path('courses/', CourseListView.as_view(), name='course-list'),
 ]

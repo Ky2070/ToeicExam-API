@@ -18,10 +18,11 @@ class QuestionSetSerializer(serializers.ModelSerializer):
 
 class PartSerializer(serializers.ModelSerializer):
     question_set_part = QuestionSetSerializer(many=True, read_only=True)  # Liên kết đến các QuestionSet trong Part
+    question_part = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Part
-        fields = ['id', 'part_description', 'question_set_part']
+        fields = ['id', 'part_description', 'question_set_part', 'question_part']
 
 
 class TestDetailSerializer(serializers.ModelSerializer):
