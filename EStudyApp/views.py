@@ -36,7 +36,8 @@ class TestPartDetailView(APIView):
     def get(self, request, test_id, part_id, format=None):
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`
-            test = Test.objects.prefetch_related('part_test').get(pk=test_id)
+            test = Test.objects.prefetch_related('part_test',
+                                                 ).get(pk=test_id)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
 

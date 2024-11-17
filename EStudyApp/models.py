@@ -223,7 +223,7 @@ class Question(models.Model):
         ("C", "C"),
         ("D", "D")
     ]
-    question_text = models.TextField()
+    question_text = models.TextField(null=True, blank=True)
     difficulty_level = models.CharField(
         max_length=30,
         choices=DIFFICULTY_LEVEL_CHOICES,
