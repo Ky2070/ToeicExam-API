@@ -1,21 +1,35 @@
+from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Test, Part, Course
+from .models import Test, Part, Course, QuestionSet, Question
 from .serializers import TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
 
 
 class TestDetailView(APIView):
     def get(self, request, pk, format=None):
         try:
-            # Nạp đầy đủ các phần, bộ câu hỏi và câu hỏi liên quan đến bài kiểm tra
+            # Nạp đầy đủ các phần, bộ câu hỏi, và câu hỏi liên quan đến bài kiểm tra
             test = Test.objects.prefetch_related(
-                'part_test',
+                Prefetch(
+                    'part_test',  # Phần trong bài kiểm tra
+                    queryset=Part.objects.prefetch_related(
+                        Prefetch(
+                            'question_set_part',  # Bộ câu hỏi trong phần
+                            queryset=QuestionSet.objects.order_by('id').prefetch_related(
+                                Prefetch(
+                                    'question_question_set',  # Câu hỏi trong bộ câu hỏi
+                                    queryset=Question.objects.order_by('question_number')
+                                )
+                            )
+                        )
+                    )
+                )
             ).get(pk=pk)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Sử dụng serializer mới để nạp dữ liệu liên kết
+        # Sử dụng serializer để nạp dữ liệu liên kết
         serializer = TestDetailSerializer(test)
         return Response(serializer.data)
 
@@ -35,9 +49,23 @@ class TestListView(APIView):
 class TestPartDetailView(APIView):
     def get(self, request, test_id, part_id, format=None):
         try:
-            # Tìm kiếm bài kiểm tra dựa trên `test_id`
-            test = Test.objects.prefetch_related('part_test',
-                                                 ).get(pk=test_id)
+            # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
+            test = Test.objects.prefetch_related(
+                Prefetch(
+                    'part_test',
+                    queryset=Part.objects.prefetch_related(
+                        Prefetch(
+                            'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
+                            queryset=QuestionSet.objects.order_by('id').prefetch_related(
+                                Prefetch(
+                                    'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
+                                    queryset=Question.objects.order_by('question_number')
+                                )
+                            )
+                        )
+                    ).order_by('id')  # Sắp xếp các phần theo `id`
+                )
+            ).get(pk=test_id)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -50,6 +78,19 @@ class TestPartDetailView(APIView):
         # Serialize dữ liệu của bài kiểm tra và phần
         test_serializer = TestSerializer(test)
         part_serializer = PartSerializer(part)
+
+        # # Kiểm tra và sắp xếp thủ công nếu cần
+        # part_data = part_serializer.data
+        # part_data["questionSetPart"] = sorted(
+        #     part_data["questionSetPart"],
+        #     key=lambda x: x["id"]
+        # )
+        #
+        # for question_set in part_data["questionSetPart"]:
+        #     question_set["questionQuestionSet"] = sorted(
+        #         question_set["questionQuestionSet"],
+        #         key=lambda x: x["questionNumber"]
+        #     )
 
         return Response({
             "test": test_serializer.data,

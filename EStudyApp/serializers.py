@@ -28,6 +28,7 @@ class PartDescriptionSerializer(serializers.ModelSerializer):
         # fields = ['part_description']
         fields = '__all__'
 
+
 class PartSerializer(serializers.ModelSerializer):
     question_set_part = QuestionSetSerializer(many=True, read_only=True)  # Liên kết đến các QuestionSet trong Part
     question_part = QuestionSerializer(many=True, read_only=True)
