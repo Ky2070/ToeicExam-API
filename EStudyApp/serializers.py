@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Test, Part, QuestionSet, Question, Course, Lesson
+from .models import PartDescription, Test, Part, QuestionSet, Question, Course, Lesson
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -22,9 +22,16 @@ class QuestionSetSerializer(serializers.ModelSerializer):
         fields = ['id', 'audio', 'page', 'image', 'question_question_set']
 
 
+class PartDescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PartDescription
+        # fields = ['part_description']
+        fields = '__all__'
+
 class PartSerializer(serializers.ModelSerializer):
     question_set_part = QuestionSetSerializer(many=True, read_only=True)  # Liên kết đến các QuestionSet trong Part
     question_part = QuestionSerializer(many=True, read_only=True)
+    part_description= PartDescriptionSerializer(read_only=True)
 
     class Meta:
         model = Part

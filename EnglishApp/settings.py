@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Replace the DATABASES section of your settings.py with this
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+tmpPostgres = urlparse(os.getenv("DATABASE_NEON"))
 
 DATABASES = {
     'default': {
