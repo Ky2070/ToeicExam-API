@@ -37,11 +37,12 @@ class TestDetailView(APIView):
 # Bạn có thể viết một view tương tự để lấy danh sách tất cả các bài kiểm tra nếu cần:
 class TestListView(APIView):
     """
-    API view để lấy danh sách tất cả các bài kiểm tra.
+    API view để lấy danh sách tất cả các bài kiểm tra đã được sắp xếp.
     """
 
     def get(self, request, format=None):
-        tests = Test.objects.all()
+        # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
+        tests = Test.objects.all().order_by('id')  # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
         serializer = TestSerializer(tests, many=True)
         return Response(serializer.data)
 
