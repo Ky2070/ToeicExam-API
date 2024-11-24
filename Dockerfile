@@ -11,17 +11,17 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Thiết lập thư mục làm việc trong container
-WORKDIR /app
+# # Thiết lập thư mục làm việc trong container
+# WORKDIR /app
 
 # Sao chép tệp yêu cầu của Django vào container
-COPY requirements.txt /app/
+COPY requirements.txt .
 
 # Cài đặt các thư viện Python
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Sao chép mã nguồn ứng dụng Django vào container
-COPY . /app/
+COPY . .
 
 # Mở port (thường dùng cho dev, có thể thay đổi)
 EXPOSE 8000
