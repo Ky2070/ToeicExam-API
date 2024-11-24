@@ -26,5 +26,7 @@ COPY . /app/
 # Mở port (thường dùng cho dev, có thể thay đổi)
 EXPOSE 8000
 
+RUN python manage.py collectstatic --noinput
+
 # Chạy lệnh để khởi chạy ứng dụng Django
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "EnglishApp.wsgi:application"]
