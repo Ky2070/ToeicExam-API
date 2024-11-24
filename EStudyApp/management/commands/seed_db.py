@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from EStudyApp.models import Test, QuestionType, PartDescription, Part, QuestionSet, Question, PartQuestionSet
 from django.utils import timezone
 
+
 class Command(BaseCommand):
     help = 'Seeds the database with sample data'
 

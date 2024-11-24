@@ -49,7 +49,7 @@ class TestDetailSerializer(serializers.ModelSerializer):
 class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count']
 
 
 class CourseSerializer(serializers.ModelSerializer):

@@ -44,6 +44,15 @@ class Test(models.Model):
         blank=True,
         null=True
     )
+    # Số câu hỏi (mặc định 200)
+    question_count = models.IntegerField(
+        default=200
+    )
+
+    # Số phần thi (mặc định 7)
+    part_count = models.IntegerField(
+        default=7
+    )
 
     def __str__(self):
         return self.name
