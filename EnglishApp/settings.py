@@ -104,7 +104,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://englishapp-client.vercel.app"
+]
 
 # Nếu bạn sử dụng credentials (ví dụ như cookies)
 CORS_ALLOW_CREDENTIALS = True
