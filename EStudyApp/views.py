@@ -8,13 +8,15 @@ from Authentication.models import User
 from .calculate_toeic import calculate_toeic_score
 from .get_question_skill import get_question_skill
 from .models import Test, Part, Course, QuestionSet, Question, History
-from .serializers import TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
+from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class QuestionSkillAPIView(APIView):
     """
     API View to retrieve the skill (LISTENING or READING) of a question by its ID.
     """
+
     def get(self, request, question_id):
         try:
             # Lấy câu hỏi dựa trên ID
@@ -32,9 +34,19 @@ class QuestionSkillAPIView(APIView):
 
 
 class SubmitTestView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
-            data = request.data  # Lấy dữ liệu từ body request
+            data = request.data["data"]  # Lấy dữ liệu từ body request
+            # Lấy ID của bài kiểm tra từ body request
+            test_id = request.data["test_id"]
+            user = request.user  # Lấy thông tin người
+
+            # Lưu kết quả vào lịch sử bài thi
+            # Giả sử có một bài thi mặc định hoặc lấy từ request
+            test = Test.objects.filter(id=test_id).first()
+            end_time = datetime.now(timezone.utc)
 
             # Kiểm tra định dạng dữ liệu (phải là danh sách các câu hỏi)
             if not isinstance(data, list):
@@ -43,10 +55,15 @@ class SubmitTestView(APIView):
             # user = get_object_or_404(User, id=user_id)
 
             # Sử dụng try-except
-            try:
-                user = User.objects.get(id=2)
-            except User.DoesNotExist:
+            # try:
+            #     user = User.objects.get(id=2)
+            # except User.DoesNotExist:
+            #     return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            if user is None:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            if test is None:
+                return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
             # Khởi tạo các biến đếm số câu hỏi đúng/sai cho listening và reading
             listening_correct = 0
@@ -91,10 +108,6 @@ class SubmitTestView(APIView):
                 listening_correct, reading_correct
             )
 
-            # Lưu kết quả vào lịch sử bài thi
-            test = Test.objects.first()  # Giả sử có một bài thi mặc định hoặc lấy từ request
-            end_time = datetime.now(timezone.utc)
-
             history = History(
                 user=user,
                 test=test,
@@ -102,25 +115,15 @@ class SubmitTestView(APIView):
                 start_time=start_time,
                 end_time=end_time,
                 correct_answers=listening_correct + reading_correct,
-                wrong_answers=(listening_total - listening_correct) + (reading_total - reading_correct),
-                unanswer_questions=0,  # Giả sử không có câu chưa trả lời
+                wrong_answers=(listening_total - listening_correct) +
+                (reading_total - reading_correct),
+                # Giả sử không có câu chưa trả lời
+                unanswer_questions=(listening_total + reading_total),
                 percentage_score=(overall_score / 100) * 100,
                 listening_score=listening_score,
                 reading_score=reading_score,
                 complete=True,
-                test_result={
-                    "listening": {
-                        "total_questions": listening_total,
-                        "correct_answers": listening_correct,
-                        "score": listening_score,
-                    },
-                    "reading": {
-                        "total_questions": reading_total,
-                        "correct_answers": reading_correct,
-                        "score": reading_score,
-                    },
-                    "overall_score": overall_score,
-                }
+                test_result=data
             )
             history.save()
             # Return response with HTTP 201 Created and a simple message
@@ -148,6 +151,30 @@ class SubmitTestView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def get(self, request):
+        user = request.user
+        histories = History.objects.filter(user=user)
+        serializer = HistorySerializer(histories, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class DetailSubmitTestView(APIView):
+    is_authenticated = [IsAuthenticated]
+    
+    def get(self, request, history_id):
+        user = request.user
+        
+        if user is None:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        history = History.objects.filter(id=history_id, user=user).first()
+        
+        if history is None:
+            return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = HistorySerializer(history, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class TestDetailView(APIView):
     def get(self, request, pk, format=None):
@@ -162,13 +189,16 @@ class TestDetailView(APIView):
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
                                     'question_question_set',  # Câu hỏi trong bộ câu hỏi
-                                    queryset=Question.objects.order_by('question_number')
+                                    queryset=Question.objects.order_by(
+                                        'question_number')
                                 )
                             )
                         ),
                         Prefetch(
                             'question_part',  # Các câu hỏi trong Part
-                            queryset=Question.objects.order_by('question_number')  # Sắp xếp theo 'question_number'
+                            # Sắp xếp theo 'question_number'
+                            queryset=Question.objects.order_by(
+                                'question_number')
                         )
                     )
                 )
@@ -189,7 +219,8 @@ class TestListView(APIView):
 
     def get(self, request, format=None):
         # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
-        tests = Test.objects.all().order_by('id')  # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
+        # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
+        tests = Test.objects.all().order_by('id')
         serializer = TestSerializer(tests, many=True)
         return Response(serializer.data)
 
@@ -207,7 +238,8 @@ class TestPartDetailView(APIView):
                             queryset=QuestionSet.objects.order_by('question_number').prefetch_related(
                                 Prefetch(
                                     'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
-                                    queryset=Question.objects.order_by('question_number')
+                                    queryset=Question.objects.order_by(
+                                        'question_number')
                                 )
                             )
                         )

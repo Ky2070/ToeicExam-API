@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import PartDescription, Test, Part, QuestionSet, Question, Course, Lesson
+
+from Authentication.serializers import UserSerializer
+from .models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -64,3 +66,11 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'content', 'quiz']
+        
+class HistorySerializer(serializers.ModelSerializer):
+    test = TestSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = History
+        fields = "__all__"
