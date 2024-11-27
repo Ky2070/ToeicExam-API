@@ -38,6 +38,7 @@ class SubmitTestView(APIView):
 
     def post(self, request):
         try:
+
             data = request.data["data"]  # Lấy dữ liệu từ body request
             # Lấy ID của bài kiểm tra từ body request
             test_id = request.data["test_id"]
@@ -53,12 +54,6 @@ class SubmitTestView(APIView):
                 return Response({"error": "Invalid data format, expected a list of questions"}, status=status.HTTP_400_BAD_REQUEST)
             # Sử dụng get_object_or_404
             # user = get_object_or_404(User, id=user_id)
-
-            # Sử dụng try-except
-            # try:
-            #     user = User.objects.get(id=2)
-            # except User.DoesNotExist:
-            #     return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
             if user is None:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -70,7 +65,7 @@ class SubmitTestView(APIView):
             reading_correct = 0
             listening_total = 0
             reading_total = 0
-
+            question_count_toeic = 200
             # Lưu lịch sử bắt đầu
             start_time = datetime.now(timezone.utc)
 
@@ -107,7 +102,7 @@ class SubmitTestView(APIView):
             listening_score, reading_score, overall_score = calculate_toeic_score(
                 listening_correct, reading_correct
             )
-
+            unanswer_questions = question_count_toeic - (listening_total + reading_total)
             history = History(
                 user=user,
                 test=test,
@@ -117,8 +112,7 @@ class SubmitTestView(APIView):
                 correct_answers=listening_correct + reading_correct,
                 wrong_answers=(listening_total - listening_correct) +
                 (reading_total - reading_correct),
-                # Giả sử không có câu chưa trả lời
-                unanswer_questions=(listening_total + reading_total),
+                unanswer_questions=unanswer_questions,
                 percentage_score=(overall_score / 100) * 100,
                 listening_score=listening_score,
                 reading_score=reading_score,
@@ -143,6 +137,7 @@ class SubmitTestView(APIView):
                         "correct_answers": reading_correct,
                         "score": reading_score,
                     },
+                    "unanswer_questions": unanswer_questions,
                     "overall_score": overall_score,
                 }
             }
