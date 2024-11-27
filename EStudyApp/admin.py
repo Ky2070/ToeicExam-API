@@ -1,15 +1,52 @@
 from django.contrib import admin
-from .models import PartDescription, Part, QuestionSet, Question, PartQuestionSet, Test, Course, Lesson
+from .models import (PartDescription, Part,
+                     QuestionSet, Question, PartQuestionSet, Test, Course, Lesson, History)
 
 
+# Định nghĩa lớp ModelAdmin để thêm phân trang
+class TestAdmin(admin.ModelAdmin):
+    list_per_page = 20  # Hiển thị 20 bản ghi trên mỗi trang
 
-# Register your models here.
-admin.site.register(Test)
-admin.site.register(PartDescription)
-admin.site.register(Part)
-admin.site.register(QuestionSet)
-admin.site.register(Question)
-admin.site.register(PartQuestionSet)
-admin.site.register(Course)
-admin.site.register(Lesson)
 
+class PartDescriptionAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class PartAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class QuestionSetAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class QuestionAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class PartQuestionSetAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class CourseAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class LessonAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+class HistoryAdmin(admin.ModelAdmin):
+    list_per_page = 20
+
+
+# Đăng ký các mô hình với phân trang
+admin.site.register(Test, TestAdmin)
+admin.site.register(PartDescription, PartDescriptionAdmin)
+admin.site.register(Part, PartAdmin)
+admin.site.register(QuestionSet, QuestionSetAdmin)
+admin.site.register(Question, QuestionAdmin)
+admin.site.register(PartQuestionSet, PartQuestionSetAdmin)
+admin.site.register(Course, CourseAdmin)
+admin.site.register(Lesson, LessonAdmin)
+admin.site.register(History, HistoryAdmin)

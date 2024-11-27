@@ -1,10 +1,13 @@
+from datetime import datetime, timezone
 from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from Authentication.models import User
 from .calculate_toeic import calculate_toeic_score
 from .get_question_skill import get_question_skill
-from .models import Test, Part, Course, QuestionSet, Question
+from .models import Test, Part, Course, QuestionSet, Question, History
 from .serializers import TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
 
 
@@ -28,38 +31,48 @@ class QuestionSkillAPIView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class QuestionSkillAnalysisView(APIView):
+class SubmitTestView(APIView):
     def post(self, request):
         try:
             data = request.data  # Lấy dữ liệu từ body request
+
+            # Kiểm tra định dạng dữ liệu (phải là danh sách các câu hỏi)
             if not isinstance(data, list):
                 return Response({"error": "Invalid data format, expected a list of questions"}, status=status.HTTP_400_BAD_REQUEST)
+            # Sử dụng get_object_or_404
+            # user = get_object_or_404(User, id=user_id)
 
-            # Tạo các biến đếm
+            # Sử dụng try-except
+            try:
+                user = User.objects.get(id=2)
+            except User.DoesNotExist:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Khởi tạo các biến đếm số câu hỏi đúng/sai cho listening và reading
             listening_correct = 0
             reading_correct = 0
             listening_total = 0
             reading_total = 0
-            print("Request data:", data)
+
+            # Lưu lịch sử bắt đầu
+            start_time = datetime.now(timezone.utc)
+
+            # Duyệt qua từng câu hỏi trong dữ liệu nhận được
             for item in data:
-                print("Processing item:", item)
                 question_id = item.get("id")
-                question_number = item.get("question_number")
                 user_answer = item.get("user_answer")
-                print(question_id)
-                print(f'Câu hỏi số : {question_number}')
+
                 try:
-                    # Lấy câu hỏi từ database
+                    # Lấy câu hỏi từ cơ sở dữ liệu
                     question = Question.objects.get(id=question_id)
-                    # Kiểm tra kỹ năng của câu hỏi
+
+                    # Kiểm tra kỹ năng của câu hỏi (Listening/Reading)
                     skill = get_question_skill(question_id)
-                    print(skill)
-                    # So sánh câu trả lời của người dùng với câu trả lời đúng
+
+                    # Kiểm tra câu trả lời của người dùng
                     is_correct = user_answer == question.correct_answer
-                    print(user_answer)
-                    print(question.correct_answer)
-                    print(is_correct)
-                    # Cập nhật số lượng theo kỹ năng
+
+                    # Cập nhật các biến đếm cho Listening hoặc Reading
                     if skill == "LISTENING":
                         listening_total += 1
                         if is_correct:
@@ -70,16 +83,32 @@ class QuestionSkillAnalysisView(APIView):
                             reading_correct += 1
 
                 except Question.DoesNotExist:
-                    # Nếu không tìm thấy câu hỏi, bỏ qua
+                    # Nếu không tìm thấy câu hỏi trong DB, bỏ qua và tiếp tục
                     continue
 
-                # Tính điểm TOEIC
-                listening_score, reading_score, overall_score = calculate_toeic_score(
-                    listening_correct, reading_correct
-                )
+            # Tính toán điểm TOEIC
+            listening_score, reading_score, overall_score = calculate_toeic_score(
+                listening_correct, reading_correct
+            )
 
-                # Trả về kết quả
-                result = {
+            # Lưu kết quả vào lịch sử bài thi
+            test = Test.objects.first()  # Giả sử có một bài thi mặc định hoặc lấy từ request
+            end_time = datetime.now(timezone.utc)
+
+            history = History(
+                user=user,
+                test=test,
+                score=overall_score,
+                start_time=start_time,
+                end_time=end_time,
+                correct_answers=listening_correct + reading_correct,
+                wrong_answers=(listening_total - listening_correct) + (reading_total - reading_correct),
+                unanswer_questions=0,  # Giả sử không có câu chưa trả lời
+                percentage_score=(overall_score / 100) * 100,
+                listening_score=listening_score,
+                reading_score=reading_score,
+                complete=True,
+                test_result={
                     "listening": {
                         "total_questions": listening_total,
                         "correct_answers": listening_correct,
@@ -92,8 +121,29 @@ class QuestionSkillAnalysisView(APIView):
                     },
                     "overall_score": overall_score,
                 }
-
-            return Response(result, status=status.HTTP_200_OK)
+            )
+            history.save()
+            # Return response with HTTP 201 Created and a simple message
+            # Trả về kết quả cho người dùng
+            # Trả về kết quả với HTTP 201
+            result = {
+                "message": "Test submitted successfully",
+                "history_id": history.id,  # Trả về ID của lịch sử
+                "result": {
+                    "listening": {
+                        "total_questions": listening_total,
+                        "correct_answers": listening_correct,
+                        "score": listening_score,
+                    },
+                    "reading": {
+                        "total_questions": reading_total,
+                        "correct_answers": reading_correct,
+                        "score": reading_score,
+                    },
+                    "overall_score": overall_score,
+                }
+            }
+            return Response(result, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

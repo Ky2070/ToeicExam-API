@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TestDetailView, TestListView, TestPartDetailView, CourseListView, QuestionSkillAnalysisView, \
+from .views import TestDetailView, TestListView, TestPartDetailView, CourseListView, SubmitTestView, \
     QuestionSkillAPIView
 
 urlpatterns = [
@@ -8,8 +8,8 @@ urlpatterns = [
     path('tests/<int:test_id>/parts/<int:part_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
 
     # API lấy skill và tính toán kết quả cho các câu hỏi
-    path('questions/skills/analyze/', QuestionSkillAnalysisView.as_view(), name='questions-skill-analyze'),
-path('questions/<int:question_id>/skill/', QuestionSkillAPIView.as_view(), name='question-skill'),
+    path('submit/', SubmitTestView.as_view(), name='test-submit'),
+    path('questions/<int:question_id>/skill/', QuestionSkillAPIView.as_view(), name='question-skill'),
     # API lấy chi tiết test và part
 
 

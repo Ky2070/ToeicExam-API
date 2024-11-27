@@ -301,6 +301,8 @@ class History(models.Model):
     complete = models.BooleanField(default=False)
     test_result = models.JSONField(blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.user} - {self.test}"
 
 class Flashcard(models.Model):
     user = models.ForeignKey(User,
