@@ -27,18 +27,22 @@ class PartDescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PartDescription
         # fields = ['part_description']
-        fields = '__all__'
+        fields = ['id', 'part_name', 'skill', 'quantity']
 
 
 class PartSerializer(serializers.ModelSerializer):
     question_set_part = QuestionSetSerializer(many=True, read_only=True)  # Liên kết đến các QuestionSet trong Part
     question_part = QuestionSerializer(many=True, read_only=True)
-    part_description= PartDescriptionSerializer(read_only=True)
+    part_description = PartDescriptionSerializer(read_only=True)
 
     class Meta:
         model = Part
         fields = ['id', 'part_description', 'question_set_part', 'question_part']
 
+    # def to_representation(self, instance):
+    #     # Tối ưu hóa với select_related để giảm số lượng truy vấn cho part_description
+    #     instance = instance.select_related('part_description')
+    #     return super().to_representation(instance)
 
 class TestDetailSerializer(serializers.ModelSerializer):
     part_test = PartSerializer(many=True, read_only=True)  # Liên kết đến các Part trong Test
@@ -66,7 +70,8 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'content', 'quiz']
-        
+
+
 class HistorySerializer(serializers.ModelSerializer):
     test = TestSerializer(read_only=True)
     user = UserSerializer(read_only=True)

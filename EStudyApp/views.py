@@ -97,22 +97,7 @@ class SubmitTestView(APIView):
                 listening_score=listening_score,
                 reading_score=reading_score,
                 complete=True,
-                test_result={
-                    "result": {
-                        "listening": {
-                            "total_questions": listening_total,
-                            "correct_answers": listening_correct,
-                            "score": listening_score,
-                        },
-                        "reading": {
-                            "total_questions": reading_total,
-                            "correct_answers": reading_correct,
-                            "score": reading_score,
-                        },
-                        "unanswer_questions": unanswer_questions,
-                        "overall_score": overall_score,
-                    }
-                }
+                test_result=data
             )
 
             result = {
