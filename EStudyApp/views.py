@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 
 from Authentication.models import User
 from .calculate_toeic import calculate_toeic_score
-from .get_question_skill import get_question_skill
 from .models import Test, Part, Course, QuestionSet, Question, History
 from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -38,53 +37,36 @@ class SubmitTestView(APIView):
 
     def post(self, request):
         try:
-
-            data = request.data["data"]  # Lấy dữ liệu từ body request
-            # Lấy ID của bài kiểm tra từ body request
+            data = request.data["data"]
             test_id = request.data["test_id"]
-            user = request.user  # Lấy thông tin người
+            user = request.user
 
-            # Lưu kết quả vào lịch sử bài thi
-            # Giả sử có một bài thi mặc định hoặc lấy từ request
+            # Lấy bài kiểm tra
             test = Test.objects.filter(id=test_id).first()
-            end_time = datetime.now(timezone.utc)
-
-            # Kiểm tra định dạng dữ liệu (phải là danh sách các câu hỏi)
-            if not isinstance(data, list):
-                return Response({"error": "Invalid data format, expected a list of questions"}, status=status.HTTP_400_BAD_REQUEST)
-            # Sử dụng get_object_or_404
-            # user = get_object_or_404(User, id=user_id)
-            if user is None:
-                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            if test is None:
+            if not test:
                 return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Khởi tạo các biến đếm số câu hỏi đúng/sai cho listening và reading
-            listening_correct = 0
-            reading_correct = 0
-            listening_total = 0
-            reading_total = 0
-            question_count_toeic = 200
-            # Lưu lịch sử bắt đầu
-            start_time = datetime.now(timezone.utc)
+            # Lấy tất cả các part và skill liên quan đến test
+            parts = Part.objects.filter(test=test).select_related('part_description')
+            part_skill_map = {part.id: part.part_description.skill for part in parts}
 
-            # Duyệt qua từng câu hỏi trong dữ liệu nhận được
+            # Lấy câu hỏi từ data
+            question_ids = [item.get("id") for item in data]
+            questions = Question.objects.filter(id__in=question_ids).only("id", "correct_answer", "part_id").in_bulk(field_name="id")
+
+            # Khởi tạo biến đếm
+            listening_correct = reading_correct = listening_total = reading_total = 0
+            start_time = datetime.now(timezone.utc)
+            end_time = datetime.now(timezone.utc)
             for item in data:
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
+                question = questions.get(question_id)
 
-                try:
-                    # Lấy câu hỏi từ cơ sở dữ liệu
-                    question = Question.objects.get(id=question_id)
-
-                    # Kiểm tra kỹ năng của câu hỏi (Listening/Reading)
-                    skill = get_question_skill(question_id)
-
-                    # Kiểm tra câu trả lời của người dùng
+                if question:
+                    # Lấy skill từ part_skill_map
+                    skill = part_skill_map.get(question.part_id)
                     is_correct = user_answer == question.correct_answer
-
-                    # Cập nhật các biến đếm cho Listening hoặc Reading
                     if skill == "LISTENING":
                         listening_total += 1
                         if is_correct:
@@ -94,38 +76,48 @@ class SubmitTestView(APIView):
                         if is_correct:
                             reading_correct += 1
 
-                except Question.DoesNotExist:
-                    # Nếu không tìm thấy câu hỏi trong DB, bỏ qua và tiếp tục
-                    continue
+            # Tính điểm TOEIC
+            listening_score, reading_score, overall_score = calculate_toeic_score(listening_correct, reading_correct)
+            correct_answers = listening_correct + reading_correct
+            wrong_answers = (listening_total - listening_correct) + (reading_total - reading_correct)
+            percentage_score = ((listening_correct + reading_correct) / max(listening_total + reading_total, 1)) * 100
+            unanswer_questions = 200 - (listening_total + reading_total)
 
-            # Tính toán điểm TOEIC
-            listening_score, reading_score, overall_score = calculate_toeic_score(
-                listening_correct, reading_correct
-            )
-            unanswer_questions = question_count_toeic - (listening_total + reading_total)
-            history = History(
+            # Lưu lịch sử làm bài kiểm tra
+            history = History.objects.create(
                 user=user,
                 test=test,
                 score=overall_score,
                 start_time=start_time,
                 end_time=end_time,
-                correct_answers=listening_correct + reading_correct,
-                wrong_answers=(listening_total - listening_correct) +
-                (reading_total - reading_correct),
+                correct_answers=correct_answers,
+                wrong_answers=wrong_answers,
                 unanswer_questions=unanswer_questions,
-                percentage_score=((listening_correct + reading_correct) / (listening_total + reading_total)) * 100,
+                percentage_score=percentage_score,
                 listening_score=listening_score,
                 reading_score=reading_score,
                 complete=True,
-                test_result=data
+                test_result={
+                    "result": {
+                        "listening": {
+                            "total_questions": listening_total,
+                            "correct_answers": listening_correct,
+                            "score": listening_score,
+                        },
+                        "reading": {
+                            "total_questions": reading_total,
+                            "correct_answers": reading_correct,
+                            "score": reading_score,
+                        },
+                        "unanswer_questions": unanswer_questions,
+                        "overall_score": overall_score,
+                    }
+                }
             )
-            history.save()
-            # Return response with HTTP 201 Created and a simple message
-            # Trả về kết quả cho người dùng
-            # Trả về kết quả với HTTP 201
+
             result = {
                 "message": "Test submitted successfully",
-                "history_id": history.id,  # Trả về ID của lịch sử
+                "history_id": history.id,
                 "result": {
                     "listening": {
                         "total_questions": listening_total,
@@ -141,10 +133,13 @@ class SubmitTestView(APIView):
                     "overall_score": overall_score,
                 }
             }
+
             return Response(result, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
     def get(self, request):
         user = request.user

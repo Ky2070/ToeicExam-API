@@ -55,7 +55,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 # Application definition
 
 REST_FRAMEWORK = {
@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'Authentication',
     'rest_framework',
     'corsheaders',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -103,6 +104,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+INTERNAL_IPS = [
+    '127.0.0.1',  # Localhost (dành cho máy chủ của bạn)
+    'localhost',  # Dành cho localhost (cũng có thể sử dụng nếu bạn làm việc trên máy cục bộ)
+    # Các IP khác nếu cần thiết
 ]
 
 CORS_ALLOWED_ORIGINS = [
