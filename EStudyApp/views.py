@@ -113,7 +113,7 @@ class SubmitTestView(APIView):
                 wrong_answers=(listening_total - listening_correct) +
                 (reading_total - reading_correct),
                 unanswer_questions=unanswer_questions,
-                percentage_score=(overall_score / 100) * 100,
+                percentage_score=((listening_correct + reading_correct) / (listening_total + reading_total)) * 100,
                 listening_score=listening_score,
                 reading_score=reading_score,
                 complete=True,
