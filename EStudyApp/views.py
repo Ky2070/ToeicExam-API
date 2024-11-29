@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 from Authentication.models import User
 from .calculate_toeic import calculate_toeic_score
 from .models import Test, Part, Course, QuestionSet, Question, History
-from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer
+from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer, \
+    HistoryDetailSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -124,8 +125,6 @@ class SubmitTestView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
     def get(self, request):
         user = request.user
         histories = History.objects.filter(user=user)
@@ -133,21 +132,48 @@ class SubmitTestView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class DetailSubmitTestView(APIView):
+class DetailHistoryView(APIView):
     is_authenticated = [IsAuthenticated]
-    
+
     def get(self, request, history_id):
         user = request.user
-        
+        user_id = user.id
         if user is None:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        history = History.objects.filter(id=history_id, user=user).first()
-        
+
+        history = History.objects.filter(id=history_id, user_id=user_id).first()
+
         if history is None:
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = HistorySerializer(history, many=False)
+
+        serializer = HistoryDetailSerializer(history, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DetailSubmitTestView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ cho phép người dùng đã xác thực
+
+    def get(self, request):
+        user_id = request.user.id  # Lấy ID của người dùng hiện tại
+
+        # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
+        histories = (
+            History.objects.filter(user_id=user_id)
+            .select_related('test')  # Join bảng Test
+            .only(
+                'id', 'user_id', 'score', 'start_time', 'end_time',  # Trường từ History
+                'complete', 'test__id', 'test__name'  # Chỉ lấy id và name từ Test
+            )
+        )
+
+        if not histories.exists():
+            return Response(
+                {"error": "No history found for this user"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serialize danh sách lịch sử
+        serializer = HistorySerializer(histories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

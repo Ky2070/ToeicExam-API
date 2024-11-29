@@ -44,6 +44,7 @@ class PartSerializer(serializers.ModelSerializer):
     #     instance = instance.select_related('part_description')
     #     return super().to_representation(instance)
 
+
 class TestDetailSerializer(serializers.ModelSerializer):
     part_test = PartSerializer(many=True, read_only=True)  # Liên kết đến các Part trong Test
 
@@ -72,10 +73,33 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'content', 'quiz']
 
 
-class HistorySerializer(serializers.ModelSerializer):
-    test = TestSerializer(read_only=True)
-    user = UserSerializer(read_only=True)
-    
+class TestSubmitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = ['id', 'name']
+
+
+class HistoryDetailSerializer(serializers.ModelSerializer):
+    # user = UserSerializer(read_only=True)
+    test = TestSubmitSerializer(read_only=True)
+
     class Meta:
         model = History
-        fields = "__all__"
+        fields = [
+            'id', 'user', 'test', 'score', 'start_time', 'end_time',
+            'correct_answers', 'wrong_answers', 'unanswer_questions',
+            'percentage_score', 'listening_score', 'reading_score',
+            'complete'
+        ]
+
+
+class HistorySerializer(serializers.ModelSerializer):
+    # user = UserSerializer(read_only=True)
+    test = TestSubmitSerializer(read_only=True)
+
+    class Meta:
+        model = History
+        fields = [
+            'id', 'user', 'test', 'score', 'start_time', 'end_time',
+            'complete'
+        ]
