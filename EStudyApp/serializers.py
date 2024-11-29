@@ -101,5 +101,6 @@ class HistorySerializer(serializers.ModelSerializer):
         model = History
         fields = [
             'id', 'user', 'test', 'score', 'start_time', 'end_time',
+            'listening_score', 'reading_score',
             'complete'
         ]

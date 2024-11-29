@@ -161,7 +161,8 @@ class DetailSubmitTestView(APIView):
             History.objects.filter(user_id=user_id)
             .select_related('test')  # Join bảng Test
             .only(
-                'id', 'user_id', 'score', 'start_time', 'end_time',  # Trường từ History
+                'id', 'user_id', 'score', 'start_time', 'end_time',
+                'listening_score', 'reading_score', # Trường từ History
                 'complete', 'test__id', 'test__name'  # Chỉ lấy id và name từ Test
             )
         )
@@ -259,19 +260,6 @@ class TestPartDetailView(APIView):
         # Serialize dữ liệu của bài kiểm tra và phần
         test_serializer = TestSerializer(test)
         part_serializer = PartSerializer(part)
-
-        # # Kiểm tra và sắp xếp thủ công nếu cần
-        # part_data = part_serializer.data
-        # part_data["questionSetPart"] = sorted(
-        #     part_data["questionSetPart"],
-        #     key=lambda x: x["id"]
-        # )
-        #
-        # for question_set in part_data["questionSetPart"]:
-        #     question_set["questionQuestionSet"] = sorted(
-        #         question_set["questionQuestionSet"],
-        #         key=lambda x: x["questionNumber"]
-        #     )
 
         return Response({
             "test": test_serializer.data,
