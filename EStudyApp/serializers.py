@@ -39,11 +39,6 @@ class PartSerializer(serializers.ModelSerializer):
         model = Part
         fields = ['id', 'part_description', 'question_set_part', 'question_part']
 
-    # def to_representation(self, instance):
-    #     # Tối ưu hóa với select_related để giảm số lượng truy vấn cho part_description
-    #     instance = instance.select_related('part_description')
-    #     return super().to_representation(instance)
-
 
 class TestDetailSerializer(serializers.ModelSerializer):
     part_test = PartSerializer(many=True, read_only=True)  # Liên kết đến các Part trong Test

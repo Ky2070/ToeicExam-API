@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from Authentication.models import User
+# from Authentication.models import User
 from .calculate_toeic import calculate_toeic_score
 from .models import Test, Part, Course, QuestionSet, Question, History
 from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer, \
@@ -53,7 +53,8 @@ class SubmitTestView(APIView):
 
             # Lấy câu hỏi từ data
             question_ids = [item.get("id") for item in data]
-            questions = Question.objects.filter(id__in=question_ids).only("id", "correct_answer", "part_id").in_bulk(field_name="id")
+            questions = (Question.objects.filter(id__in=question_ids)
+                         .only("id", "correct_answer", "part_id").in_bulk(field_name="id"))
 
             # Khởi tạo biến đếm
             listening_correct = reading_correct = listening_total = reading_total = 0
@@ -162,7 +163,7 @@ class DetailSubmitTestView(APIView):
             .select_related('test')  # Join bảng Test
             .only(
                 'id', 'user_id', 'score', 'start_time', 'end_time',
-                'listening_score', 'reading_score', # Trường từ History
+                'listening_score', 'reading_score',  # Trường từ History
                 'complete', 'test__id', 'test__name'  # Chỉ lấy id và name từ Test
             )
         )

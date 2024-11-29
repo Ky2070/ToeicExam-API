@@ -9,6 +9,8 @@ from Authentication.models import User  # type: ignore
 
 
 class Test(models.Model):
+    DoesNotExist = None
+    objects = None
     TYPE_TEST_CHOICES = [
         ('READING', 'Reading'),
         ('LISTENING', 'Listening'),
@@ -154,6 +156,8 @@ class PartDescription(models.Model):
 
 
 class Part(models.Model):
+    DoesNotExist = None
+    objects = None
     part_description = models.ForeignKey(
         PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING)
     test = models.ForeignKey(
@@ -165,6 +169,7 @@ class Part(models.Model):
 
 
 class QuestionSet(models.Model):
+    objects = None
     test = models.ForeignKey(Test,
                              related_name='question_set_test',
                              on_delete=models.DO_NOTHING,
@@ -198,6 +203,8 @@ class QuestionSet(models.Model):
 
 
 class Question(models.Model):
+    DoesNotExist = None
+    objects = None
     test = models.ForeignKey(Test,
                              related_name='question_test',
                              on_delete=models.DO_NOTHING,
@@ -281,6 +288,7 @@ class PartQuestionSet(models.Model):
 
 
 class History(models.Model):
+    objects = None
     user = models.ForeignKey(
         User, related_name='history_user', on_delete=models.DO_NOTHING)
     test = models.ForeignKey(
@@ -303,6 +311,7 @@ class History(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
+
 
 class Flashcard(models.Model):
     user = models.ForeignKey(User,
@@ -328,6 +337,7 @@ class Flashcard(models.Model):
 
 
 class Course(models.Model):
+    objects = None
     user = models.ForeignKey(User,
                              related_name='course_user',
                              on_delete=models.DO_NOTHING)
