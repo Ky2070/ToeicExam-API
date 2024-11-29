@@ -210,7 +210,7 @@ class TestPartDetailView(APIView):
                     queryset=Part.objects.prefetch_related(
                         Prefetch(
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
-                            queryset=QuestionSet.objects.order_by('question_number').prefetch_related(
+                            queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
                                     'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
                                     queryset=Question.objects.order_by(
