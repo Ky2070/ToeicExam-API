@@ -6,10 +6,14 @@ from EStudyApp.views import DetailSubmitTestView, TestDetailView, TestListView, 
 urlpatterns = [
     # API lấy chi tiết test và part
     path('tests/', TestListView.as_view(), name='test-list'),  # API lấy danh sách tất cả các bài kiểm tra
+
     path('tests/<int:pk>/', TestDetailView.as_view(), name='test-detail'),  # API lấy thông tin chi tiết của một bài
     # kiểm tra
-    path('tests/<int:test_id>/parts/<int:part_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
     path('tests/<int:test_id>/parts/', PartListView.as_view(), name='part-list'),
+
+    path('tests-parts/<int:test_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
+
+
     # API lấy skill và tính toán kết quả cho các câu hỏi
     path('submit/', SubmitTestView.as_view(), name='test-submit'),
     path('submit/history/', DetailSubmitTestView.as_view(), name='get-submit-id'),
