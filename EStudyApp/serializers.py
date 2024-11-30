@@ -27,7 +27,7 @@ class PartDescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PartDescription
         # fields = ['part_description']
-        fields = ['id', 'part_name', 'skill', 'quantity']
+        fields = ['id', 'part_name', 'skill', 'quantity', 'part_description']
 
 
 class PartSerializer(serializers.ModelSerializer):
