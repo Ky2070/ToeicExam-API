@@ -131,7 +131,7 @@ CACHES = {
             'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
         },
         'KEY_PREFIX': 'EStudyApp',
-        'TIMEOUT': 300,  # 5 phút timeout mặc định
+        'TIMEOUT': 3000,  # 5 phút timeout mặc định
     }
 }
 

@@ -56,6 +56,7 @@ class TestSerializer(serializers.ModelSerializer):
 
 class PartListSerializer(serializers.ModelSerializer):
     part_description = PartDescriptionSerializer(read_only=True)
+
     class Meta:
         model = Part
         # fields = ['part_description']

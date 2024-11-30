@@ -3,8 +3,9 @@ from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
-
+from EStudyApp.utils import get_cached_tests, get_cached_question_sets, get_cached_questions, get_cached_part_question_sets  # Import hàm cache từ utils.py
+from django.conf import settings
+from django.core.cache import cache
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History
@@ -12,6 +13,33 @@ from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestS
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer
 from rest_framework.permissions import IsAuthenticated
+
+
+class QuestionSetListView(APIView):
+    """
+    API view để lấy danh sách tất cả các bộ câu hỏi (QuestionSets) đã được sắp xếp.
+    """
+    def get(self, request, format=None):
+        question_sets = get_cached_question_sets()
+        return Response(question_sets)
+
+
+class QuestionListView(APIView):
+    """
+    API view để lấy danh sách tất cả các câu hỏi (Questions) đã được sắp xếp.
+    """
+    def get(self, request, format=None):
+        questions = get_cached_questions()
+        return Response(questions)
+
+
+class PartQuestionSetListView(APIView):
+    """
+    API view để lấy danh sách tất cả các phần của bộ câu hỏi (PartQuestionSets) đã được sắp xếp.
+    """
+    def get(self, request, format=None):
+        part_question_sets = get_cached_part_question_sets()
+        return Response(part_question_sets)
 
 
 class QuestionSkillAPIView(APIView):
@@ -181,8 +209,54 @@ class DetailSubmitTestView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# class TestDetailView(APIView):
+#     def get(self, request, pk, format=None):
+#         try:
+#             # Nạp đầy đủ các phần, bộ câu hỏi, và câu hỏi liên quan đến bài kiểm tra
+#             test = Test.objects.prefetch_related(
+#                 Prefetch(
+#                     'part_test',  # Phần trong bài kiểm tra
+#                     queryset=Part.objects.prefetch_related(
+#                         Prefetch(
+#                             'question_set_part',  # Bộ câu hỏi trong phần
+#                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
+#                                 Prefetch(
+#                                     'question_question_set',  # Câu hỏi trong bộ câu hỏi
+#                                     queryset=Question.objects.order_by(
+#                                         'question_number')
+#                                 )
+#                             )
+#                         ),
+#                         Prefetch(
+#                             'question_part',  # Các câu hỏi trong Part
+#                             # Sắp xếp theo 'question_number'
+#                             queryset=Question.objects.order_by(
+#                                 'question_number')
+#                         )
+#                     )
+#                 )
+#             ).get(pk=pk)
+#         except Test.DoesNotExist:
+#             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
+#
+#         # Sử dụng serializer để nạp dữ liệu liên kết
+#         serializer = TestDetailSerializer(test)
+#         return Response(serializer.data)
+
 class TestDetailView(APIView):
     def get(self, request, pk, format=None):
+        # Tạo cache key cho bài kiểm tra cụ thể
+        cache_key = f'test_detail_{pk}'
+
+        # Kiểm tra xem dữ liệu đã có trong cache chưa
+        test_data = cache.get(cache_key)
+
+        if test_data:
+            # Nếu có, trả về dữ liệu từ cache
+            print("Cache hit!")
+            return Response(test_data)
+
+        # Nếu không có trong cache, truy vấn cơ sở dữ liệu
         try:
             # Nạp đầy đủ các phần, bộ câu hỏi, và câu hỏi liên quan đến bài kiểm tra
             test = Test.objects.prefetch_related(
@@ -213,6 +287,12 @@ class TestDetailView(APIView):
 
         # Sử dụng serializer để nạp dữ liệu liên kết
         serializer = TestDetailSerializer(test)
+
+        # Lưu kết quả vào cache với thời gian hết hạn (ví dụ 5 phút)
+        cache.set(cache_key, serializer.data, timeout=settings.CACHES['default'].get('TIMEOUT', 300))
+
+        # Trả về dữ liệu đã được serialize
+        print("Cache miss! Fetching from DB...")
         return Response(serializer.data)
 
 
@@ -224,15 +304,57 @@ class TestListView(APIView):
     def get(self, request, format=None):
         # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
         # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
-        tests = Test.objects.all().order_by('id')
+        tests = get_cached_tests()
+        # tests = Test.objects.all().order_by('id')
         serializer = TestSerializer(tests, many=True)
         return Response(serializer.data)
 
 
+# class TestPartDetailView(APIView):
+#     def get(self, request, test_id, format=None):
+#         parts = [int(part) for part in request.GET.get('parts').split(',')]
+#
+#         try:
+#             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
+#             test = Test.objects.prefetch_related(
+#                 Prefetch(
+#                     'part_test',
+#                     queryset=Part.objects.filter(id__in=parts).prefetch_related(
+#                         Prefetch(
+#                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
+#                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
+#                                 Prefetch(
+#                                     'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
+#                                     queryset=Question.objects.order_by(
+#                                         'question_number')
+#                                 )
+#                             )
+#                         )
+#                     ).order_by('id')  # Sắp xếp các phần theo `id`
+#                 )
+#             ).get(pk=test_id)
+#         except Test.DoesNotExist:
+#             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
+#
+#         serializer = TestDetailSerializer(test)
+#         return Response(serializer.data)
+
+
 class TestPartDetailView(APIView):
     def get(self, request, test_id, format=None):
+        # Lấy tham số 'parts' từ query string và tách chúng thành danh sách
         parts = [int(part) for part in request.GET.get('parts').split(',')]
-        
+
+        # Tạo cache key cho bài kiểm tra với các phần yêu cầu
+        cache_key = f'test_part_detail_{test_id}{"".join(map(str, parts))}'
+
+        # Kiểm tra xem dữ liệu đã có trong cache chưa
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            # Nếu có, trả về dữ liệu từ cache
+            print("Cache hit!")
+            return Response(cached_data)
+
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
             test = Test.objects.prefetch_related(
@@ -254,8 +376,15 @@ class TestPartDetailView(APIView):
             ).get(pk=test_id)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        # Sử dụng serializer để nạp dữ liệu liên kết
         serializer = TestDetailSerializer(test)
+
+        # Lưu kết quả vào cache với thời gian hết hạn (ví dụ 5 phút)
+        cache.set(cache_key, serializer.data, timeout=settings.CACHES['default'].get('TIMEOUT', 300))
+
+        # Trả về dữ liệu đã được serialize
+        print("Cache miss! Fetching from DB...")
         return Response(serializer.data)
 
 
