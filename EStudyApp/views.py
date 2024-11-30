@@ -3,12 +3,14 @@ from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
-from .calculate_toeic import calculate_toeic_score
-from .models import Test, Part, Course, QuestionSet, Question, History
-from .serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, CourseSerializer, \
-    HistoryDetailSerializer
+from EStudyApp.calculate_toeic import calculate_toeic_score
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History
+from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
+    CourseSerializer, \
+    HistoryDetailSerializer, PartListSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -214,7 +216,6 @@ class TestDetailView(APIView):
         return Response(serializer.data)
 
 
-# Bạn có thể viết một view tương tự để lấy danh sách tất cả các bài kiểm tra nếu cần:
 class TestListView(APIView):
     """
     API view để lấy danh sách tất cả các bài kiểm tra đã được sắp xếp.
@@ -274,5 +275,10 @@ class CourseListView(APIView):
         serializer = CourseSerializer(courses, many=True)
         return Response(serializer.data)
 
-# class CourseDetailView(APIView):
-# def get(self, request, id):
+
+class PartListView(APIView):
+    def get(self, request, test_id):
+        parts = Part.objects.filter(test=test_id).select_related('part_description').order_by('id')
+
+        serializer = PartListSerializer(parts, many=True)
+        return Response(serializer.data)

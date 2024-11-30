@@ -118,6 +118,24 @@ CORS_ALLOWED_ORIGINS = [
     "https://englishapp-client.vercel.app"
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 100,
+                'retry_on_timeout': True,
+            },
+            'COMPRESSOR': 'django_redis.compressors.zlib.ZlibCompressor',
+        },
+        'KEY_PREFIX': 'EStudyApp',
+        'TIMEOUT': 300,  # 5 phút timeout mặc định
+    }
+}
+
+
 # Nếu bạn sử dụng credentials (ví dụ như cookies)
 CORS_ALLOW_CREDENTIALS = True
 

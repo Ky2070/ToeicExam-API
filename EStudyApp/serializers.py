@@ -54,6 +54,14 @@ class TestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count']
 
 
+class PartListSerializer(serializers.ModelSerializer):
+    part_description = PartDescriptionSerializer(read_only=True)
+    class Meta:
+        model = Part
+        # fields = ['part_description']
+        fields = '__all__'
+
+
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
