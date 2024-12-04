@@ -19,6 +19,9 @@ class Tag(models.Model):
         null=True
     )
 
+    def __str__(self):
+        return self.name
+
 
 class Test(models.Model):
     DoesNotExist = None
@@ -89,6 +92,7 @@ class Test(models.Model):
 
 
 class QuestionType(models.Model):
+    objects = None
     name = models.CharField(
         max_length=100,
         blank=True,

@@ -1,7 +1,7 @@
 from django.urls import path
 from EStudyApp.views import DetailSubmitTestView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
     SubmitTestView, \
-    QuestionSkillAPIView, DetailHistoryView, PartListView
+    QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView
 
 urlpatterns = [
     # API lấy chi tiết test và part
@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('tests-parts/<int:test_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
 
+    path('questions/', QuestionListView.as_view(), name='question-list'),
 
     # API lấy skill và tính toán kết quả cho các câu hỏi
     path('submit/', SubmitTestView.as_view(), name='test-submit'),

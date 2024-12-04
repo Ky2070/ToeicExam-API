@@ -7,10 +7,10 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
-    HistoryDetailSerializer, PartListSerializer
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -133,7 +133,7 @@ class SubmitTestView(APIView):
         histories = History.objects.filter(user=user)
         serializer = HistorySerializer(histories, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class DetailHistoryView(APIView):
     is_authenticated = [IsAuthenticated]
@@ -224,7 +224,7 @@ class TestListView(APIView):
     def get(self, request, format=None):
         # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
         # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
-        tests = Test.objects.all().order_by('id')
+        tests = Test.objects.all().select_related('tag').order_by('id')
         serializer = TestSerializer(tests, many=True)
         return Response(serializer.data)
 
@@ -232,7 +232,7 @@ class TestListView(APIView):
 class TestPartDetailView(APIView):
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
-        
+
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
             test = Test.objects.prefetch_related(
@@ -254,7 +254,7 @@ class TestPartDetailView(APIView):
             ).get(pk=test_id)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = TestDetailSerializer(test)
         return Response(serializer.data)
 
@@ -272,3 +272,25 @@ class PartListView(APIView):
 
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data)
+
+
+class QuestionListView(APIView):
+    def get(self, request):
+        questions = (Question.objects.all()
+                     .select_related('question_type')
+                     .order_by('id'))
+        # Kiểm tra nếu queryset trống
+        if not questions.exists():
+            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
+        serializer = QuestionDetailSerializer(questions, many=True)
+        return Response(serializer.data)
+
+        # .only('id',
+        #       'question_number',
+        #       'question_text',
+        #       'answers',
+        #       'question_type__id',
+        #       'question_type__name'
+        #       )
