@@ -8,7 +8,7 @@ from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, 
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['id', 'user', 'test', 'name', 'info', 'used']
+        fields = ['id', 'info']
         read_only_fields = ['id']  # Để tự động tạo ID
 
 class QuestionTypeSerializer(serializers.ModelSerializer):

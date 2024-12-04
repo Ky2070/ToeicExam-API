@@ -122,6 +122,13 @@ class SubmitTestView(APIView):
                     "overall_score": overall_score,
                 }
             }
+            
+            state = State.objects.filter(user=user, test=test).order_by('-id').first()
+            if state:
+                state.used = True
+                state.save()
+            else:
+                pass
 
             return Response(result, status=status.HTTP_201_CREATED)
 
@@ -302,8 +309,17 @@ class StateCreateView(APIView):
     def post(self, request):
         # Lấy user từ request
         user = request.user
-        # Thêm user vào dữ liệu được gửi từ client
         test = Test.objects.filter(id=request.data.get('test_id')).first()
+        
+        state = State.objects.filter(user=user, test=test).order_by('-id').first()
+        
+        if state and state.used == False:
+            return Response(
+                {"detail": "State is already created."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Thêm user vào dữ liệu được gửi từ client
         
         info = request.data["info"]
 
@@ -312,6 +328,26 @@ class StateCreateView(APIView):
         serializer=StateSerializer(state, many=False)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+    def patch(self, request):
+        user = request.user
+        test = Test.objects.filter(id=request.data.get('test_id')).first()
+        
+        state = State.objects.filter(user=user, test=test, used=False).order_by('-id').first()
+        
+        if not state:
+            return Response(
+                {"detail": "No state found for the current user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        state.info = request.data["info"]
+        state.save()
+        
+        serializer = StateSerializer(state, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class StateView(APIView):
@@ -321,7 +357,7 @@ class StateView(APIView):
         user = request.user
 
         # Lấy state mới nhất
-        state = State.objects.filter(user=user).order_by('-id').first()
+        state = State.objects.filter(user=user, used=False).order_by('-id').first()
 
         if not state:
             return Response(
