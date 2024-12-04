@@ -67,7 +67,12 @@ class Test(models.Model):
     part_count = models.IntegerField(
         default=7
     )
-    tag = models.ForeignKey(Tag, related_name='test_tag', on_delete=models.DO_NOTHING)
+    tag = models.ForeignKey(Tag, related_name='test_tag',
+                            on_delete=models.DO_NOTHING,
+                            null=True,
+                            blank=True
+                            )
+
     def __str__(self):
         return self.name
 
@@ -327,11 +332,11 @@ class History(models.Model):
 
 class HistoryTraining(models.Model):
     user = models.ForeignKey(
-        User, related_name='history_user', on_delete=models.DO_NOTHING)
+        User, related_name='training_user', on_delete=models.DO_NOTHING)
     test = models.ForeignKey(
-        Test, related_name='history_test', on_delete=models.DO_NOTHING)
+        Test, related_name='training_test', on_delete=models.DO_NOTHING)
     part = models.ForeignKey(
-        Part, related_name='history_part', on_delete=models.DO_NOTHING)
+        Part, related_name='training_part', on_delete=models.DO_NOTHING)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     correct_answers = models.IntegerField(blank=True, null=True)
