@@ -1,7 +1,7 @@
 from django.urls import path
 from EStudyApp.views import DetailSubmitTestView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
     SubmitTestView, \
-    QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView
+    QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView
 
 urlpatterns = [
     # API lấy chi tiết test và part
@@ -23,6 +23,8 @@ urlpatterns = [
 
     # Lưu state
     path('create/state/', StateCreateView.as_view(), name='state-create'),
+
+    path('state/', StateView.as_view(), name='state'),
 
     path('courses/', CourseListView.as_view(), name='course-list'),
 ]

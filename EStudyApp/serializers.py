@@ -11,7 +11,6 @@ class StateSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'test', 'name', 'info', 'used']
         read_only_fields = ['id']  # Để tự động tạo ID
 
-
 class QuestionTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionType
