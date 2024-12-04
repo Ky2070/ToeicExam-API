@@ -1,9 +1,18 @@
 from django.contrib import admin
-from .models import (PartDescription, Part,
-                     QuestionSet, Question, PartQuestionSet, Test, Course, Lesson, History)
+from EStudyApp.models import (PartDescription, Part,
+                              QuestionSet, Question, PartQuestionSet,
+                              Test, Course, Lesson, History, Tag, QuestionType)
 
 
 # Định nghĩa lớp ModelAdmin để thêm phân trang
+class QuestionTypeAdmin(admin.ModelAdmin):
+    list_per_page = 20  # Hiển thị 20 bản ghi trên mỗi trang
+
+
+class TagAdmin(admin.ModelAdmin):
+    list_per_page = 10  # Hiển thị 20 bản ghi trên mỗi trang
+
+
 class TestAdmin(admin.ModelAdmin):
     list_per_page = 20  # Hiển thị 20 bản ghi trên mỗi trang
 
@@ -41,6 +50,7 @@ class HistoryAdmin(admin.ModelAdmin):
 
 
 # Đăng ký các mô hình với phân trang
+admin.site.register(Tag, TagAdmin)
 admin.site.register(Test, TestAdmin)
 admin.site.register(PartDescription, PartDescriptionAdmin)
 admin.site.register(Part, PartAdmin)
@@ -50,3 +60,4 @@ admin.site.register(PartQuestionSet, PartQuestionSetAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Lesson, LessonAdmin)
 admin.site.register(History, HistoryAdmin)
+admin.site.register(QuestionType, QuestionTypeAdmin)

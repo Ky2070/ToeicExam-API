@@ -7,6 +7,21 @@ from Authentication.models import User  # type: ignore
 
 # Create your models here.
 
+class Tag(models.Model):
+    name = models.CharField(
+        max_length=125,
+        blank=True,
+        null=True
+    )
+    description = models.CharField(
+        max_length=125,
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.name
+
 
 class Test(models.Model):
     DoesNotExist = None
@@ -55,6 +70,11 @@ class Test(models.Model):
     part_count = models.IntegerField(
         default=7
     )
+    tag = models.ForeignKey(Tag, related_name='test_tag',
+                            on_delete=models.DO_NOTHING,
+                            null=True,
+                            blank=True
+                            )
 
     def __str__(self):
         return self.name
@@ -72,6 +92,7 @@ class Test(models.Model):
 
 
 class QuestionType(models.Model):
+    objects = None
     name = models.CharField(
         max_length=100,
         blank=True,
@@ -313,6 +334,53 @@ class History(models.Model):
         return f"{self.user} - {self.test}"
 
 
+class HistoryTraining(models.Model):
+    user = models.ForeignKey(
+        User, related_name='training_user', on_delete=models.DO_NOTHING)
+    test = models.ForeignKey(
+        Test, related_name='training_test', on_delete=models.DO_NOTHING)
+    part = models.ForeignKey(
+        Part, related_name='training_part', on_delete=models.DO_NOTHING)
+    start_time = models.DateTimeField(blank=True, null=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+    correct_answers = models.IntegerField(blank=True, null=True)
+    wrong_answers = models.IntegerField(blank=True, null=True)
+    unanswer_questions = models.IntegerField(blank=True, null=True)
+    percentage_score = models.DecimalField(
+        max_digits=4, decimal_places=1, blank=True, null=True)
+    complete = models.BooleanField(default=False)
+    test_result = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.part}"
+
+
+class TestComment(models.Model):
+    user = models.ForeignKey(
+        User,
+        related_name='testcomment_user',
+        on_delete=models.DO_NOTHING
+    )  # Người dùng bình luận
+    test = models.ForeignKey(
+        Test,
+        related_name='testcomment_test',
+        on_delete=models.DO_NOTHING
+    )  # Liên kết đến bài học (Lesson)
+    parent = models.ForeignKey(
+        'self',
+        related_name='replies',
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True
+    )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
+    content = models.TextField()  # Nội dung bình luận
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
+
+    def __str__(self):
+        return f'Comment by {self.user} on {self.test}'
+
+
 class Flashcard(models.Model):
     user = models.ForeignKey(User,
                              related_name='flashcard_user',
@@ -396,7 +464,8 @@ class CommentLesson(models.Model):
         null=True
     )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
     content = models.TextField()  # Nội dung bình luận
-    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):
         return f'Comment by {self.user} on {self.lesson}'
@@ -429,7 +498,37 @@ class CommentBlog(models.Model):
                                null=True
                                )
     content = models.TextField()
-    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):
         return f'Comment by {self.user} on {self.blog}'
+
+
+class State(models.Model):
+    user = models.ForeignKey(User,
+                             related_name='state_user',
+                             on_delete=models.DO_NOTHING,
+                             blank=True,
+                             null=True)
+    test = models.ForeignKey(Test, related_name='state_test',
+                             on_delete=models.DO_NOTHING,
+                             blank=True,
+                             null=True
+                             )
+    time = models.DurationField(blank=True, null=True)
+    initial_minutes = models.IntegerField(blank=True, null=True)
+    initial_seconds = models.IntegerField(blank=True, null=True)
+
+    name = models.CharField(
+        max_length=125,
+        blank=True,
+        null=True
+    )
+    info = models.JSONField(
+        blank=True,
+        null=True
+    )
+    used = models.BooleanField(
+        default=False
+    )

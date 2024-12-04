@@ -7,10 +7,10 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
-    HistoryDetailSerializer, PartListSerializer
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -122,6 +122,13 @@ class SubmitTestView(APIView):
                     "overall_score": overall_score,
                 }
             }
+            
+            state = State.objects.filter(user=user, test=test).order_by('-id').first()
+            if state:
+                state.used = True
+                state.save()
+            else:
+                pass
 
             return Response(result, status=status.HTTP_201_CREATED)
 
@@ -133,7 +140,7 @@ class SubmitTestView(APIView):
         histories = History.objects.filter(user=user)
         serializer = HistorySerializer(histories, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class DetailHistoryView(APIView):
     is_authenticated = [IsAuthenticated]
@@ -224,7 +231,7 @@ class TestListView(APIView):
     def get(self, request, format=None):
         # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
         # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
-        tests = Test.objects.all().order_by('id')
+        tests = Test.objects.all().select_related('tag').order_by('id')
         serializer = TestSerializer(tests, many=True)
         return Response(serializer.data)
 
@@ -232,7 +239,7 @@ class TestListView(APIView):
 class TestPartDetailView(APIView):
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
-        
+
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
             test = Test.objects.prefetch_related(
@@ -254,7 +261,7 @@ class TestPartDetailView(APIView):
             ).get(pk=test_id)
         except Test.DoesNotExist:
             return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = TestDetailSerializer(test)
         return Response(serializer.data)
 
@@ -272,3 +279,108 @@ class PartListView(APIView):
 
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data)
+
+
+class QuestionListView(APIView):
+    def get(self, request):
+        questions = (Question.objects.all()
+                     .select_related('question_type')
+                     .order_by('id'))
+
+        # .only('id',
+        #       'question_number',
+        #       'question_text',
+        #       'answers',
+        #       'question_type__id',
+        #       'question_type__name'
+        #       )
+        # Kiểm tra nếu queryset trống
+        if not questions.exists():
+            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
+        serializer = QuestionDetailSerializer(questions, many=True)
+        return Response(serializer.data)
+
+
+class StateCreateView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ cho phép người dùng đã đăng nhập
+
+    def post(self, request):
+        # Lấy user từ request
+        user = request.user
+        test = Test.objects.filter(id=request.data.get('test_id')).first()
+        
+        state = State.objects.filter(user=user, test=test).order_by('-id').first()
+        
+        if state and state.used == False:
+            return Response(
+                {"detail": "State is already created."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Thêm user vào dữ liệu được gửi từ client
+        
+        info = request.data["info"]
+        initial_minutes = 0
+        initial_seconds = 0
+
+        state = State.objects.create(
+            user=user,
+            test=test,
+            info=info,
+            initial_minutes=initial_minutes,
+            initial_seconds=initial_seconds,
+            name='abc',
+            used=False
+        )
+        
+        serializer=StateSerializer(state, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+    def patch(self, request):
+        user = request.user
+        test = Test.objects.filter(id=request.data.get('test_id')).first()
+        initial_minutes = request.data.get('initial_minutes')
+        initial_seconds = request.data.get('initial_seconds')
+        
+        state = State.objects.filter(user=user, test=test, used=False).order_by('-id').first()
+        
+        if not state:
+            return Response(
+                {"detail": "No state found for the current user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        state.info = request.data["info"]
+        state.initial_minutes = initial_minutes
+        state.initial_seconds = initial_seconds
+        state.save()
+        
+        serializer = StateSerializer(state, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class StateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Lấy state mới nhất
+        state = State.objects.filter(user=user, used=False).order_by('-id').first()
+
+        if not state:
+            return Response(
+                {"detail": "No state found for the current user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serialize state
+        serializer = StateSerializer(state)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+

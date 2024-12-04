@@ -1,7 +1,34 @@
 from rest_framework import serializers
 
 from Authentication.serializers import UserSerializer
-from .models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson
+from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
+    QuestionType, State
+
+
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = State
+        fields = ['id', 'info', 'initial_minutes', 'initial_seconds']
+        read_only_fields = ['id']  # Để tự động tạo ID
+
+class QuestionTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionType
+        fields = ['id', 'name']
+
+
+class QuestionDetailSerializer(serializers.ModelSerializer):
+    question_type = serializers.StringRelatedField()
+
+    class Meta:
+        model = Question
+        fields = ['id',
+                  'question_number',
+                  'question_text',
+                  'difficulty_level',
+                  'answers',
+                  'question_type',
+                  ]
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -48,14 +75,23 @@ class TestDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'test_date', 'duration', 'part_test']
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+
+
 class TestSerializer(serializers.ModelSerializer):
+    tag = TagSerializer(read_only=True)
+
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag']
 
 
 class PartListSerializer(serializers.ModelSerializer):
     part_description = PartDescriptionSerializer(read_only=True)
+
     class Meta:
         model = Part
         # fields = ['part_description']
