@@ -374,7 +374,8 @@ class TestComment(models.Model):
         null=True
     )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
     content = models.TextField()  # Nội dung bình luận
-    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):
         return f'Comment by {self.user} on {self.test}'
@@ -463,7 +464,8 @@ class CommentLesson(models.Model):
         null=True
     )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
     content = models.TextField()  # Nội dung bình luận
-    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):
         return f'Comment by {self.user} on {self.lesson}'
@@ -496,13 +498,17 @@ class CommentBlog(models.Model):
                                null=True
                                )
     content = models.TextField()
-    publish_date = models.DateTimeField(auto_now_add=True)  # Thời gian bình luận được tạo
+    publish_date = models.DateTimeField(
+        auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):
         return f'Comment by {self.user} on {self.blog}'
 
 
 class State(models.Model):
+    user = models.ForeignKey(User,
+                             related_name='state_user',
+                             on_delete=models.DO_NOTHING)
     name = models.CharField(
         max_length=125,
         blank=True,
@@ -511,4 +517,7 @@ class State(models.Model):
     info = models.JSONField(
         blank=True,
         null=True
+    )
+    used = models.BooleanField(
+        default=False
     )
