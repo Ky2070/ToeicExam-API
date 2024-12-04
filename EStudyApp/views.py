@@ -7,7 +7,7 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer
@@ -303,14 +303,15 @@ class StateCreateView(APIView):
         # Lấy user từ request
         user = request.user
         # Thêm user vào dữ liệu được gửi từ client
-        data = request.data.copy()
-        data['user'] = user.id
+        test = Test.objects.filter(id=request.data.get('test_id')).first()
+        
+        info = request.data["info"]
 
-        serializer = StateSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()  # Lưu thông tin state vào database
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        state = State.objects.create(user=user, test=test, info=info, name='abc', used=False)
+        
+        serializer=StateSerializer(state, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
