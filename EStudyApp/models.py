@@ -508,7 +508,14 @@ class CommentBlog(models.Model):
 class State(models.Model):
     user = models.ForeignKey(User,
                              related_name='state_user',
-                             on_delete=models.DO_NOTHING)
+                             on_delete=models.DO_NOTHING,
+                             blank=True,
+                             null=True)
+    test = models.ForeignKey(Test, related_name='state_test',
+                             on_delete=models.DO_NOTHING,
+                             blank=True,
+                             null=True
+                             )
     name = models.CharField(
         max_length=125,
         blank=True,

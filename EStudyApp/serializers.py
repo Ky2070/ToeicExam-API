@@ -2,7 +2,14 @@ from rest_framework import serializers
 
 from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
-    QuestionType
+    QuestionType, State
+
+
+class StateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = State
+        fields = ['id', 'user', 'test', 'name', 'info', 'used']
+        read_only_fields = ['id']  # Để tự động tạo ID
 
 
 class QuestionTypeSerializer(serializers.ModelSerializer):

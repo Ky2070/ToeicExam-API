@@ -10,7 +10,7 @@ from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
-    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -279,13 +279,6 @@ class QuestionListView(APIView):
         questions = (Question.objects.all()
                      .select_related('question_type')
                      .order_by('id'))
-        # Kiểm tra nếu queryset trống
-        if not questions.exists():
-            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
-        serializer = QuestionDetailSerializer(questions, many=True)
-        return Response(serializer.data)
 
         # .only('id',
         #       'question_number',
@@ -294,3 +287,30 @@ class QuestionListView(APIView):
         #       'question_type__id',
         #       'question_type__name'
         #       )
+        # Kiểm tra nếu queryset trống
+        if not questions.exists():
+            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
+        serializer = QuestionDetailSerializer(questions, many=True)
+        return Response(serializer.data)
+
+
+class StateCreateView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ cho phép người dùng đã đăng nhập
+
+    def post(self, request):
+        # Lấy user từ request
+        user = request.user
+        # Thêm user vào dữ liệu được gửi từ client
+        data = request.data.copy()
+        data['user'] = user.id
+
+        serializer = StateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()  # Lưu thông tin state vào database
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
