@@ -303,14 +303,15 @@ class StateCreateView(APIView):
         # Lấy user từ request
         user = request.user
         # Thêm user vào dữ liệu được gửi từ client
-        data = request.data.copy()
-        data['user'] = user.id
+        test = Test.objects.filter(id=request.data.get('test_id')).first()
+        
+        info = request.data["info"]
 
-        serializer = StateSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()  # Lưu thông tin state vào database
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        state = State.objects.create(user=user, test=test, info=info, name='abc', used=False)
+        
+        serializer=StateSerializer(state, many=False)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class StateView(APIView):
