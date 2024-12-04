@@ -322,8 +322,18 @@ class StateCreateView(APIView):
         # Thêm user vào dữ liệu được gửi từ client
         
         info = request.data["info"]
+        initial_minutes = 0
+        initial_seconds = 0
 
-        state = State.objects.create(user=user, test=test, info=info, name='abc', used=False)
+        state = State.objects.create(
+            user=user,
+            test=test,
+            info=info,
+            initial_minutes=initial_minutes,
+            initial_seconds=initial_seconds,
+            name='abc',
+            used=False
+        )
         
         serializer=StateSerializer(state, many=False)
         
@@ -333,6 +343,8 @@ class StateCreateView(APIView):
     def patch(self, request):
         user = request.user
         test = Test.objects.filter(id=request.data.get('test_id')).first()
+        initial_minutes = request.data.get('initial_minutes')
+        initial_seconds = request.data.get('initial_seconds')
         
         state = State.objects.filter(user=user, test=test, used=False).order_by('-id').first()
         
@@ -343,6 +355,8 @@ class StateCreateView(APIView):
             )
         
         state.info = request.data["info"]
+        state.initial_minutes = initial_minutes
+        state.initial_seconds = initial_seconds
         state.save()
         
         serializer = StateSerializer(state, many=False)
