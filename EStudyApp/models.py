@@ -516,6 +516,10 @@ class State(models.Model):
                              blank=True,
                              null=True
                              )
+    time = models.DurationField(blank=True, null=True)
+    initial_minutes = models.IntegerField(blank=True, null=True)
+    initial_seconds = models.IntegerField(blank=True, null=True)
+
     name = models.CharField(
         max_length=125,
         blank=True,
