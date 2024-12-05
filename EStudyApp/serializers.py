@@ -2,7 +2,33 @@ from rest_framework import serializers
 
 from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
-    QuestionType, State
+    QuestionType, State, TestComment
+
+
+class TestCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestComment
+        fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
+
+    def validate_content(self, value):
+        """Kiểm tra nội dung comment không được rỗng và không quá ngắn."""
+        if not value.strip():
+            raise serializers.ValidationError("Content cannot be empty.")
+        if len(value) < 5:
+            raise serializers.ValidationError("Content must be at least 5 characters long.")
+        return value
+
+    def validate_parent(self, value):
+        """Kiểm tra nếu `parent` được chỉ định, nó phải thuộc cùng một bài test."""
+        if value and value.test_id != self.initial_data.get('test'):
+            raise serializers.ValidationError("The parent comment must belong to the same test.")
+        return value
+
+    def validate(self, data):
+        """Kiểm tra logic tổng quát nếu cần."""
+        if data.get('parent') and data.get('parent').parent:
+            raise serializers.ValidationError("Replies to replies are not allowed.")
+        return data
 
 
 class StateSerializer(serializers.ModelSerializer):
@@ -10,6 +36,7 @@ class StateSerializer(serializers.ModelSerializer):
         model = State
         fields = ['id', 'info', 'initial_minutes', 'initial_seconds']
         read_only_fields = ['id']  # Để tự động tạo ID
+
 
 class QuestionTypeSerializer(serializers.ModelSerializer):
     class Meta:

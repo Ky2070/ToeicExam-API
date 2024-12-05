@@ -7,10 +7,10 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State, TestComment
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
-    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -122,7 +122,7 @@ class SubmitTestView(APIView):
                     "overall_score": overall_score,
                 }
             }
-            
+
             state = State.objects.filter(user=user, test=test).order_by('-id').first()
             if state:
                 state.used = True
@@ -310,17 +310,17 @@ class StateCreateView(APIView):
         # Lấy user từ request
         user = request.user
         test = Test.objects.filter(id=request.data.get('test_id')).first()
-        
+
         state = State.objects.filter(user=user, test=test).order_by('-id').first()
-        
+
         if state and state.used == False:
             return Response(
                 {"detail": "State is already created."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Thêm user vào dữ liệu được gửi từ client
-        
+
         info = request.data["info"]
         initial_minutes = 0
         initial_seconds = 0
@@ -331,36 +331,147 @@ class StateCreateView(APIView):
             info=info,
             initial_minutes=initial_minutes,
             initial_seconds=initial_seconds,
-            name='abc',
+            name='Test State',
             used=False
         )
-        
-        serializer=StateSerializer(state, many=False)
-        
+
+        serializer = StateSerializer(state, many=False)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    
+
     def patch(self, request):
         user = request.user
         test = Test.objects.filter(id=request.data.get('test_id')).first()
         initial_minutes = request.data.get('initial_minutes')
         initial_seconds = request.data.get('initial_seconds')
-        
+
         state = State.objects.filter(user=user, test=test, used=False).order_by('-id').first()
-        
+
         if not state:
             return Response(
                 {"detail": "No state found for the current user."},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         state.info = request.data["info"]
         state.initial_minutes = initial_minutes
         state.initial_seconds = initial_seconds
         state.save()
-        
+
         serializer = StateSerializer(state, many=False)
-        
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TestCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        # data = request.data["data"]
+        # test_id = request.data["test_id"]
+        # parent_id = request.data["parent_id"]
+        data = request.data.get("data")  # Nội dung comment
+        test_id = request.data.get("test_id")  # ID của bài kiểm tra
+        parent_id = request.data.get("parent_id")  # ID của comment cha (nếu là reply)
+
+        if not data:
+            return Response({"detail": "Comment content is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not test_id:
+            return Response({"detail": "Test ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            test = Test.objects.get(id=test_id)
+        except Test.DoesNotExist:
+            return Response({"detail": "Test not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Kiểm tra comment cha
+        parent = None
+        if parent_id:
+            try:
+                parent = TestComment.objects.get(id=parent_id, test_id=test_id)
+            except TestComment.DoesNotExist:
+                return Response({"detail": "Parent comment not found or does not belong to this test."},
+                                status=status.HTTP_404_NOT_FOUND)
+        # Chuẩn bị dữ liệu để post comment
+        comment_data = {
+            "user": user.id,
+            "test": test.id,
+            "parent": parent.id if parent else None,
+            "content": data,
+        }
+        serializer = TestCommentSerializer(data=comment_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        """
+        Cập nhật một phần nội dung bình luận.
+        """
+        user = request.user
+        data = request.data  # Payload từ yêu cầu
+
+        try:
+            comment = TestComment.objects.get(id=pk, user=user)
+        except TestComment.DoesNotExist:
+            return Response(
+                {"detail": "Comment not found or you are not authorized to edit this comment."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Cập nhật với serializer
+        serializer = TestCommentSerializer(comment, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        """
+        Xóa một comment và tất cả các comment con (nếu có).
+        """
+        user = request.user
+
+        try:
+            # Lấy comment dựa vào ID và đảm bảo user là chủ sở hữu
+            comment = TestComment.objects.get(id=pk, user=user)
+        except TestComment.DoesNotExist:
+            return Response(
+                {"detail": "Comment not found or you are not authorized to delete this comment."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Xóa tất cả các comment con liên quan
+        child_comments = TestComment.objects.filter(parent=comment)
+        for child in child_comments:
+            child.delete()
+
+        # Xóa comment cha
+        comment.delete()
+
+        return Response({"detail": "Comment and its children deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class CommentView(APIView):
+    def get(self, request, test_id):
+        """
+        Lấy danh sách comment trong một bài kiểm tra.
+        """
+        # Kiểm tra bài kiểm tra có tồn tại không
+        try:
+            test = Test.objects.get(id=test_id)
+        except Test.DoesNotExist:
+            return Response(
+                {"detail": "Test not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Lấy tất cả comment thuộc về bài kiểm tra này
+        comments = TestComment.objects.filter(test=test).order_by("-publish_date")
+
+        # Serialize dữ liệu
+        serializer = TestCommentSerializer(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -382,5 +493,3 @@ class StateView(APIView):
         # Serialize state
         serializer = StateSerializer(state)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
