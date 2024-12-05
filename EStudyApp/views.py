@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from django.db.models import Prefetch
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
@@ -223,17 +224,34 @@ class TestDetailView(APIView):
         return Response(serializer.data)
 
 
+class FixedTestPagination(PageNumberPagination):
+    """
+    Phân trang với giới hạn cố định 6 bài kiểm tra mỗi trang.
+    """
+    page_size = 6  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
+    page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
+    max_page_size = 6  # Giới hạn cứng
+
+
 class TestListView(APIView):
     """
-    API view để lấy danh sách tất cả các bài kiểm tra đã được sắp xếp.
+       API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
 
     def get(self, request, format=None):
-        # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
-        # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
-        tests = Test.objects.all().select_related('tag').order_by('id')
-        serializer = TestSerializer(tests, many=True)
-        return Response(serializer.data)
+        # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
+        tests = Test.objects.all().select_related('tag').order_by('id')  # Sắp xếp theo `id`
+        paginator = FixedTestPagination()  # Sử dụng phân trang cố định
+        paginated_tests = paginator.paginate_queryset(tests, request)  # Phân trang dữ liệu
+        serializer = TestSerializer(paginated_tests, many=True)
+        return paginator.get_paginated_response(serializer.data)  # Trả dữ liệu kèm thông tin phân trang
+
+    # def get(self, request, format=None):
+    #     # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
+    #     # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
+    #     tests = Test.objects.all().select_related('tag').order_by('id')
+    #     serializer = TestSerializer(tests, many=True)
+    #     return Response(serializer.data)
 
 
 class TestPartDetailView(APIView):
