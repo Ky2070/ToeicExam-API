@@ -115,7 +115,8 @@ INTERNAL_IPS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
-    "https://englishapp-client.vercel.app"
+    "https://englishapp-client.vercel.app",
+    "http://localhost:3001",
 ]
 
 CACHES = {
