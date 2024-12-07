@@ -379,6 +379,14 @@ class TestComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user} on {self.test}'
+    
+    @property
+    def replies(seft):
+        return TestComment.objects.filter(parent=self)
+    
+    @property
+    def get_replies(self):
+        return self.replies.all()
 
 
 class Flashcard(models.Model):
