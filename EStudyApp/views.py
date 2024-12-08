@@ -1,5 +1,7 @@
 from datetime import datetime, timezone, timedelta
-from django.db.models import Prefetch
+
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.db.models import Prefetch, Q
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -13,7 +15,7 @@ from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History,
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class QuestionSkillAPIView(APIView):
@@ -636,6 +638,47 @@ class SubmitTrainingView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SearchTestsAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        query_param = request.GET.get('q', '').strip()
+        if not query_param:
+            return Response({"error": "Query parameter 'q' is required."}, status=400)
+
+        # # Tách từ khóa thành danh sách và tìm kiếm tất cả các từ
+        # search_terms = query_param.split()
+        # query = SearchQuery(' & '.join(search_terms), search_type='plain')
+        #
+        # # Tìm kiếm trong trường 'name'
+        # tests = Test.objects.annotate(
+        #     search=SearchVector('name', config='english')
+        # ).filter(search=query)
+
+            # Tìm kiếm theo name hoặc tag (case-insensitive)
+        tests = Test.objects.filter(
+            Q(name__icontains=query_param) | Q(tag__name__icontains=query_param)
+        )
+
+        # Chuyển đổi kết quả sang JSON
+        result = [
+            {
+                "id": test.id,
+                "name": test.name,
+                "description": test.description,
+                "type": test.type,
+                "testDate": test.test_date.strftime('%Y-%m-%d %H:%M:%S') if test.test_date else None,
+                "duration": str(test.duration) if test.duration else None,
+                "questionCount": test.question_count,
+                "partCount": test.part_count,
+                "tag": test.tag.name if test.tag else None,
+            }
+            for test in tests
+        ]
+
+        return Response(result)
 
 
 
