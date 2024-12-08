@@ -4,11 +4,13 @@ from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
     QuestionType, State, TestComment
 
+
 class TestRepliesSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
+
 
 class TestCommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

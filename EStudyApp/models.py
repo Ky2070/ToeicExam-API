@@ -381,7 +381,7 @@ class TestComment(models.Model):
         return f'Comment by {self.user} on {self.test}'
     
     @property
-    def replies(seft):
+    def replies(self):
         return TestComment.objects.filter(parent=self)
     
     @property
