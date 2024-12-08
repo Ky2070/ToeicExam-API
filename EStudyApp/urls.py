@@ -2,11 +2,13 @@ from django.urls import path
 from EStudyApp.views import DetailSubmitTestView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
-    TestCommentView, CommentView
+    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView
 
 urlpatterns = [
     # API lấy chi tiết test và part
     path('tests/', TestListView.as_view(), name='test-list'),  # API lấy danh sách tất cả các bài kiểm tra
+
+    path('tests/search-tests/', SearchTestsAPIView.as_view(), name='search_tests_api'),
 
     path('tests/<int:pk>/', TestDetailView.as_view(), name='test-detail'),  # API lấy thông tin chi tiết của một bài
     # kiểm tra
@@ -22,6 +24,7 @@ urlpatterns = [
     path('submit/result/<int:history_id>/', DetailHistoryView.as_view(), name='history-detail'),
     path('questions/<int:question_id>/skill/', QuestionSkillAPIView.as_view(), name='question-skill'),
 
+    path('submit/training/', SubmitTrainingView.as_view(), name='training-submit'),
     # Lưu state
     path('create/state/', StateCreateView.as_view(), name='state-create'),
 

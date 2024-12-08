@@ -4,11 +4,13 @@ from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
     QuestionType, State, TestComment
 
+
 class TestRepliesSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
+
 
 class TestCommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -103,10 +105,11 @@ class PartSerializer(serializers.ModelSerializer):
 
 class TestDetailSerializer(serializers.ModelSerializer):
     part_test = PartSerializer(many=True, read_only=True)  # Liên kết đến các Part trong Test
+    question_test = QuestionDetailSerializer(many=True, read_only=True)
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'part_test']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'part_test', 'question_test']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -160,9 +163,8 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
         model = History
         fields = [
             'id', 'user', 'test', 'score', 'start_time', 'end_time',
-            'correct_answers', 'wrong_answers', 'unanswer_questions',
-            'percentage_score', 'listening_score', 'reading_score',
-            'complete'
+            'listening_score', 'reading_score', 'correct_answers', 'wrong_answers', 'unanswer_questions',
+            'complete', 'completion_time', 'test_result', 'percentage_score'
         ]
 
 
@@ -174,6 +176,6 @@ class HistorySerializer(serializers.ModelSerializer):
         model = History
         fields = [
             'id', 'user', 'test', 'score', 'start_time', 'end_time',
-            'listening_score', 'reading_score',
-            'complete'
+            'listening_score', 'reading_score', 'correct_answers', 'wrong_answers', 'unanswer_questions',
+            'complete', 'completion_time', 'percentage_score'
         ]
