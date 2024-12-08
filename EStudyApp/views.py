@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from django.db.models import Prefetch
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -8,7 +8,8 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State, TestComment
+from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State, TestComment, \
+    HistoryTraining
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
@@ -61,8 +62,16 @@ class SubmitTestView(APIView):
 
             # Khởi tạo biến đếm
             listening_correct = reading_correct = listening_total = reading_total = 0
+            # Giả sử timestamp gửi từ frontend dạng 'mm:ss'
+            timestamp = request.data['timestamp']
+            # VD: timestamp = "30:25"  # 30 phút 25 giây
+
+            # Chuyển timestamp sang giây
+            minutes, seconds = map(int, timestamp.split(":"))
+            timestamp_in_seconds = minutes * 60 + seconds
+
             start_time = datetime.now(timezone.utc)
-            end_time = datetime.now(timezone.utc)
+            end_time = start_time + timedelta(seconds=timestamp_in_seconds)
             for item in data:
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
@@ -105,6 +114,13 @@ class SubmitTestView(APIView):
                 test_result=data
             )
 
+            # Tính time_taken
+            time_taken = end_time - start_time
+
+            # Chuyển đổi time_taken sang chuỗi định dạng 'mm:ss'
+            minutes, seconds = divmod(time_taken.total_seconds(), 60)
+            formatted_time_taken = f"{int(minutes):02}:{int(seconds):02}"
+
             result = {
                 "message": "Test submitted successfully",
                 "history_id": history.id,
@@ -121,6 +137,7 @@ class SubmitTestView(APIView):
                     },
                     "unanswer_questions": unanswer_questions,
                     "overall_score": overall_score,
+                    "time_taken": formatted_time_taken
                 }
             }
 
@@ -237,7 +254,6 @@ class TestListView(APIView):
     """
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
-
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         tests = Test.objects.all().select_related('tag').order_by('id')  # Sắp xếp theo `id`
@@ -511,3 +527,119 @@ class StateView(APIView):
         # Serialize state
         serializer = StateSerializer(state)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SubmitTrainingView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            test_id = request.data['test_id']
+            data = request.data['data']
+
+            test = Test.objects.filter(id=test_id).first()
+            if not Test:
+                return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Khởi tạo các biến tổng kết cho bài luyện tập
+            total_correct_answers = 0
+            total_wrong_answers = 0
+            total_unanswer_questions = 0
+            total_percentage_score = 0
+
+            # Lưu trữ kết quả từng phần
+            part_results = []
+
+            for part_data in data:
+                part_id = part_data["part_id"]
+                part = Part.objects.filter(id=part_id).first()
+                if not part:
+                    return Response({"error": f"Part {part_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+                # Lấy câu hỏi trong part
+                question_ids = [item.get("id") for item in part_data["data"]]
+                questions = Question.objects.filter(id__in=question_ids).only("id", "correct_answer", "part_id")
+                question_map = {question.id: question for question in questions}
+
+                # Khởi tạo biến đếm số lượng câu đúng, sai và chưa trả lời cho mỗi phần
+                correct_answers = 0
+                wrong_answers = 0
+                unanswer_questions = 0
+
+                # Xử lý dữ liệu câu hỏi và câu trả lời của phần
+                for item in part_data["data"]:
+                    question_id = item.get("id")
+                    user_answer = item.get("user_answer")
+                    question = question_map.get(question_id)
+
+                    if question:
+                        # Kiểm tra câu trả lời của người dùng
+                        if user_answer is None:
+                            unanswer_questions += 1
+                        elif user_answer == question.correct_answer:
+                            correct_answers += 1
+                        else:
+                            wrong_answers += 1
+                # Tính toán điểm phần cho part
+                total_questions = correct_answers + wrong_answers + unanswer_questions
+                percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+                # Lưu kết quả cho phần vào cơ sở dữ liệu
+                history = HistoryTraining.objects.create(
+                    user=user,
+                    test=test,
+                    part=part,
+                    start_time=None,  # Có thể thay đổi nếu cần tính thời gian thực tế
+                    end_time=datetime.now(),  # Cập nhật thời gian thực tế
+                    correct_answers=correct_answers,
+                    wrong_answers=wrong_answers,
+                    unanswer_questions=unanswer_questions,
+                    percentage_score=percentage_score,
+                    complete=True,
+                    test_result=part_data["data"]
+                )
+
+                # Cập nhật kết quả tổng hợp
+                total_correct_answers += correct_answers
+                total_wrong_answers += wrong_answers
+                total_unanswer_questions += unanswer_questions
+                total_percentage_score += percentage_score
+
+                part_results.append({
+                    "part_id": part.id,
+                    "correct_answers": correct_answers,
+                    "wrong_answers": wrong_answers,
+                    "unanswer_questions": unanswer_questions,
+                    "percentage_score": percentage_score,
+                    "history_id": history.id,
+                })
+
+                # Tính toán tổng kết điểm
+            total_questions = total_correct_answers + total_wrong_answers + total_unanswer_questions
+            overall_percentage_score = (total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+            # Trả về kết quả tổng hợp và chi tiết các phần
+            result = {
+                "message": "Training submitted successfully",
+                "overall_result": {
+                    "total_correct_answers": total_correct_answers,
+                    "total_wrong_answers": total_wrong_answers,
+                    "total_unanswer_questions": total_unanswer_questions,
+                    "overall_percentage_score": overall_percentage_score,
+                },
+                "part_results": part_results  # Chi tiết kết quả từng phần
+            }
+
+            return Response(result, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
