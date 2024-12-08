@@ -15,12 +15,7 @@ from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History,
 from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
-<<<<<<< HEAD
-from rest_framework.permissions import IsAuthenticated
-import json
-=======
 from rest_framework.permissions import IsAuthenticated, AllowAny
->>>>>>> 863c42a8e4dba918334abf6f4d757c63ceba2ec8
 
 
 class QuestionSkillAPIView(APIView):
