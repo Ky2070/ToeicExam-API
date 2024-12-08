@@ -4,11 +4,18 @@ from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
     QuestionType, State, TestComment
 
-
-class TestCommentSerializer(serializers.ModelSerializer):
+class TestRepliesSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
+
+class TestCommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    replies = TestRepliesSerializer(many=True, read_only=True)
+    class Meta:
+        model = TestComment
+        fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date', 'replies']
 
     def validate_content(self, value):
         """Kiểm tra nội dung comment không được rỗng và không quá ngắn."""

@@ -405,11 +405,11 @@ class TestCommentView(APIView):
         # data = request.data["data"]
         # test_id = request.data["test_id"]
         # parent_id = request.data["parent_id"]
-        data = request.data.get("data")  # Nội dung comment
+        content = request.data.get("content")  # Nội dung comment
         test_id = request.data.get("test_id")  # ID của bài kiểm tra
         parent_id = request.data.get("parent_id")  # ID của comment cha (nếu là reply)
 
-        if not data:
+        if not content:
             return Response({"detail": "Comment content is required."}, status=status.HTTP_400_BAD_REQUEST)
         if not test_id:
             return Response({"detail": "Test ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -427,17 +427,18 @@ class TestCommentView(APIView):
                 return Response({"detail": "Parent comment not found or does not belong to this test."},
                                 status=status.HTTP_404_NOT_FOUND)
         # Chuẩn bị dữ liệu để post comment
-        comment_data = {
-            "user": user.id,
-            "test": test.id,
-            "parent": parent.id if parent else None,
-            "content": data,
-        }
-        serializer = TestCommentSerializer(data=comment_data)
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            comment = TestComment.objects.create(
+                user=user,
+                test=test,
+                parent=parent,
+                content=content
+            )
+            comment.save()
+            serializer = TestCommentSerializer(comment, many=False)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
         """
@@ -502,7 +503,7 @@ class CommentView(APIView):
             )
 
         # Lấy tất cả comment thuộc về bài kiểm tra này
-        comments = TestComment.objects.filter(test=test).order_by("-publish_date")
+        comments = TestComment.objects.filter(test=test, parent=None).order_by("-publish_date")
 
         # Serialize dữ liệu
         serializer = TestCommentSerializer(comments, many=True)
