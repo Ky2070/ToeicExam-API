@@ -332,6 +332,12 @@ class History(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
+    
+    @property 
+    def completion_time(self): 
+        delta = self.end_time - self.start_time
+        return round(delta.total_seconds())
+
 
 
 class HistoryTraining(models.Model):
