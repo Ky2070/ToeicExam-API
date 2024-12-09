@@ -78,8 +78,9 @@ class SubmitTestView(APIView):
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
                 question = questions.get(question_id)
+                item["correct_answer"] = question.correct_answer
 
-                if question:
+                if question and user_answer is not None:
                     # Lấy skill từ part_skill_map
                     skill = part_skill_map.get(question.part_id)
                     is_correct = user_answer == question.correct_answer
@@ -98,6 +99,8 @@ class SubmitTestView(APIView):
             wrong_answers = (listening_total - listening_correct) + (reading_total - reading_correct)
             percentage_score = ((listening_correct + reading_correct) / max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
+            
+            # Chuyển đối tượng QuerySet thành danh sách dictionary
 
             # Lưu lịch sử làm bài kiểm tra
             history = History.objects.create(
@@ -153,6 +156,7 @@ class SubmitTestView(APIView):
             return Response(result, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            print(e)
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get(self, request):
@@ -233,6 +237,10 @@ class TestDetailView(APIView):
                                 'question_number')
                         )
                     )
+                ),
+                Prefetch(
+                    'question_test',
+                    queryset = Question.objects.order_by('question_number')
                 )
             ).get(pk=pk)
         except Test.DoesNotExist:
