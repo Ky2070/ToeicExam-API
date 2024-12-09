@@ -190,10 +190,17 @@ class DetailSubmitTestView(APIView):
 
     def get(self, request):
         user_id = request.user.id  # Lấy ID của người dùng hiện tại
+        test_id = request.GET.get('test_id')
+        if test_id is None:
+            return Response({"error": "Test ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        test = Test.objects.get(id=test_id)
+        if test is None:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
         histories = (
-            History.objects.filter(user_id=user_id)
+            History.objects.filter(user_id=user_id, test=test)
             .select_related('test')  # Join bảng Test
             .only(
                 'id', 'user_id', 'score', 'start_time', 'end_time',
