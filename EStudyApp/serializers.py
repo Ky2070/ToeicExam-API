@@ -64,6 +64,7 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
                   'difficulty_level',
                   'answers',
                   'question_type',
+                  'part_id',
                   ]
 
 
@@ -75,6 +76,7 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'question_text',
                   'difficulty_level',
                   'answers',
+                  'part_id',
                   ]
 
 

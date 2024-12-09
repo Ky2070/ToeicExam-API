@@ -283,7 +283,6 @@ class TestListView(APIView):
 class TestPartDetailView(APIView):
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
-
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
             test = Test.objects.prefetch_related(
@@ -301,6 +300,10 @@ class TestPartDetailView(APIView):
                             )
                         )
                     ).order_by('id')  # Sắp xếp các phần theo `id`
+                ),
+                Prefetch(
+                    'question_test',
+                    queryset = Question.objects.filter(part_id__in=parts).order_by('question_number')
                 )
             ).get(pk=test_id)
         except Test.DoesNotExist:

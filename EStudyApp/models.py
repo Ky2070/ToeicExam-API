@@ -296,6 +296,10 @@ class Question(models.Model):
 
     def __str__(self):
         return f'{self.question_number} - {self.question_text} - {self.question_set}'
+    
+    @property
+    def part_id(self):
+        return self.part.id
 
 
 class PartQuestionSet(models.Model):
