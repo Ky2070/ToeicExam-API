@@ -283,7 +283,6 @@ class TestListView(APIView):
 class TestPartDetailView(APIView):
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
-
         try:
             # Tìm kiếm bài kiểm tra dựa trên `test_id`, đồng thời sắp xếp các phần liên quan
             test = Test.objects.prefetch_related(
@@ -301,6 +300,10 @@ class TestPartDetailView(APIView):
                             )
                         )
                     ).order_by('id')  # Sắp xếp các phần theo `id`
+                ),
+                Prefetch(
+                    'question_test',
+                    queryset = Question.objects.filter(part_id__in=parts).order_by('question_number')
                 )
             ).get(pk=test_id)
         except Test.DoesNotExist:
@@ -563,14 +566,14 @@ class SubmitTrainingView(APIView):
             part_results = []
 
             for part_data in data:
-                part_id = part_data["part_id"]
+                part_id = part_data["partId"]
                 part = Part.objects.filter(id=part_id).first()
                 if not part:
                     return Response({"error": f"Part {part_id} not found"}, status=status.HTTP_404_NOT_FOUND)
 
                 # Lấy câu hỏi trong part
                 question_ids = [item.get("id") for item in part_data["data"]]
-                questions = Question.objects.filter(id__in=question_ids).only("id", "correct_answer", "part_id")
+                questions = Question.objects.filter(id__in=question_ids).only("id", "correct_answer", "partId")
                 question_map = {question.id: question for question in questions}
 
                 # Khởi tạo biến đếm số lượng câu đúng, sai và chưa trả lời cho mỗi phần
