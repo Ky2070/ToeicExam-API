@@ -651,6 +651,7 @@ class SubmitTrainingView(APIView):
                     question_id = item.get("id")
                     user_answer = item.get("user_answer")
                     question = questions.get(question_id)
+                    item["correct_answer"] = question.correct_answer
 
                     if not question:
                         continue  # Bỏ qua nếu câu hỏi không hợp lệ
