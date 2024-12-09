@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from Authentication.serializers import UserSerializer
-from EStudyApp.models import History, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
+from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
     QuestionType, State, TestComment
 
 
@@ -64,6 +64,7 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
                   'difficulty_level',
                   'answers',
                   'question_type',
+                  'part_id',
                   ]
 
 
@@ -75,6 +76,7 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'question_text',
                   'difficulty_level',
                   'answers',
+                  'part_id',
                   ]
 
 
@@ -167,6 +169,15 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
             'complete', 'completion_time', 'test_result', 'percentage_score'
         ]
 
+
+class HistoryTrainingSerializer(serializers.ModelSerializer):
+    test = TestSubmitSerializer(read_only=True)
+    
+    class Meta:
+        model = HistoryTraining
+        fields = ['id', 'user', 'test', 'start_time', 'end_time',
+            'correct_answers', 'wrong_answers', 'unanswer_questions',
+            'complete', 'completion_time', 'percentage_score', 'part_list', 'test_result']
 
 class HistorySerializer(serializers.ModelSerializer):
     # user = UserSerializer(read_only=True)

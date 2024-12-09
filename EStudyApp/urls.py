@@ -1,5 +1,5 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
+from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView
@@ -25,6 +25,7 @@ urlpatterns = [
     path('questions/<int:question_id>/skill/', QuestionSkillAPIView.as_view(), name='question-skill'),
 
     path('submit/training/', SubmitTrainingView.as_view(), name='training-submit'),
+    path('submit/training/<int:history_id>/', DetailTrainingView.as_view(), name='training-detail'),
     # Lưu state
     path('create/state/', StateCreateView.as_view(), name='state-create'),
 
