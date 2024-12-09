@@ -540,6 +540,14 @@ class SubmitTrainingView(APIView):
             user = request.user
             test_id = request.data['test_id']
             data = request.data['data']
+            timestamp = request.data['timestamp']
+
+            # Chuyển timestamp sang giây
+            minutes, seconds = map(int, timestamp.split(":"))
+            timestamp_in_seconds = minutes * 60 + seconds
+
+            start_time = datetime.now(timezone.utc)
+            end_time = start_time + timedelta(seconds=timestamp_in_seconds)
 
             test = Test.objects.filter(id=test_id).first()
             if not Test:
@@ -593,8 +601,8 @@ class SubmitTrainingView(APIView):
                     user=user,
                     test=test,
                     part=part,
-                    start_time=None,  # Có thể thay đổi nếu cần tính thời gian thực tế
-                    end_time=datetime.now(),  # Cập nhật thời gian thực tế
+                    start_time=start_time,  # Có thể thay đổi nếu cần tính thời gian thực tế
+                    end_time=end_time,  # Cập nhật thời gian thực tế
                     correct_answers=correct_answers,
                     wrong_answers=wrong_answers,
                     unanswer_questions=unanswer_questions,
@@ -622,6 +630,13 @@ class SubmitTrainingView(APIView):
             total_questions = total_correct_answers + total_wrong_answers + total_unanswer_questions
             overall_percentage_score = (total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
+            # Tính time_taken
+            time_taken = end_time - start_time
+
+            # Chuyển đổi time_taken sang chuỗi định dạng 'mm:ss'
+            minutes, seconds = divmod(time_taken.total_seconds(), 60)
+            formatted_time_taken = f"{int(minutes):02}:{int(seconds):02}"
+
             # Trả về kết quả tổng hợp và chi tiết các phần
             result = {
                 "message": "Training submitted successfully",
@@ -631,7 +646,8 @@ class SubmitTrainingView(APIView):
                     "total_unanswer_questions": total_unanswer_questions,
                     "overall_percentage_score": overall_percentage_score,
                 },
-                "part_results": part_results  # Chi tiết kết quả từng phần
+                "part_results": part_results, # Chi tiết kết quả từng phần
+                "time_taken": formatted_time_taken
             }
 
             return Response(result, status=status.HTTP_201_CREATED)
