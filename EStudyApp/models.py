@@ -343,14 +343,11 @@ class History(models.Model):
         return round(delta.total_seconds())
 
 
-
 class HistoryTraining(models.Model):
     user = models.ForeignKey(
         User, related_name='training_user', on_delete=models.DO_NOTHING)
     test = models.ForeignKey(
         Test, related_name='training_test', on_delete=models.DO_NOTHING)
-    part = models.ForeignKey(
-        Part, related_name='training_part', on_delete=models.DO_NOTHING)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     correct_answers = models.IntegerField(blank=True, null=True)
@@ -360,6 +357,11 @@ class HistoryTraining(models.Model):
         max_digits=4, decimal_places=1, blank=True, null=True)
     complete = models.BooleanField(default=False)
     test_result = models.JSONField(blank=True, null=True)
+    part_list = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return f"{self.user} - {self.part}"

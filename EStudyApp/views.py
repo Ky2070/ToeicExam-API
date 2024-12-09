@@ -629,16 +629,14 @@ class SubmitTrainingView(APIView):
                 return Response({"error": f"Questions not found: {', '.join(map(str, missing_questions))}"},
                                 status=status.HTTP_404_NOT_FOUND)
 
-            # Tổ chức dữ liệu câu hỏi theo `part_id`
-            questions_by_part = defaultdict(list)
-            for question in questions.values():
-                questions_by_part[question.part_id].append(question)
-
             # Xử lý câu hỏi và tính toán kết quả
             total_correct_answers = 0
             total_wrong_answers = 0
             total_unanswer_questions = 0
             part_results = []
+
+            # Danh sách part đã xử lý
+            processed_parts = []
 
             for part_id in part_ids:
                 part = parts.get(part_id)
@@ -668,25 +666,13 @@ class SubmitTrainingView(APIView):
                 total_questions = correct_answers + wrong_answers + unanswer_questions
                 percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
-                # Lưu kết quả cho phần vào cơ sở dữ liệu
-                history = HistoryTraining.objects.create(
-                    user=user,
-                    test=test,
-                    part=part,
-                    start_time=start_time,
-                    end_time=end_time,
-                    correct_answers=correct_answers,
-                    wrong_answers=wrong_answers,
-                    unanswer_questions=unanswer_questions,
-                    percentage_score=percentage_score,
-                    complete=True,
-                    test_result=data,
-                )
-
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
                 total_wrong_answers += wrong_answers
                 total_unanswer_questions += unanswer_questions
+
+                # Lưu thông tin part đã xử lý
+                processed_parts.append(part.id)
 
                 part_results.append({
                     "part_id": part.id,
@@ -694,7 +680,6 @@ class SubmitTrainingView(APIView):
                     "wrong_answers": wrong_answers,
                     "unanswer_questions": unanswer_questions,
                     "percentage_score": percentage_score,
-                    "history_id": history.id,
                 })
 
             # Tính toán tổng kết điểm
@@ -705,6 +690,21 @@ class SubmitTrainingView(APIView):
             time_taken = end_time - start_time
             minutes, seconds = divmod(time_taken.total_seconds(), 60)
             formatted_time_taken = f"{int(minutes):02}:{int(seconds):02}"
+
+            # Lưu kết quả tổng vào `HistoryTraining`
+            history = HistoryTraining.objects.create(
+                user=user,
+                test=test,
+                start_time=start_time,
+                end_time=end_time,
+                correct_answers=total_correct_answers,
+                wrong_answers=total_wrong_answers,
+                unanswer_questions=total_unanswer_questions,
+                percentage_score=overall_percentage_score,
+                complete=True,
+                test_result=data,
+                part_list=",".join(map(str, processed_parts))  # Lưu danh sách part_id vào part_list
+            )
 
             # Trả về kết quả tổng hợp
             result = {
@@ -717,12 +717,14 @@ class SubmitTrainingView(APIView):
                 },
                 "part_results": part_results,
                 "time_taken": formatted_time_taken,
+                "history_id": history.id,
             }
 
             return Response(result, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
