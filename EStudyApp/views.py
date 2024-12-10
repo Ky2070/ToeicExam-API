@@ -671,7 +671,7 @@ class SubmitTrainingView(APIView):
                         wrong_answers += 1
 
                 # Tính toán điểm phần
-                total_questions = correct_answers + wrong_answers + unanswer_questions
+                total_questions = correct_answers + wrong_answers
                 percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
@@ -691,7 +691,7 @@ class SubmitTrainingView(APIView):
                 })
 
             # Tính toán tổng kết điểm
-            total_questions = total_correct_answers + total_wrong_answers + total_unanswer_questions
+            total_questions = total_correct_answers + total_wrong_answers
             overall_percentage_score = (total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
