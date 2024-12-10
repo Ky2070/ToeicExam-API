@@ -221,7 +221,12 @@ class QuestionSet(models.Model):
     )
 
     def __str__(self):
-        return f'{self.page} - {self.test} - {self.part}'
+        if self.page:
+            page_content = str(self.page)
+            if len(page_content) > 50:
+                return f'{page_content[:50]}...'
+            return page_content
+        return "No Page Content"
 
 
 class Question(models.Model):

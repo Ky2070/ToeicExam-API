@@ -45,4 +45,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.email
+        email_str = str(self.email)  # Ép kiểu email về chuỗi nếu cần
+        return email_str.split('@')[0]  # Chỉ hiển thị phần trước dấu "@"
+

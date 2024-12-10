@@ -43,5 +43,3 @@ tzdata==2024.2
 views==0.3
 Werkzeug==3.0.4
 whitenoise==6.8.2
-
-django-admin-black==1.0.14

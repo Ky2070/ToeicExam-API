@@ -42,3 +42,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+//custom for page question_set
+
+document.addEventListener("DOMContentLoaded", function () {
+    alert("Admin page loaded!");
+    // Highlight row on hover
+    document.querySelectorAll("tr").forEach(row => {
+        row.addEventListener("mouseenter", () => {
+            row.style.backgroundColor = "#f1f1f1";
+        });
+        row.addEventListener("mouseleave", () => {
+            row.style.backgroundColor = "";
+        });
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("Admin page loaded!");
+    // Hiệu ứng hover
+    document.querySelectorAll("tr").forEach(row => {
+        row.addEventListener("mouseenter", () => {
+            row.style.backgroundColor = "#f1f1f1";
+        });
+        row.addEventListener("mouseleave", () => {
+            row.style.backgroundColor = "";
+        });
+    });
+});
