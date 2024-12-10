@@ -75,6 +75,7 @@ class Test(models.Model):
                             null=True,
                             blank=True
                             )
+    publish = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -295,7 +296,7 @@ class Question(models.Model):
         self.soft_delete()
 
     def __str__(self):
-        return f'{self.question_number} - {self.question_text} - {self.question_set}'
+        return f'{self.question_number} - {self.question_text}'
     
     @property
     def part_id(self):

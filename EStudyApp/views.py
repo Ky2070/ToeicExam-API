@@ -274,7 +274,7 @@ class TestListView(APIView):
     """
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
-        tests = Test.objects.all().select_related('tag').order_by('id')  # Sắp xếp theo `id`
+        tests = Test.objects.filter(publish=True).select_related('tag').order_by('id')  # Sắp xếp theo `id`
         paginator = FixedTestPagination()  # Sử dụng phân trang cố định
         paginated_tests = paginator.paginate_queryset(tests, request)  # Phân trang dữ liệu
         serializer = TestSerializer(paginated_tests, many=True)

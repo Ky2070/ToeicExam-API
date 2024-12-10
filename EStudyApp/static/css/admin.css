@@ -1,0 +1,60 @@
+/* Thêm border-radius, padding và hiệu ứng hover */
+.badge-success {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.badge-danger {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.badge-success:hover,
+.badge-danger:hover {
+    opacity: 0.8;
+}
+
+/* admin.css */
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.table-striped tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Tùy chỉnh độ rộng các cột */
+th.column-name, td.column-name {
+    width: 150px; /* Giới hạn độ rộng cột Name */
+    text-align: left; /* Căn chỉnh trái */
+    overflow: hidden; /* Cắt nội dung tràn */
+    text-overflow: ellipsis; /* Thêm dấu ... nếu nội dung quá dài */
+    white-space: nowrap; /* Không xuống dòng */
+}
+
+th.column-colored_publish_status, td.column-colored_publish_status {
+    width: 100px; /* Độ rộng nhỏ hơn cho trạng thái */
+    text-align: center; /* Căn giữa */
+}
+
+th.column-tag, td.column-tag {
+    width: 120px; /* Độ rộng của cột Tag */
+    text-align: right; /* Căn phải */
+}
+
