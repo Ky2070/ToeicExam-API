@@ -13,7 +13,7 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining
-from EStudyApp.serializers import HistorySerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
+from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
     CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -190,10 +190,17 @@ class DetailSubmitTestView(APIView):
 
     def get(self, request):
         user_id = request.user.id  # Lấy ID của người dùng hiện tại
+        test_id = request.GET.get('test_id')
+        if test_id is None:
+            return Response({"error": "Test ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        test = Test.objects.get(id=test_id)
+        if test is None:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
         histories = (
-            History.objects.filter(user_id=user_id)
+            History.objects.filter(user_id=user_id, test=test)
             .select_related('test')  # Join bảng Test
             .only(
                 'id', 'user_id', 'score', 'start_time', 'end_time',
@@ -725,6 +732,30 @@ class SubmitTrainingView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def get(self, request):
+        test_id = request.GET.get('test_id')
+        test = Test.objects.get(id=test_id)
+        if not test:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        user = request.user
+        history = HistoryTraining.objects.filter(user=user, test=test).order_by('-id')
+        serializer = HistoryTrainingSerializer(history, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class DetailTrainingView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, history_id):
+        print(history_id)
+        history = HistoryTraining.objects.get(id=history_id)
+        if not history:
+            return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = HistoryTrainingSerializer(history, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 
