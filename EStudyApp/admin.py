@@ -223,7 +223,7 @@ class TestAdmin(admin.ModelAdmin):
             ' cursor: pointer;'
             ' transition: opacity 0.3s ease;'
             ' opacity: 1;"'
-            ' on-mouseover="this.style.opacity=0.8;" on-mouse-out="this.style.opacity=1;">'
+            ' onmouseover="this.style.opacity=0.8;" onmouseout="this.style.opacity=1;">'
             '<i class="fas fa-{}" style="margin-right: 0.1rem;"></i> {}</span>',
             css_class, icon, label
         )
