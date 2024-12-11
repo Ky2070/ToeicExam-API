@@ -69,6 +69,7 @@ th.column-tag, td.column-tag {
     margin-right: 0.5rem; /* Khoảng cách giữa biểu tượng và chữ */
     font-size: 1.2rem; /* Biểu tượng lớn hơn một chút */
 }
-
-
-
+.badge-warning:hover,
+.badge-info:hover {
+    opacity: 0.8;
+}

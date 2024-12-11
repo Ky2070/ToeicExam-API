@@ -219,12 +219,22 @@ class TestAdmin(admin.ModelAdmin):
         css_class, icon, label = type_styles.get(obj.types, default_style)
         return format_html(
             '<span class="badge {}" style="border-radius: 20px;'
-            ' font-size: 0.8rem;text-transform: uppercase;">'
+            ' font-size: 0.8rem; text-transform: uppercase;'
+            ' cursor: pointer;'
+            ' transition: opacity 0.3s ease;'
+            ' opacity: 1;"'
+            ' on-mouseover="this.style.opacity=0.8;" on-mouse-out="this.style.opacity=1;">'
             '<i class="fas fa-{}" style="margin-right: 0.1rem;"></i> {}</span>',
             css_class, icon, label
         )
 
     colored_types.short_description = 'Loại bài kiểm tra'
+
+    class Media:
+        css = {
+            'all': ('css/admin.css',)  # Liên kết tới file CSS tùy chỉnh
+        }
+        js = ('js/custom_admin.js',)  # Liên kết tới tệp JavaScript tùy chỉnh của bạn
 
     def colored_publish_status(self, obj):
         color = 'badge-success' if obj.publish else 'badge-danger'
