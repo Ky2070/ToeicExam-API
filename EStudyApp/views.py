@@ -286,9 +286,11 @@ class TestListView(APIView):
 
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
-        types = request.GET.get('types') if request.GET.get('type') is None else 'Practice'
-        tests = Test.objects.filter(publish=True, types=types).select_related(
+        # get type from request and default is Practice
+        type = request.GET.get('type') if request.GET.get('type') is not None else 'Practice'
+        tests = Test.objects.filter(publish=True, types=type).select_related(
             'tag').order_by('id')  # Sắp xếp theo `id`
+
         paginator = FixedTestPagination()  # Sử dụng phân trang cố định
         paginated_tests = paginator.paginate_queryset(
             tests, request)  # Phân trang dữ liệu
