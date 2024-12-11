@@ -73,10 +73,13 @@ class SubmitTestView(APIView):
 
             # Chuyển timestamp sang giây
             minutes, seconds = map(int, timestamp.split(":"))
-            timestamp_in_seconds = minutes * 60 + seconds
+            timestamp_in_seconds = 120 * 60 - (minutes * 60 + seconds)
 
-            start_time = datetime.now(timezone.utc)
-            end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            # start_time = datetime.now(timezone.utc)
+            # end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            end_time = datetime.now(timezone.utc)
+            start_time = end_time - timedelta(seconds=timestamp_in_seconds)
+            
             for item in data:
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
@@ -282,9 +285,10 @@ class TestListView(APIView):
     """
 
     def get(self, request, format=None):
-        # Lấy giá trị `types` từ query parameters
-        types = request.GET.get('type')
-        tests = Test.objects.filter(publish=True, types=types).select_related(
+        # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
+        # get type from request and default is Practice
+        type = request.GET.get('type') if request.GET.get('type') is not None else 'Practice'
+        tests = Test.objects.filter(publish=True, types=type).select_related(
             'tag').order_by('id')  # Sắp xếp theo `id`
         paginator = FixedTestPagination()  # Sử dụng phân trang cố định
         paginated_tests = paginator.paginate_queryset(
