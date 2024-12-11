@@ -297,7 +297,6 @@ class TestListView(APIView):
             )
         ).filter(publish=True, types=type).select_related(
             'tag').order_by('id')  # Sắp xếp theo `id`
-
         paginator = FixedTestPagination()  # Sử dụng phân trang cố định
         paginated_tests = paginator.paginate_queryset(
             tests, request)  # Phân trang dữ liệu
