@@ -205,7 +205,26 @@ class PublishStatusFilter(SimpleListFilter):
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'colored_publish_status', 'tag')
+    list_display = ('name', 'colored_publish_status', 'colored_types', 'tag')
+
+    def colored_types(self, obj):
+        # Gán màu sắc và biểu tượng dựa trên giá trị `types`
+        type_styles = {
+            'Practice': ('badge-info', 'laptop', 'Practice'),
+            'Online': ('badge-success', 'globe', 'Online'),
+            'All': ('badge-warning', 'book', 'All'),
+        }
+        default_style = ('badge-secondary', 'question-circle', 'Unknown')
+
+        css_class, icon, label = type_styles.get(obj.types, default_style)
+        return format_html(
+            '<span class="badge {}" style="border-radius: 20px;'
+            ' font-size: 0.8rem;text-transform: uppercase;">'
+            '<i class="fas fa-{}" style="margin-right: 0.1rem;"></i> {}</span>',
+            css_class, icon, label
+        )
+
+    colored_types.short_description = 'Loại bài kiểm tra'
 
     def colored_publish_status(self, obj):
         color = 'badge-success' if obj.publish else 'badge-danger'
@@ -228,7 +247,7 @@ class TestAdmin(admin.ModelAdmin):
         js = ('js/custom_admin.js',)  # Liên kết tới tệp JavaScript tùy chỉnh của bạn
 
     search_fields = ('name', 'description')
-    list_filter = (PublishStatusFilter, 'tag')  # Thêm bộ lọc tùy chỉnh vào đây
+    list_filter = (PublishStatusFilter, 'tag', 'types')  # Thêm bộ lọc tùy chỉnh vào đây
     list_per_page = 6
     readonly_fields = ('id', 'test_date',)
 
@@ -238,7 +257,8 @@ class TestAdmin(admin.ModelAdmin):
     # Sử dụng fields thay vì fieldsets
     fields = ('name', 'description', 'types', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'publish')
 
-    actions = ['mark_tests_published', 'mark_tests_unpublished', 'export_to_csv']
+    actions = ['mark_tests_published', 'mark_tests_unpublished', 'mark_tests_as_practice',
+               'mark_tests_as_online', 'mark_tests_as_all', 'export_to_csv']
 
     def mark_tests_published(self, request, queryset):
         to_update = queryset.filter(publish=False)
@@ -273,6 +293,48 @@ class TestAdmin(admin.ModelAdmin):
         self.message_user(request, " ".join(messages))
 
     mark_tests_unpublished.short_description = "Đánh dấu các bài kiểm tra là 'Unpublish'"
+
+    def mark_tests_as_practice(self, request, queryset):
+        updated_count = queryset.exclude(types='Practice').update(types='Practice')
+        skipped_count = queryset.filter(types='Practice').count()
+
+        messages = []
+        if updated_count:
+            messages.append(f"{updated_count} bài kiểm tra đã được đặt thành loại 'Practice'.")
+        if skipped_count:
+            messages.append(f"{skipped_count} bài kiểm tra đã ở loại 'Practice' và không cần cập nhật.")
+
+        self.message_user(request, "".join(messages))
+
+    mark_tests_as_practice.short_description = "Đặt loại Test là 'Practice'"
+
+    def mark_tests_as_online(self, request, queryset):
+        updated_count = queryset.exclude(types='Online').update(types='Online')
+        skipped_count = queryset.filter(types='Online').count()
+
+        messages = []
+        if updated_count:
+            messages.append(f"{updated_count} bài kiểm tra đã được đặt thành loại 'Online'.")
+        if skipped_count:
+            messages.append(f"{skipped_count} bài kiểm tra đã ở loại 'Online' và không cần cập nhật.")
+
+        self.message_user(request, " ".join(messages))
+
+    mark_tests_as_online.short_description = "Đặt loại Test là 'Online'"
+
+    def mark_tests_as_all(self, request, queryset):
+        updated_count = queryset.exclude(types='All').update(types='All')
+        skipped_count = queryset.filter(types='All').count()
+
+        messages = []
+        if updated_count:
+            messages.append(f"{updated_count} bài kiểm tra đã được đặt thành loại 'All'.")
+        if skipped_count:
+            messages.append(f"{skipped_count} bài kiểm tra đã ở loại 'All' và không cần cập nhật.")
+
+        self.message_user(request, " ".join(messages))
+
+    mark_tests_as_all.short_description = "Đặt loại Test là 'All'"
 
     # Action export dữ liệu ra file CSV
     def export_to_csv(self, request, queryset):
