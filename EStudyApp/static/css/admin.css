@@ -1,7 +1,7 @@
 /* Thêm border-radius, padding và hiệu ứng hover */
 .badge-success {
     background-color: green;
-    color: white;
+    color: black;
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 20px;
@@ -58,3 +58,18 @@ th.column-tag, td.column-tag {
     text-align: right; /* Căn phải */
 }
 
+.custom-badge {
+    font-size: 1.1rem; /* Kích thước chữ lớn hơn */
+    padding: 0.5rem; /* Tăng khoảng cách giữa chữ và viền */
+    display: inline-flex;
+    align-items: center; /* Căn giữa biểu tượng và chữ */
+}
+
+.custom-badge i {
+    margin-right: 0.5rem; /* Khoảng cách giữa biểu tượng và chữ */
+    font-size: 1.2rem; /* Biểu tượng lớn hơn một chút */
+}
+.badge-warning:hover,
+.badge-info:hover {
+    opacity: 0.8;
+}
