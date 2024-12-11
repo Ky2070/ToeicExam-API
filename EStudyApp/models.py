@@ -27,8 +27,9 @@ class Test(models.Model):
     DoesNotExist = None
     objects = None
     TYPE_TEST_CHOICES = [
-        ('READING', 'Reading'),
-        ('LISTENING', 'Listening'),
+        ('Online', 'Online'),
+        ('Practice', 'Practice'),
+        ('All', 'All')
     ]
 
     name = models.CharField(
@@ -41,7 +42,7 @@ class Test(models.Model):
         blank=True,
         null=True
     )
-    type = models.CharField(
+    types = models.CharField(
         max_length=30,
         choices=TYPE_TEST_CHOICES,
         null=True,
@@ -550,6 +551,7 @@ class State(models.Model):
     time = models.DurationField(blank=True, null=True)
     initial_minutes = models.IntegerField(blank=True, null=True)
     initial_seconds = models.IntegerField(blank=True, null=True)
+    time_taken = models.IntegerField(blank=True, null=True)
 
     name = models.CharField(
         max_length=125,
@@ -563,3 +565,5 @@ class State(models.Model):
     used = models.BooleanField(
         default=False
     )
+    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)

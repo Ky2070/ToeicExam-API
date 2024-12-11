@@ -55,8 +55,10 @@ class SubmitTestView(APIView):
                 return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
             # Lấy tất cả các part và skill liên quan đến test
-            parts = Part.objects.filter(test=test).select_related('part_description')
-            part_skill_map = {part.id: part.part_description.skill for part in parts}
+            parts = Part.objects.filter(
+                test=test).select_related('part_description')
+            part_skill_map = {
+                part.id: part.part_description.skill for part in parts}
 
             # Lấy câu hỏi từ data
             question_ids = [item.get("id") for item in data]
@@ -71,10 +73,13 @@ class SubmitTestView(APIView):
 
             # Chuyển timestamp sang giây
             minutes, seconds = map(int, timestamp.split(":"))
-            timestamp_in_seconds = minutes * 60 + seconds
+            timestamp_in_seconds = 120 * 60 - (minutes * 60 + seconds)
 
-            start_time = datetime.now(timezone.utc)
-            end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            # start_time = datetime.now(timezone.utc)
+            # end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            end_time = datetime.now(timezone.utc)
+            start_time = end_time - timedelta(seconds=timestamp_in_seconds)
+
             for item in data:
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
@@ -95,12 +100,15 @@ class SubmitTestView(APIView):
                             reading_correct += 1
 
             # Tính điểm TOEIC
-            listening_score, reading_score, overall_score = calculate_toeic_score(listening_correct, reading_correct)
+            listening_score, reading_score, overall_score = calculate_toeic_score(
+                listening_correct, reading_correct)
             correct_answers = listening_correct + reading_correct
-            wrong_answers = (listening_total - listening_correct) + (reading_total - reading_correct)
-            percentage_score = ((listening_correct + reading_correct) / max(listening_total + reading_total, 1)) * 100
+            wrong_answers = (listening_total - listening_correct) + \
+                (reading_total - reading_correct)
+            percentage_score = ((listening_correct + reading_correct) /
+                                max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
-            
+
             # Chuyển đối tượng QuerySet thành danh sách dictionary
 
             # Lưu lịch sử làm bài kiểm tra
@@ -147,7 +155,8 @@ class SubmitTestView(APIView):
                 }
             }
 
-            state = State.objects.filter(user=user, test=test).order_by('-id').first()
+            state = State.objects.filter(
+                user=user, test=test).order_by('-id').first()
             if state:
                 state.used = True
                 state.save()
@@ -176,7 +185,8 @@ class DetailHistoryView(APIView):
         if user is None:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        history = History.objects.filter(id=history_id, user_id=user_id).first()
+        history = History.objects.filter(
+            id=history_id, user_id=user_id).first()
 
         if history is None:
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -186,14 +196,15 @@ class DetailHistoryView(APIView):
 
 
 class DetailSubmitTestView(APIView):
-    permission_classes = [IsAuthenticated]  # Chỉ cho phép người dùng đã xác thực
+    # Chỉ cho phép người dùng đã xác thực
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user_id = request.user.id  # Lấy ID của người dùng hiện tại
         test_id = request.GET.get('test_id')
         if test_id is None:
             return Response({"error": "Test ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         test = Test.objects.get(id=test_id)
         if test is None:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -248,7 +259,7 @@ class TestDetailView(APIView):
                 ),
                 Prefetch(
                     'question_test',
-                    queryset = Question.objects.order_by('question_number')
+                    queryset=Question.objects.order_by('question_number')
                 )
             ).get(pk=pk)
         except Test.DoesNotExist:
@@ -272,13 +283,25 @@ class TestListView(APIView):
     """
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
+
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
-        tests = Test.objects.filter(publish=True).select_related('tag').order_by('id')  # Sắp xếp theo `id`
+        # get type from request and default is Practice
+        type = request.GET.get('type') if request.GET.get(
+            'type') is not None else 'Practice'
+        tests = Test.objects.prefetch_related(
+            Prefetch(
+                'part_test',
+                queryset=Part.objects.all()
+            )
+        ).filter(publish=True, types=type).select_related(
+            'tag').order_by('id')  # Sắp xếp theo `id`
         paginator = FixedTestPagination()  # Sử dụng phân trang cố định
-        paginated_tests = paginator.paginate_queryset(tests, request)  # Phân trang dữ liệu
+        paginated_tests = paginator.paginate_queryset(
+            tests, request)  # Phân trang dữ liệu
         serializer = TestSerializer(paginated_tests, many=True)
-        return paginator.get_paginated_response(serializer.data)  # Trả dữ liệu kèm thông tin phân trang
+        # Trả dữ liệu kèm thông tin phân trang
+        return paginator.get_paginated_response(serializer.data)
 
     # def get(self, request, format=None):
     #     # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
@@ -311,7 +334,8 @@ class TestPartDetailView(APIView):
                 ),
                 Prefetch(
                     'question_test',
-                    queryset = Question.objects.filter(part_id__in=parts).order_by('question_number')
+                    queryset=Question.objects.filter(
+                        part_id__in=parts).order_by('question_number')
                 )
             ).get(pk=test_id)
         except Test.DoesNotExist:
@@ -330,7 +354,8 @@ class CourseListView(APIView):
 
 class PartListView(APIView):
     def get(self, request, test_id):
-        parts = Part.objects.filter(test=test_id).select_related('part_description').order_by('id')
+        parts = Part.objects.filter(test=test_id).select_related(
+            'part_description').order_by('id')
 
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data)
@@ -359,14 +384,16 @@ class QuestionListView(APIView):
 
 
 class StateCreateView(APIView):
-    permission_classes = [IsAuthenticated]  # Chỉ cho phép người dùng đã đăng nhập
+    # Chỉ cho phép người dùng đã đăng nhập
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         # Lấy user từ request
         user = request.user
         test = Test.objects.filter(id=request.data.get('test_id')).first()
 
-        state = State.objects.filter(user=user, test=test).order_by('-id').first()
+        state = State.objects.filter(
+            user=user, test=test).order_by('-id').first()
 
         if state and state.used == False:
             return Response(
@@ -377,7 +404,7 @@ class StateCreateView(APIView):
         # Thêm user vào dữ liệu được gửi từ client
 
         info = request.data["info"]
-        initial_minutes = 0
+        initial_minutes = 120
         initial_seconds = 0
 
         state = State.objects.create(
@@ -399,8 +426,12 @@ class StateCreateView(APIView):
         test = Test.objects.filter(id=request.data.get('test_id')).first()
         initial_minutes = request.data.get('initial_minutes')
         initial_seconds = request.data.get('initial_seconds')
+        minutes = (120 - initial_minutes) * 60
+        seconds = (60 - initial_seconds)
+        time_taken = minutes + seconds
 
-        state = State.objects.filter(user=user, test=test, used=False).order_by('-id').first()
+        state = State.objects.filter(
+            user=user, test=test, used=False).order_by('-id').first()
 
         if not state:
             return Response(
@@ -411,6 +442,7 @@ class StateCreateView(APIView):
         state.info = request.data["info"]
         state.initial_minutes = initial_minutes
         state.initial_seconds = initial_seconds
+        state.time_taken = time_taken
         state.save()
 
         serializer = StateSerializer(state, many=False)
@@ -428,7 +460,8 @@ class TestCommentView(APIView):
         # parent_id = request.data["parent_id"]
         content = request.data.get("content")  # Nội dung comment
         test_id = request.data.get("test_id")  # ID của bài kiểm tra
-        parent_id = request.data.get("parent_id")  # ID của comment cha (nếu là reply)
+        # ID của comment cha (nếu là reply)
+        parent_id = request.data.get("parent_id")
 
         if not content:
             return Response({"detail": "Comment content is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -524,7 +557,8 @@ class CommentView(APIView):
             )
 
         # Lấy tất cả comment thuộc về bài kiểm tra này
-        comments = TestComment.objects.filter(test=test, parent=None).order_by("-publish_date")
+        comments = TestComment.objects.filter(
+            test=test, parent=None).order_by("-publish_date")
 
         # Serialize dữ liệu
         serializer = TestCommentSerializer(comments, many=True)
@@ -538,7 +572,22 @@ class StateView(APIView):
         user = request.user
 
         # Lấy state mới nhất
-        state = State.objects.filter(user=user, used=False).order_by('-id').first()
+        state = State.objects.filter(
+            user=user, used=False).order_by('-id').first()
+        # convert state.created_at - date now to seconds
+        created_at = state.created_at
+        now = datetime.now(timezone.utc)
+        time_taken = now - created_at
+        minutes, seconds = divmod(time_taken.total_seconds(), 60)
+        state.initial_minutes = 120 - minutes
+        state.initial_seconds = 60 - seconds
+        state.time_taken = minutes + seconds
+        state.save()
+
+        # # convert time to seconds
+        # time_taken = state.time
+        # minutes, seconds = divmod(time_taken.total_seconds(), 60)
+        # formatted_time_taken = f"{int(minutes):02}:{int(seconds):02}"
 
         if not state:
             return Response(
@@ -570,7 +619,8 @@ class SearchTestsAPIView(APIView):
 
             # Tìm kiếm theo name hoặc tag (case-insensitive)
         tests = Test.objects.filter(
-            Q(name__icontains=query_param) | Q(tag__name__icontains=query_param)
+            Q(name__icontains=query_param) | Q(
+                tag__name__icontains=query_param)
         )
 
         # Chuyển đổi kết quả sang JSON
@@ -619,7 +669,8 @@ class SubmitTrainingView(APIView):
             question_ids = {item.get("id") for item in data}
 
             # Truy vấn tất cả Part trong một lần
-            parts = Part.objects.filter(id__in=part_ids).in_bulk(field_name="id")
+            parts = Part.objects.filter(
+                id__in=part_ids).in_bulk(field_name="id")
             missing_parts = part_ids - set(parts.keys())
             if missing_parts:
                 return Response({"error": f"Parts not found: {', '.join(map(str, missing_parts))}"},
@@ -627,7 +678,8 @@ class SubmitTrainingView(APIView):
 
             # Truy vấn tất cả các Question liên quan
             questions = (
-                Question.objects.filter(id__in=question_ids, part_id__in=part_ids)
+                Question.objects.filter(
+                    id__in=question_ids, part_id__in=part_ids)
                 .only("id", "correct_answer", "part_id")
                 .in_bulk(field_name="id")
             )
@@ -671,8 +723,9 @@ class SubmitTrainingView(APIView):
                         wrong_answers += 1
 
                 # Tính toán điểm phần
-                total_questions = correct_answers + wrong_answers + unanswer_questions
-                percentage_score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                total_questions = correct_answers + wrong_answers
+                percentage_score = (
+                    correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
@@ -691,8 +744,9 @@ class SubmitTrainingView(APIView):
                 })
 
             # Tính toán tổng kết điểm
-            total_questions = total_correct_answers + total_wrong_answers + total_unanswer_questions
-            overall_percentage_score = (total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+            total_questions = total_correct_answers + total_wrong_answers
+            overall_percentage_score = (
+                total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
             time_taken = end_time - start_time
@@ -711,7 +765,8 @@ class SubmitTrainingView(APIView):
                 percentage_score=overall_percentage_score,
                 complete=True,
                 test_result=data,
-                part_list=",".join(map(str, processed_parts))  # Lưu danh sách part_id vào part_list
+                # Lưu danh sách part_id vào part_list
+                part_list=",".join(map(str, processed_parts))
             )
 
             # Trả về kết quả tổng hợp
@@ -732,19 +787,20 @@ class SubmitTrainingView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
     def get(self, request):
         test_id = request.GET.get('test_id')
         test = Test.objects.get(id=test_id)
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
         user = request.user
-        history = HistoryTraining.objects.filter(user=user, test=test).order_by('-id')
+        history = HistoryTraining.objects.filter(
+            user=user, test=test).order_by('-id')
         serializer = HistoryTrainingSerializer(history, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
+
+
 class DetailTrainingView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -755,10 +811,3 @@ class DetailTrainingView(APIView):
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = HistoryTrainingSerializer(history, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-
-
-
-
