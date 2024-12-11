@@ -73,10 +73,13 @@ class SubmitTestView(APIView):
 
             # Chuyển timestamp sang giây
             minutes, seconds = map(int, timestamp.split(":"))
-            timestamp_in_seconds = minutes * 60 + seconds
+            timestamp_in_seconds = 120 * 60 - (minutes * 60 + seconds)
 
-            start_time = datetime.now(timezone.utc)
-            end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            # start_time = datetime.now(timezone.utc)
+            # end_time = start_time + timedelta(seconds=timestamp_in_seconds)
+            end_time = datetime.now(timezone.utc)
+            start_time = end_time - timedelta(seconds=timestamp_in_seconds)
+            
             for item in data:
                 question_id = item.get("id")
                 user_answer = item.get("user_answer")
