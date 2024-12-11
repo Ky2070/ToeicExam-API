@@ -8,7 +8,7 @@ from django.utils.html import format_html
 
 from EStudyApp.models import (PartDescription, Part,
                               QuestionSet, Question, PartQuestionSet,
-                              Test, Course, Lesson, History, Tag, QuestionType)
+                              Test, Course, Lesson, History, Tag, QuestionType, HistoryTraining)
 
 
 # Định nghĩa lớp ModelAdmin để thêm phân trang
@@ -647,6 +647,10 @@ class HistoryAdmin(admin.ModelAdmin):
                        'test_result')
 
 
+class HistoryTrainingAdmin(admin.ModelAdmin):
+    list_per_page = 10
+
+
 # Đăng ký các mô hình với phân trang
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Test, TestAdmin)
@@ -659,3 +663,4 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(Lesson, LessonAdmin)
 admin.site.register(History, HistoryAdmin)
 admin.site.register(QuestionType, QuestionTypeAdmin)
+admin.site.register(HistoryTraining, HistoryTrainingAdmin)

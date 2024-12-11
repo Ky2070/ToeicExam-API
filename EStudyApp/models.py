@@ -27,8 +27,9 @@ class Test(models.Model):
     DoesNotExist = None
     objects = None
     TYPE_TEST_CHOICES = [
-        ('READING', 'Reading'),
-        ('LISTENING', 'Listening'),
+        ('Online', 'Online'),
+        ('Practice', 'Practice'),
+        ('All', 'All')
     ]
 
     name = models.CharField(
@@ -41,7 +42,7 @@ class Test(models.Model):
         blank=True,
         null=True
     )
-    type = models.CharField(
+    types = models.CharField(
         max_length=30,
         choices=TYPE_TEST_CHOICES,
         null=True,
