@@ -236,7 +236,7 @@ class TestAdmin(admin.ModelAdmin):
     ordering = ('-publish', 'id')
 
     # Sử dụng fields thay vì fieldsets
-    fields = ('name', 'description', 'type', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'publish')
+    fields = ('name', 'description', 'types', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'publish')
 
     actions = ['mark_tests_published', 'mark_tests_unpublished', 'export_to_csv']
 
