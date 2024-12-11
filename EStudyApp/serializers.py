@@ -125,7 +125,7 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types', 'part_test']
 
 
 class PartListSerializer(serializers.ModelSerializer):
