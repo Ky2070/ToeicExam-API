@@ -15,7 +15,7 @@ from EStudyApp.models import (PartDescription, Part,
 
 class QuestionTypeAdmin(admin.ModelAdmin):
     list_display = ('name_display', 'count_display', 'description_display')  # Hiển thị các cột tùy chỉnh
-    list_filter = ('description', )
+    list_filter = ('description',)
     list_per_page = 10  # Hiển thị 10 bản ghi trên mỗi trang
     ordering = ('id',)
 
@@ -567,6 +567,8 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = (
         'test',
         'question_set',
+        'short_question_type',  # Hiển thị loại câu hỏi
+        'short_part',  # Hiển thị phần
         'question_number',
         'short_question_text',
         'difficulty_icon',  # Thay thế cột mức độ khó bằng icon
@@ -575,12 +577,14 @@ class QuestionAdmin(admin.ModelAdmin):
     )
     list_per_page = 10  # Số lượng bản ghi mỗi trang
     search_fields = ('question_text', 'test__name', 'question_set__name')  # Tìm kiếm
-    ordering = ('id',)  # Sắp xếp tăng dần
+    ordering = ('-id',)  # Sắp xếp giảm dần
 
     # Các trường chỉnh sửa
     fields = (
         'test',
         'question_set',
+        'question_type',  # Thêm loại câu hỏi
+        'part',  # Thêm phần
         'question_number',
         'question_text',
         'correct_answer',
@@ -595,6 +599,59 @@ class QuestionAdmin(admin.ModelAdmin):
         return obj.question_text[:50] + "..." if obj.question_text else "Không có nội dung"
 
     short_question_text.short_description = "Nội dung Câu hỏi"
+
+    def short_question_type(self, obj):
+        if obj.question_type:
+            return format_html(
+                '<span class="badge badge-primary">{}</span>',
+                obj.question_type.name
+            )
+        return format_html('<span class="badge badge-secondary">Không có loại</span>')
+
+    short_question_type.short_description = "Loại câu hỏi"
+
+    def short_part(self, obj):
+        if obj.part and obj.part.part_description:
+            # Lấy giá trị part_name
+            part_name = str(obj.part.part_description).strip()
+
+            # Lấy tên Test từ Part và cắt ngắn tên Test nếu cần
+            test_name = str(obj.part.test.name)
+            # Tách tên Test thành các từ và chỉ lấy phần đầu (ví dụ: "new economy 2")
+            test_name_parts = test_name.split()
+            if len(test_name_parts) > 3:
+                test_name = " ".join(test_name_parts[:2]) + " " + test_name_parts[-1]
+            else:
+                test_name = " ".join(test_name_parts)
+
+            print(f"DEBUG: part_name = '{part_name}', test_name = '{test_name}'")  # Debug để kiểm tra giá trị thực tế
+
+            # Kiểm tra điều kiện Part 1 đến Part 4
+            if any(f"Part {i}" in part_name for i in range(1, 5)):
+                return format_html(
+                    '<b style="color: #00F2C3;">{} - {}</b>',
+                    part_name,
+                    test_name
+                )
+
+            # Kiểm tra điều kiện Part 5 đến Part 7
+            elif any(f"Part {i}" in part_name for i in range(5, 8)):
+                return format_html(
+                    '<b style="color: #E14ECA;">{} - {}</b>',
+                    part_name,
+                    test_name
+                )
+
+            # Trường hợp khác
+            else:
+                return format_html(
+                    '<b style="color: black;">{} - Test: {}</b>',
+                    part_name,
+                    test_name
+                )
+
+        # Nếu không có part hoặc part_description, trả về thông báo mặc định
+        return "No part available"
 
     # 2. Kiểm tra trạng thái xóa
     def is_deleted(self, obj):
@@ -629,7 +686,8 @@ class QuestionAdmin(admin.ModelAdmin):
         writer.writerow(['ID', 'Test', 'Question Set', 'Number', 'Text', 'Difficulty', 'Deleted'])
         for obj in queryset:
             writer.writerow(
-                [obj.id, obj.test, obj.question_set, obj.question_number, obj.question_text, obj.difficulty_level,
+                [obj.id, obj.test, obj.question_set, obj.question_type.name if obj.question_type else '',
+                 obj.part.part_description if obj.part else '', obj.question_number, obj.question_text, obj.difficulty_level,
                  obj.deleted_at])
         return response
 
@@ -647,14 +705,6 @@ class PartQuestionSetAdmin(admin.ModelAdmin):
     list_per_page = 20
 
 
-class CourseAdmin(admin.ModelAdmin):
-    list_per_page = 20
-
-
-class LessonAdmin(admin.ModelAdmin):
-    list_per_page = 20
-
-
 class HistoryAdmin(admin.ModelAdmin):
     # Số lượng bản ghi hiển thị trên mỗi trang
     list_per_page = 10
@@ -666,7 +716,7 @@ class HistoryAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'test__name')
 
     # Thêm tính năng lọc theo các trường
-    list_filter = ('user', )
+    list_filter = ('user',)
 
     # Tùy chỉnh hiển thị các trường chi tiết khi chỉnh sửa
     fields = ('user', 'test', 'score', 'start_time', 'end_time',
@@ -731,8 +781,6 @@ admin.site.register(Part, PartAdmin)
 admin.site.register(QuestionSet, QuestionSetAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(PartQuestionSet, PartQuestionSetAdmin)
-admin.site.register(Course, CourseAdmin)
-admin.site.register(Lesson, LessonAdmin)
 admin.site.register(History, HistoryAdmin)
 admin.site.register(QuestionType, QuestionTypeAdmin)
 admin.site.register(HistoryTraining, HistoryTrainingAdmin)
