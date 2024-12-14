@@ -117,7 +117,7 @@ class QuestionType(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.description}'
 
 
 # class Part(models.Model):
