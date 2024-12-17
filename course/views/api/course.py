@@ -7,11 +7,13 @@ from rest_framework import status
 
 from course.serializer.course import CourseDetailSerializer, CourseSerializer
 
+
 # post create course
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_course(request):
     return Response({'message': 'Course created successfully'})
+
 
 # get course list
 @api_view(['GET'])
@@ -20,6 +22,7 @@ def course_list(request):
     courses = Course.objects.all()
     serializer = CourseSerializer(courses, many=True).data
     return Response(serializer, status=status.HTTP_200_OK)
+
 
 # get course detail
 @api_view(['GET'])

@@ -1,17 +1,27 @@
 from django.db import models
 from course.models.course import Course
 from Authentication.models import User
+from ckeditor.fields import RichTextField
+
 
 class Lesson(models.Model):
+    objects = None
     course = models.ForeignKey(Course,
                                related_name='lesson_course',
                                on_delete=models.DO_NOTHING)
-    title = models.CharField(
-        max_length=50,
+    title = models.TextField(
         blank=True,
         null=True
     )
-    content = models.TextField()
+    video = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    content = RichTextField(
+        blank=True,
+        null=True
+    )
     quiz = models.TextField()
     updated_at = models.DateTimeField(
         auto_now=True,
@@ -24,6 +34,7 @@ class Lesson(models.Model):
 
 
 class ReviewLesson(models.Model):
+    objects = None
     user = models.ForeignKey(
         User,
         related_name='reviewlesson_user',
