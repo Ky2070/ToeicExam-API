@@ -5,10 +5,10 @@ from course.models.course import Course
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'title', 'level', 'duration', 'updated_at', 'created_at']
+        fields = ['id', 'title', 'level', 'duration', 'info', 'target', 'banner', 'updated_at', 'created_at']
         
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'level', 'duration', 'updated_at', 'created_at']
+        fields = ['id', 'title', 'description', 'level', 'duration', 'info', 'target', 'banner', 'updated_at', 'created_at']

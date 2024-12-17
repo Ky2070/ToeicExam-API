@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from Authentication.models import User
 from ckeditor.fields import RichTextField
+from django.contrib.postgres.fields import ArrayField
 
 # Create your models here.
 class Course(models.Model):
@@ -27,6 +28,25 @@ class Course(models.Model):
         choices=COURSE_LEVEL_CHOICES,
         default=('BASIC', 'Basic'),
     )
+    banner = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    # thông tin khóa học text array
+    info = ArrayField(
+        models.TextField(blank=True, null=True),
+        blank=True,
+        null=True
+    )
+    
+    # mục tiêu khóa học text array
+    target = ArrayField(
+        models.TextField(blank=True, null=True),
+        blank=True,
+        null=True
+    )
+    
     duration = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
