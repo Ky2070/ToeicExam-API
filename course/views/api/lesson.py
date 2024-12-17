@@ -9,10 +9,13 @@ from course.serializer.lesson import LessonSerializer, ReviewLessonSerializer
 # GET lesson list
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def lesson_list(request):
-    lessons = Lesson.objects.all()
-    serializer = LessonSerializer(lessons, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+def lesson_list(request, course_id):
+    try:
+        lessons = Lesson.objects.filter(course_id=course_id)
+        serializer = LessonSerializer(lessons, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Lesson.DoesNotExist:
+        return Response({'error': 'Lesson not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 # GET lesson detail

@@ -9,7 +9,7 @@ urlpatterns = [
 
     # Lesson list and lesson-detail
 
-    path('lessons/', lesson_list, name='lesson_list'),
+    path('<int:course_id>/lessons/', lesson_list, name='lesson_list'),
     path('lessons/<int:id>/', lesson_detail, name='lesson_detail'),
     path('lessons/<int:lesson_id>/reviews/', review_list_by_lesson, name='review_list_by_lesson'),
     
