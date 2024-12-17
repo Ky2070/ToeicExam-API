@@ -577,7 +577,7 @@ class QuestionAdmin(admin.ModelAdmin):
     )
     list_per_page = 10  # Số lượng bản ghi mỗi trang
     search_fields = ('question_text', 'test__name', 'question_set__name')  # Tìm kiếm
-    ordering = ('-id',)  # Sắp xếp giảm dần
+    ordering = ('id',)  # Sắp xếp giảm dần
 
     # Các trường chỉnh sửa
     fields = (
@@ -645,13 +645,15 @@ class QuestionAdmin(admin.ModelAdmin):
             # Trường hợp khác
             else:
                 return format_html(
-                    '<b style="color: black;">{} - Test: {}</b>',
+                    '<b style="color: black;">{} - {}</b>',
                     part_name,
                     test_name
                 )
 
         # Nếu không có part hoặc part_description, trả về thông báo mặc định
         return "No part available"
+
+    short_part.short_description = "Phần đề thi"
 
     # 2. Kiểm tra trạng thái xóa
     def is_deleted(self, obj):
