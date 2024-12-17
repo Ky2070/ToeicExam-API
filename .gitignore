@@ -85,6 +85,5 @@ venv.bak2/
 .venv/
 
 __pycache__/
-__init__.py
 
 

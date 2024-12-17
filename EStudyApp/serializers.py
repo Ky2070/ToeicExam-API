@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from Authentication.serializers import UserSerializer
-from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Part, QuestionSet, Question, Course, Lesson, Tag, \
+from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Part, QuestionSet, Question, Tag, \
     QuestionType, State, TestComment
 
 
@@ -137,18 +137,18 @@ class PartListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = ['id', 'title', 'description', 'level', 'duration']
+# class CourseSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Course
+#         fields = ['id', 'title', 'description', 'level', 'duration']
 
 
-class LessonSerializer(serializers.ModelSerializer):
-    lesson_course = CourseSerializer(many=True, read_only=True)
+# class LessonSerializer(serializers.ModelSerializer):
+#     lesson_course = CourseSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Lesson
-        fields = ['id', 'title', 'content', 'quiz']
+#     class Meta:
+#         model = Lesson
+#         fields = ['id', 'title', 'content', 'quiz']
 
 
 class TestSubmitSerializer(serializers.ModelSerializer):

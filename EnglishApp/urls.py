@@ -23,6 +23,7 @@ urlpatterns = [
     path('__debug__/', include('debug_toolbar.urls')),
     path("api/v1/auth/", include("Authentication.urls")),
     path("api/v1/app/", include("EStudyApp.urls")),
+    path("api/v1/course/", include("course.urls")),
     path('', include('admin_black.urls')),
     path('admin/', admin.site.urls),
 ]
