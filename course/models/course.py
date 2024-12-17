@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from Authentication.models import User
+from ckeditor.fields import RichTextField
 
 # Create your models here.
 class Course(models.Model):
@@ -8,13 +9,11 @@ class Course(models.Model):
     user = models.ForeignKey(User,
                              related_name='course_user',
                              on_delete=models.DO_NOTHING)
-    title = models.CharField(
-        max_length=50,
+    title = models.TextField(
         blank=True,
         null=True
     )
-    description = models.CharField(
-        max_length=100,
+    description = RichTextField(
         blank=True,
         null=True
     )
@@ -32,5 +31,19 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
+    def __str__(self):
+        return self.title
+    
+    @property
+    def video_id(self):
+        """Extract YouTube video ID from URL"""
+        if self.video_url:
+            if 'youtube.com/watch?v=' in self.video_url:
+                return self.video_url.split('watch?v=')[1].split('&')[0]
+            elif 'youtu.be/' in self.video_url:
+                return self.video_url.split('youtu.be/')[1]
+        return None
+    
+
 
 

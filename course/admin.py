@@ -1,18 +1,24 @@
 from django.contrib import admin
+from course.models import Course
 
-# Register your models here.
-# import course models
-from course.models.course import Course
-from course.models.lesson import Lesson
-from course.models.blog import Blog
-
-# Register models
+@admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'level', 'created_at', 'updated_at')
-    list_filter = ('created_at', 'updated_at')
+    list_display = ('title', 'level', 'user', 'created_at', 'updated_at')
+    list_filter = ('level', 'created_at')
     search_fields = ('title', 'description')
+    readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('Course Information', {
+            'fields': ('title', 'description', 'level')
+        }),
+        ('Time Information', {
+            'fields': ('duration', 'created_at', 'updated_at')
+        })
+    )
 
-admin.site.register(Course, CourseAdmin)
-admin.site.register(Lesson)
-admin.site.register(Blog)
+    def save_model(self, request, obj, form, change):
+        if not change:  # If creating new course
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
