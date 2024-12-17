@@ -1,5 +1,5 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, TestDetailView, TestListView, TestPartDetailView, CourseListView, \
+from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, TestDetailView, TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView
@@ -35,5 +35,5 @@ urlpatterns = [
     path('edit/comments/<int:pk>/', TestCommentView.as_view(), name='comment-update'),
     path('delete/comments/<int:pk>/', TestCommentView.as_view(), name='comment-delete'),
 
-    path('courses/', CourseListView.as_view(), name='course-list'),
+    # path('courses/', CourseListView.as_view(), name='course-list'),
 ]

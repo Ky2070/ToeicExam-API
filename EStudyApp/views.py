@@ -11,10 +11,9 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, Course, QuestionSet, Question, History, QuestionType, State, TestComment, \
+from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
-    CourseSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -345,11 +344,11 @@ class TestPartDetailView(APIView):
         return Response(serializer.data)
 
 
-class CourseListView(APIView):
-    def get(self, request):
-        courses = Course.objects.all()
-        serializer = CourseSerializer(courses, many=True)
-        return Response(serializer.data)
+# class CourseListView(APIView):
+#     def get(self, request):
+#         courses = Course.objects.all()
+#         serializer = CourseSerializer(courses, many=True)
+#         return Response(serializer.data)
 
 
 class PartListView(APIView):

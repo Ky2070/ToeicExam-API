@@ -8,7 +8,7 @@ from django.utils.html import format_html
 
 from EStudyApp.models import (PartDescription, Part,
                               QuestionSet, Question, PartQuestionSet,
-                              Test, Course, Lesson, History, Tag, QuestionType, HistoryTraining)
+                              Test, History, Tag, QuestionType, HistoryTraining)
 
 
 # Định nghĩa lớp ModelAdmin để thêm phân trang
