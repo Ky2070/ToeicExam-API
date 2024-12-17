@@ -32,7 +32,7 @@ class CourseAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Course Information', {
-            'fields': ('title', 'description', 'level', 'info', 'target', 'banner')
+            'fields': ('title', 'description', 'level', 'info', 'target', 'banner', 'cover')
         }),
         ('Time Information', {
             'fields': ('duration', 'created_at', 'updated_at')

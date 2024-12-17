@@ -28,6 +28,13 @@ class Course(models.Model):
         choices=COURSE_LEVEL_CHOICES,
         default=('BASIC', 'Basic'),
     )
+    
+    cover = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    
     banner = models.CharField(
         max_length=255,
         blank=True,
@@ -53,16 +60,6 @@ class Course(models.Model):
     
     def __str__(self):
         return self.title
-    
-    @property
-    def video_id(self):
-        """Extract YouTube video ID from URL"""
-        if self.video_url:
-            if 'youtube.com/watch?v=' in self.video_url:
-                return self.video_url.split('watch?v=')[1].split('&')[0]
-            elif 'youtu.be/' in self.video_url:
-                return self.video_url.split('youtu.be/')[1]
-        return None
     
 
 
