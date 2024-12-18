@@ -78,8 +78,18 @@ class Test(models.Model):
                             )
     publish = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )  # Thời gian bình luận được cập nhật
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True
+    )  # Thời gian bình luận được tạo
+
+
+def __str__(self):
+    return self.name
 
 
 # class UserTestResult(models.Model):
@@ -303,7 +313,7 @@ class Question(models.Model):
 
     def __str__(self):
         return f'{self.question_number} - {self.question_text}'
-    
+
     @property
     def part_id(self):
         return self.part.id
@@ -343,9 +353,9 @@ class History(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
-    
-    @property 
-    def completion_time(self): 
+
+    @property
+    def completion_time(self):
         delta = self.end_time - self.start_time
         return round(delta.total_seconds())
 
@@ -372,12 +382,12 @@ class HistoryTraining(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
-    
-    @property 
-    def completion_time(self): 
+
+    @property
+    def completion_time(self):
         delta = self.end_time - self.start_time
         return round(delta.total_seconds())
-    
+
 
 class TestComment(models.Model):
     user = models.ForeignKey(
@@ -403,11 +413,11 @@ class TestComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user} on {self.test}'
-    
+
     @property
     def replies(self):
         return TestComment.objects.filter(parent=self)
-    
+
     @property
     def get_replies(self):
         return self.replies.all()
@@ -434,7 +444,6 @@ class Flashcard(models.Model):
         default=('BASIC', 'Basic'),
     )
     example = models.TextField()
-
 
 
 class State(models.Model):

@@ -286,6 +286,11 @@ class TestListView(APIView):
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         # get type from request and default is Practice
+        if request.GET.get('type') is None:
+            tests = Test.objects.all()
+            serializer = TestSerializer(tests, many=True)
+            return Response(serializer.data)
+        
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
         tests = Test.objects.prefetch_related(

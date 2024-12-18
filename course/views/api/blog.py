@@ -5,7 +5,7 @@ from rest_framework import status
 from course.models.blog import Blog
 from EStudyApp.models import Question, QuestionSet
 from course.serializer.blog import BlogSerializer
-
+from django.db.models import Prefetch
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -43,7 +43,7 @@ def create_blog(request):
         questions_set=questions_set,
         title=data['title'],
         content=data['content'],
-        part_info=data['part_info'],
+        part_info=data['part'],
         from_ques=data['from'],
         to_ques=data['to']
     )
@@ -57,7 +57,7 @@ def create_blog(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def blog_list(request):
-    blogs = Blog.objects.all()
+    blogs = Blog.objects.all().order_by('-created_at')
     serializer = BlogSerializer(blogs, many=True).data
     return Response(serializer, status=status.HTTP_200_OK)
 
@@ -65,7 +65,14 @@ def blog_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def blog_detail(request, id):
-    blog = Blog.objects.get(id=id)
+    blog = Blog.objects.prefetch_related(
+        Prefetch(
+            'questions_set',
+            queryset=QuestionSet.objects.prefetch_related(
+                Prefetch('question_question_set', queryset=Question.objects.order_by('question_number'))
+            )
+        )
+    ).get(id=id)
     serializer = BlogSerializer(blog).data
     return Response(serializer, status=status.HTTP_200_OK)
 
