@@ -7,6 +7,7 @@ from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Pa
 
 class TestRepliesSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
@@ -15,6 +16,7 @@ class TestRepliesSerializer(serializers.ModelSerializer):
 class TestCommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     replies = TestRepliesSerializer(many=True, read_only=True)
+
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date', 'replies']
@@ -125,7 +127,8 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types', 'part_test', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types',
+                  'part_test', 'created_at', 'updated_at']
 
 
 class PartListSerializer(serializers.ModelSerializer):
@@ -172,12 +175,13 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
 
 class HistoryTrainingSerializer(serializers.ModelSerializer):
     test = TestSubmitSerializer(read_only=True)
-    
+
     class Meta:
         model = HistoryTraining
         fields = ['id', 'user', 'test', 'start_time', 'end_time',
-            'correct_answers', 'wrong_answers', 'unanswer_questions',
-            'complete', 'completion_time', 'percentage_score', 'part_list', 'test_result']
+                  'correct_answers', 'wrong_answers', 'unanswer_questions',
+                  'complete', 'completion_time', 'percentage_score', 'part_list', 'test_result']
+
 
 class HistorySerializer(serializers.ModelSerializer):
     # user = UserSerializer(read_only=True)
@@ -190,3 +194,13 @@ class HistorySerializer(serializers.ModelSerializer):
             'listening_score', 'reading_score', 'correct_answers', 'wrong_answers', 'unanswer_questions',
             'complete', 'completion_time', 'percentage_score'
         ]
+
+
+class CreateTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = [
+            'id', 'name', 'description', 'types', 'test_date', 'duration',
+            'question_count', 'part_count', 'tag', 'publish', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']

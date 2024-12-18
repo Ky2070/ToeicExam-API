@@ -13,8 +13,10 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining
-from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
-    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
+from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, \
+    PartSerializer, \
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
+    CreateTestSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -815,3 +817,14 @@ class DetailTrainingView(APIView):
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = HistoryTrainingSerializer(history, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+# Tạo đề thi
+class TestCreateAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
+
+    def post(self, request, *args, **kwargs):
+        serializer = CreateTestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
