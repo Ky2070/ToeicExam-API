@@ -16,7 +16,7 @@ from EStudyApp.models import Test, Part, QuestionSet, Question, History, Questio
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
-    CreateTestSerializer
+    CreateTestSerializer, TestListSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -105,7 +105,7 @@ class SubmitTestView(APIView):
                 listening_correct, reading_correct)
             correct_answers = listening_correct + reading_correct
             wrong_answers = (listening_total - listening_correct) + \
-                (reading_total - reading_correct)
+                            (reading_total - reading_correct)
             percentage_score = ((listening_correct + reading_correct) /
                                 max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
@@ -292,7 +292,7 @@ class TestListView(APIView):
             tests = Test.objects.all()
             serializer = TestSerializer(tests, many=True)
             return Response(serializer.data)
-        
+
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
         tests = Test.objects.prefetch_related(
@@ -623,7 +623,7 @@ class SearchTestsAPIView(APIView):
         #     search=SearchVector('name', config='english')
         # ).filter(search=query)
 
-            # Tìm kiếm theo name hoặc tag (case-insensitive)
+        # Tìm kiếm theo name hoặc tag (case-insensitive)
         tests = Test.objects.filter(
             Q(name__icontains=query_param) | Q(
                 tag__name__icontains=query_param)
@@ -731,7 +731,7 @@ class SubmitTrainingView(APIView):
                 # Tính toán điểm phần
                 total_questions = correct_answers + wrong_answers
                 percentage_score = (
-                    correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                                           correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
@@ -752,7 +752,7 @@ class SubmitTrainingView(APIView):
             # Tính toán tổng kết điểm
             total_questions = total_correct_answers + total_wrong_answers
             overall_percentage_score = (
-                total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                                               total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
             time_taken = end_time - start_time
@@ -818,6 +818,7 @@ class DetailTrainingView(APIView):
         serializer = HistoryTrainingSerializer(history, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 # Tạo đề thi
 class TestCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
@@ -828,3 +829,47 @@ class TestCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        Lấy thông tin chi tiết bài thi theo ID.
+        """
+        try:
+            test = Test.objects.get(id=id)
+            serializer = TestListSerializer(test)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TestUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập
+
+    def put(self, request, id, *args, **kwargs):
+        """
+            Cập nhật thông tin bài thi theo ID.
+            """
+        try:
+            test = Test.objects.get(id=id)
+            serializer = CreateTestSerializer(test, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TestDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+            Xóa bài thi theo ID.
+            """
+        try:
+            test = Test.objects.get(id=id)
+            test.delete()
+            return Response({'message': 'Test deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
