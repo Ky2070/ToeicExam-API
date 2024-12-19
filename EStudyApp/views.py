@@ -819,6 +819,18 @@ class DetailTrainingView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class ListTestView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
+
+    def get(self, request, *args, **kwargs):
+        """
+        Lấy danh sách bài kiểm tra.
+        """
+        tests = Test.objects.all().order_by('-id')  # Lấy tất cả các bài kiểm tra từ cơ sở dữ liệu
+        serializer = TestListSerializer(tests, many=True)  # Sử dụng serializer để chuyển đổi dữ liệu
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 # Tạo đề thi
 class TestCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
@@ -873,3 +885,55 @@ class TestDeleteAPIView(APIView):
             return Response({'message': 'Test deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Test.DoesNotExist:
             return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetPartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id=None, *args, **kwargs):
+        """
+        Lấy danh sách tất cả hoặc thông tin chi tiết của một phần (Part).
+        """
+        if id:
+            try:
+                part = Part.objects.get(id=id)
+                serializer = PartListSerializer(part)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Part.DoesNotExist:
+                return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            parts = Part.objects.all().order_by('-id')
+            serializer = PartListSerializer(parts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreatePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        Tạo một phần (Part) mới.
+        """
+        serializer = PartListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdatePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, id, *args, **kwargs):
+        """
+        Cập nhật thông tin một phần (Part) theo ID.
+        """
+        try:
+            part = Part.objects.get(id=id)
+            serializer = PartListSerializer(part, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Part.DoesNotExist:
+            return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)

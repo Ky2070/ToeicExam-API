@@ -3,14 +3,14 @@ from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, TestDetail
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
-    TestDeleteAPIView
+    TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView
 
 urlpatterns = [
     # API lấy chi tiết test và part
     path('tests/', TestListView.as_view(), name='test-list'),  # API lấy danh sách tất cả các bài kiểm tra
 
     path('tests/create/', TestCreateAPIView.as_view(), name='test-create'),
-
+    path('tests/test-list/', ListTestView.as_view(), name='list-test'),
     path('tests/test-list/<int:id>/', TestCreateAPIView.as_view(), name='test-detail'),
 
     path('tests/<int:id>/update/', TestUpdateAPIView.as_view(), name='test-update'),  # Sửa bài thi
@@ -24,6 +24,12 @@ urlpatterns = [
 
     path('tests-parts/<int:test_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
     path('tests/<int:test_id>/comments/', CommentView.as_view(), name='test-comments'),
+
+    path('parts/', GetPartAPIView.as_view(), name='part-list'),  # GET all
+    path('parts/<int:id>/', GetPartAPIView.as_view(), name='part-detail'),  # GET theo ID
+    path('parts/create/', CreatePartAPIView.as_view(), name='part-create'),  # POST
+    path('parts/update/<int:id>/', UpdatePartAPIView.as_view(), name='part-update'),  # PUT
+
     path('questions/', QuestionListView.as_view(), name='question-list'),
 
     # API lấy skill và tính toán kết quả cho các câu hỏi
