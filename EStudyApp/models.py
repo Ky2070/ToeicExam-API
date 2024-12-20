@@ -34,8 +34,8 @@ class Test(models.Model):
 
     name = models.CharField(
         max_length=255,
-        blank=True,
-        null=True
+        blank=False,
+        null=False
     )
     description = models.CharField(
         max_length=255,
@@ -192,9 +192,9 @@ class Part(models.Model):
     DoesNotExist = None
     objects = None
     part_description = models.ForeignKey(
-        PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING)
+        PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING, null=False, blank=False)
     test = models.ForeignKey(
-        Test, related_name='part_test', on_delete=models.DO_NOTHING)
+        Test, related_name='part_test', on_delete=models.DO_NOTHING, null=True, blank=True)
     pass
 
     def __str__(self):

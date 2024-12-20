@@ -3,7 +3,8 @@ from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, TestDetail
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
-    TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView
+    TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
+    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView
 
 urlpatterns = [
     # API lấy chi tiết test và part
@@ -24,14 +25,21 @@ urlpatterns = [
 
     path('tests-parts/<int:test_id>/', TestPartDetailView.as_view(), name='test-part-detail'),
     path('tests/<int:test_id>/comments/', CommentView.as_view(), name='test-comments'),
+    # Part API
 
     path('parts/', GetPartAPIView.as_view(), name='part-list'),  # GET all
     path('parts/<int:id>/', GetPartAPIView.as_view(), name='part-detail'),  # GET theo ID
     path('parts/create/', CreatePartAPIView.as_view(), name='part-create'),  # POST
     path('parts/update/<int:id>/', UpdatePartAPIView.as_view(), name='part-update'),  # PUT
+    path('parts/delete/<int:id>/', DeletePartAPIView.as_view(), name='part-delete'),  # API xóa phần (DELETE)
+
+    # Question API
 
     path('questions/', QuestionListView.as_view(), name='question-list'),
-
+    path('questions/create/', CreateQuestionAPIView.as_view(), name='question-create'),  # Tạo câu hỏi mới
+    path('questions/<int:id>/', DetailQuestionAPIView.as_view(), name='question-detail'),  # Chi tiết câu hỏi
+    path('questions/update/<int:id>/', UpdateQuestionAPIView.as_view(), name='question-update'),  # Cập nhật câu hỏi
+    path('questions/delete/<int:id>/', DeleteQuestionAPIView.as_view(), name='question-delete'),  # Xóa câu hỏi
     # API lấy skill và tính toán kết quả cho các câu hỏi
     path('submit/', SubmitTestView.as_view(), name='test-submit'),
     path('submit/history/', DetailSubmitTestView.as_view(), name='get-submit-id'),

@@ -16,7 +16,7 @@ from EStudyApp.models import Test, Part, QuestionSet, Question, History, Questio
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
-    CreateTestSerializer, TestListSerializer
+    CreateTestSerializer, TestListSerializer, QuestionSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -364,28 +364,6 @@ class PartListView(APIView):
             'part_description').order_by('id')
 
         serializer = PartListSerializer(parts, many=True)
-        return Response(serializer.data)
-
-
-class QuestionListView(APIView):
-    def get(self, request):
-        questions = (Question.objects.all()
-                     .select_related('question_type')
-                     .order_by('id'))
-
-        # .only('id',
-        #       'question_number',
-        #       'question_text',
-        #       'answers',
-        #       'question_type__id',
-        #       'question_type__name'
-        #       )
-        # Kiểm tra nếu queryset trống
-        if not questions.exists():
-            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
-        serializer = QuestionDetailSerializer(questions, many=True)
         return Response(serializer.data)
 
 
@@ -937,3 +915,105 @@ class UpdatePartAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Part.DoesNotExist:
             return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DeletePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+        Delete (Part) theo ID.
+        """
+        try:
+            part = Part.objects.get(id=id)
+            part.delete()
+            return Response({'message': 'Part deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Part.DoesNotExist:
+            return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class QuestionListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        questions = (Question.objects.filter(deleted_at__isnull=True)
+                     .select_related('question_type')
+                     .order_by('id'))
+
+        # .only('id',
+        #       'question_number',
+        #       'question_text',
+        #       'answers',
+        #       'question_type__id',
+        #       'question_type__name'
+        #       )
+        # Kiểm tra nếu queryset trống
+        if not questions.exists():
+            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
+        serializer = QuestionDetailSerializer(questions, many=True)
+        return Response(serializer.data)
+
+
+class CreateQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+               Tạo một câu hỏi mới.
+               """
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DetailQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id,  *args, **kwargs):
+        """
+        Lấy chi tiết một câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id, deleted_at__isnull=True)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found or Question deleted'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = QuestionDetailSerializer(question)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, id, *args, **kwargs):
+        """
+        Cập nhật thông tin câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id, deleted_at__isnull=True)
+            serializer = QuestionDetailSerializer(question, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found or Question deleted'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DeleteQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+        Xóa một câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id)
+            question.delete()
+            return Response({'message': 'Question deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
+
