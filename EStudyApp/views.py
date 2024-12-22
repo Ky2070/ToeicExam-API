@@ -11,7 +11,7 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
+from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining, Tag
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, TestDetailSerializer, TestSerializer, \
     PartSerializer, \
