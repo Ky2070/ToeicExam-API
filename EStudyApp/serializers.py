@@ -80,6 +80,7 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'question_number',
                   'question_text',
                   'difficulty_level',
+                  'correct_answer',
                   'answers',
                   'part_id',
                   ]
@@ -90,7 +91,7 @@ class QuestionSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionSet
-        fields = ['id', 'audio', 'page', 'image', 'question_question_set']
+        fields = ['id', 'audio', 'page', 'image', 'from_ques', 'to_ques', 'question_question_set']
 
 
 class PartDescriptionSerializer(serializers.ModelSerializer):
