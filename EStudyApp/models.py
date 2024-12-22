@@ -232,6 +232,7 @@ class QuestionSet(models.Model):
         blank=True,
         null=True
     )
+    from_ques = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         if self.page:

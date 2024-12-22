@@ -90,7 +90,7 @@ class QuestionSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionSet
-        fields = ['id', 'audio', 'page', 'image', 'question_question_set']
+        fields = ['id', 'audio', 'page', 'image', 'question_question_set', 'from_ques']
 
 
 class PartDescriptionSerializer(serializers.ModelSerializer):
