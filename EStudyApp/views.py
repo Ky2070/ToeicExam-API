@@ -11,12 +11,12 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
-    HistoryTraining
+from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
+    HistoryTraining, Tag
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
-    CreateTestSerializer, TestListSerializer, QuestionSerializer
+    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -1018,7 +1018,7 @@ class CreateQuestionAPIView(APIView):
 class DetailQuestionAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id,  *args, **kwargs):
+    def get(self, request, id, *args, **kwargs):
         """
         Lấy chi tiết một câu hỏi theo ID.
         """
@@ -1063,3 +1063,4 @@ class DeleteQuestionAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         except Question.DoesNotExist:
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
+

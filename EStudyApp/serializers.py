@@ -122,7 +122,7 @@ class TestDetailSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'description']
 
 
 class TestSerializer(serializers.ModelSerializer):
@@ -217,4 +217,9 @@ class TestListSerializer(serializers.ModelSerializer):
         ]
 
 
+class TestByTagSerializer(serializers.ModelSerializer):
+    tag = TagSerializer(read_only=True)
 
+    class Meta:
+        model = Test
+        fields = ['id', 'name', 'description', 'duration', 'question_count', 'part_count', 'tag']

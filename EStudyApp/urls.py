@@ -4,9 +4,13 @@ from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, PartListQu
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
-    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView
+    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, TagListView, \
+    TestByTagView
 
 urlpatterns = [
+    # Tag for Test-list
+    path('tags/', TagListView.as_view(), name='tag-list'),
+    path('tags/<int:tag_id>/tests/', TestByTagView.as_view(), name='test-by-tag'),
     # API lấy chi tiết test và part
     path('tests/', TestListView.as_view(), name='test-list'),  # API lấy danh sách tất cả các bài kiểm tra
 

@@ -8,6 +8,8 @@ from Authentication.models import User  # type: ignore
 # Create your models here.
 
 class Tag(models.Model):
+    DoesNotExist = None
+    objects = None
     name = models.CharField(
         max_length=125,
         blank=True,
