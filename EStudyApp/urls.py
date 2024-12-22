@@ -1,11 +1,11 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, PartListQuestionsSetAPIView, TestDetailView, TestListView, TestPartDetailView, \
+from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, PartListQuestionsSetAPIView, TestDetailView, \
+    TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
-    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView \
-    # TestByTagView
+    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView
 
 urlpatterns = [
     # Tag for Test-list
