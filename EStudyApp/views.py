@@ -11,9 +11,9 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
+from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining
-from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, \
+from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
     CreateTestSerializer, TestListSerializer, QuestionSerializer
@@ -709,7 +709,7 @@ class SubmitTrainingView(APIView):
                 # Tính toán điểm phần
                 total_questions = correct_answers + wrong_answers
                 percentage_score = (
-                                           correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                    correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
@@ -730,7 +730,7 @@ class SubmitTrainingView(APIView):
             # Tính toán tổng kết điểm
             total_questions = total_correct_answers + total_wrong_answers
             overall_percentage_score = (
-                                               total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
             time_taken = end_time - start_time
@@ -798,20 +798,24 @@ class DetailTrainingView(APIView):
 
 
 class ListTestView(APIView):
-    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
+    # Chỉ người dùng đã đăng nhập mới được phép truy cập
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         """
         Lấy danh sách bài kiểm tra.
         """
-        tests = Test.objects.all().order_by('-id')  # Lấy tất cả các bài kiểm tra từ cơ sở dữ liệu
-        serializer = TestListSerializer(tests, many=True)  # Sử dụng serializer để chuyển đổi dữ liệu
+        tests = Test.objects.all().order_by(
+            '-id')  # Lấy tất cả các bài kiểm tra từ cơ sở dữ liệu
+        # Sử dụng serializer để chuyển đổi dữ liệu
+        serializer = TestListSerializer(tests, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Tạo đề thi
 class TestCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập mới được phép truy cập
+    # Chỉ người dùng đã đăng nhập mới được phép truy cập
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = CreateTestSerializer(data=request.data)
@@ -841,7 +845,8 @@ class TestUpdateAPIView(APIView):
             """
         try:
             test = Test.objects.get(id=id)
-            serializer = CreateTestSerializer(test, data=request.data, partial=True)
+            serializer = CreateTestSerializer(
+                test, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -885,18 +890,56 @@ class GetPartAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class PartListQuestionsSetAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, part_id, *args, **kwargs):
+        part = Part.objects.get(id=part_id)
+        if not part:
+            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        questions_set = QuestionSet.objects.filter(part=part)
+
+        serializer = QuestionSetSerializer(questions_set, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class CreatePartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, test_id, *args, **kwargs):
         """
         Tạo một phần (Part) mới.
         """
-        serializer = PartListSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        part_number = request.data['part']
+
+        test = Test.objects.get(id=test_id)
+        partDescription = PartDescription.objects.filter(
+            part_name=f"Part {part_number}",
+        ).first()
+
+        if not test:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not partDescription:
+            return Response({"error": "Part description not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        part = Part.objects.create(
+            part_description=partDescription,
+            test=test,
+        )
+
+        serializer = PartListSerializer(part)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, test_id, *args, **kwargs):
+        test = Test.objects.get(id=test_id)
+        if not test:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+        parts = Part.objects.filter(test=test)
+        serializer = PartListSerializer(parts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UpdatePartAPIView(APIView):
@@ -908,7 +951,8 @@ class UpdatePartAPIView(APIView):
         """
         try:
             part = Part.objects.get(id=id)
-            serializer = PartListSerializer(part, data=request.data, partial=True)
+            serializer = PartListSerializer(
+                part, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -926,8 +970,9 @@ class DeletePartAPIView(APIView):
         """
         try:
             part = Part.objects.get(id=id)
+            serializer = PartListSerializer(part)
             part.delete()
-            return Response({'message': 'Part deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Part.DoesNotExist:
             return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -994,7 +1039,8 @@ class UpdateQuestionAPIView(APIView):
         """
         try:
             question = Question.objects.get(id=id, deleted_at__isnull=True)
-            serializer = QuestionDetailSerializer(question, data=request.data, partial=True)
+            serializer = QuestionDetailSerializer(
+                question, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1013,7 +1059,7 @@ class DeleteQuestionAPIView(APIView):
         try:
             question = Question.objects.get(id=id)
             question.delete()
-            return Response({'message': 'Question deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            serializer = QuestionDetailSerializer(question)
+            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         except Question.DoesNotExist:
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
-
