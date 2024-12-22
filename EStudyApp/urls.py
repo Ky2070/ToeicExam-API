@@ -1,5 +1,6 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, PartListQuestionsSetAPIView, TestDetailView, TestListView, TestPartDetailView, \
+from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, PartListQuestionsSetAPIView, TestDetailView, \
+    TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
