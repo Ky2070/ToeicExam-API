@@ -233,6 +233,7 @@ class QuestionSet(models.Model):
         null=True
     )
     from_ques = models.IntegerField(blank=True, null=True)
+    to_ques = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         if self.page:
