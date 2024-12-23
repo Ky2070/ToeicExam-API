@@ -8,6 +8,8 @@ from Authentication.models import User  # type: ignore
 # Create your models here.
 
 class Tag(models.Model):
+    DoesNotExist = None
+    objects = None
     name = models.CharField(
         max_length=125,
         blank=True,
@@ -34,8 +36,8 @@ class Test(models.Model):
 
     name = models.CharField(
         max_length=255,
-        blank=True,
-        null=True
+        blank=False,
+        null=False
     )
     description = models.CharField(
         max_length=255,
@@ -78,8 +80,18 @@ class Test(models.Model):
                             )
     publish = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )  # Thời gian bình luận được cập nhật
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True
+    )  # Thời gian bình luận được tạo
+
+
+def __str__(self):
+    return self.name
 
 
 # class UserTestResult(models.Model):
@@ -182,9 +194,9 @@ class Part(models.Model):
     DoesNotExist = None
     objects = None
     part_description = models.ForeignKey(
-        PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING)
+        PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING, null=False, blank=False)
     test = models.ForeignKey(
-        Test, related_name='part_test', on_delete=models.DO_NOTHING)
+        Test, related_name='part_test', on_delete=models.DO_NOTHING, null=True, blank=True)
     pass
 
     def __str__(self):
@@ -220,6 +232,8 @@ class QuestionSet(models.Model):
         blank=True,
         null=True
     )
+    from_ques = models.IntegerField(blank=True, null=True)
+    to_ques = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         if self.page:
@@ -303,7 +317,7 @@ class Question(models.Model):
 
     def __str__(self):
         return f'{self.question_number} - {self.question_text}'
-    
+
     @property
     def part_id(self):
         return self.part.id
@@ -343,9 +357,9 @@ class History(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
-    
-    @property 
-    def completion_time(self): 
+
+    @property
+    def completion_time(self):
         delta = self.end_time - self.start_time
         return round(delta.total_seconds())
 
@@ -372,12 +386,12 @@ class HistoryTraining(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.test}"
-    
-    @property 
-    def completion_time(self): 
+
+    @property
+    def completion_time(self):
         delta = self.end_time - self.start_time
         return round(delta.total_seconds())
-    
+
 
 class TestComment(models.Model):
     user = models.ForeignKey(
@@ -403,11 +417,11 @@ class TestComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user} on {self.test}'
-    
+
     @property
     def replies(self):
         return TestComment.objects.filter(parent=self)
-    
+
     @property
     def get_replies(self):
         return self.replies.all()
@@ -434,7 +448,6 @@ class Flashcard(models.Model):
         default=('BASIC', 'Basic'),
     )
     example = models.TextField()
-
 
 
 class State(models.Model):

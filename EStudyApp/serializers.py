@@ -7,6 +7,7 @@ from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Pa
 
 class TestRepliesSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date']
@@ -15,6 +16,7 @@ class TestRepliesSerializer(serializers.ModelSerializer):
 class TestCommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     replies = TestRepliesSerializer(many=True, read_only=True)
+
     class Meta:
         model = TestComment
         fields = ['id', 'user', 'test', 'parent', 'content', 'publish_date', 'replies']
@@ -65,6 +67,9 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
                   'answers',
                   'question_type',
                   'part_id',
+                  'created_at',
+                  'update_at',
+                  'deleted_at',
                   ]
 
 
@@ -75,6 +80,7 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'question_number',
                   'question_text',
                   'difficulty_level',
+                  'correct_answer',
                   'answers',
                   'part_id',
                   ]
@@ -85,7 +91,7 @@ class QuestionSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuestionSet
-        fields = ['id', 'audio', 'page', 'image', 'question_question_set']
+        fields = ['id', 'audio', 'page', 'image', 'from_ques', 'to_ques', 'question_question_set']
 
 
 class PartDescriptionSerializer(serializers.ModelSerializer):
@@ -117,7 +123,7 @@ class TestDetailSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'description']
 
 
 class TestSerializer(serializers.ModelSerializer):
@@ -125,7 +131,8 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types', 'part_test']
+        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types',
+                  'part_test', 'created_at', 'updated_at']
 
 
 class PartListSerializer(serializers.ModelSerializer):
@@ -172,12 +179,13 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
 
 class HistoryTrainingSerializer(serializers.ModelSerializer):
     test = TestSubmitSerializer(read_only=True)
-    
+
     class Meta:
         model = HistoryTraining
         fields = ['id', 'user', 'test', 'start_time', 'end_time',
-            'correct_answers', 'wrong_answers', 'unanswer_questions',
-            'complete', 'completion_time', 'percentage_score', 'part_list', 'test_result']
+                  'correct_answers', 'wrong_answers', 'unanswer_questions',
+                  'complete', 'completion_time', 'percentage_score', 'part_list', 'test_result']
+
 
 class HistorySerializer(serializers.ModelSerializer):
     # user = UserSerializer(read_only=True)
@@ -190,3 +198,29 @@ class HistorySerializer(serializers.ModelSerializer):
             'listening_score', 'reading_score', 'correct_answers', 'wrong_answers', 'unanswer_questions',
             'complete', 'completion_time', 'percentage_score'
         ]
+
+
+class CreateTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = [
+            'id', 'name', 'description', 'types', 'test_date', 'duration',
+            'question_count', 'part_count', 'tag', 'publish', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class TestListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = [
+            'name', 'description', 'types'
+        ]
+
+
+class TestByTagSerializer(serializers.ModelSerializer):
+    tag = TagSerializer(read_only=True)
+
+    class Meta:
+        model = Test
+        fields = ['id', 'name', 'description', 'duration', 'question_count', 'part_count', 'tag']

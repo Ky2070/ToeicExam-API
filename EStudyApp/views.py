@@ -11,10 +11,12 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
-    HistoryTraining
-from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, TestDetailSerializer, TestSerializer, PartSerializer, \
-    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer
+from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
+    HistoryTraining, Tag
+from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, TestDetailSerializer, TestSerializer, \
+    PartSerializer, \
+    HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
+    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -103,12 +105,12 @@ class SubmitTestView(APIView):
                 listening_correct, reading_correct)
             correct_answers = listening_correct + reading_correct
             wrong_answers = (listening_total - listening_correct) + \
-                (reading_total - reading_correct)
+                            (reading_total - reading_correct)
             percentage_score = ((listening_correct + reading_correct) /
                                 max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
 
-            # Chuyển đối tượng QuerySet thành danh sách dictionary
+            # Chuyển ��ổi QuerySet thành danh sách dictionary
 
             # Lưu lịch sử làm bài kiểm tra
             history = History.objects.create(
@@ -251,7 +253,7 @@ class TestDetailView(APIView):
                         Prefetch(
                             'question_part',  # Các câu hỏi trong Part
                             # Sắp xếp theo 'question_number'
-                            queryset=Question.objects.order_by(
+                            queryset=Question.objects.filter(test_id=pk).order_by(
                                 'question_number')
                         )
                     )
@@ -274,7 +276,7 @@ class FixedTestPagination(PageNumberPagination):
     Phân trang với giới hạn cố định 6 bài kiểm tra mỗi trang.
     """
     page_size = 6  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
-    page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
+    page_size_query_param = None  # Không cho phép người dùng thay ��ổi số lượng
     max_page_size = 6  # Giới hạn cứng
 
 
@@ -286,6 +288,11 @@ class TestListView(APIView):
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         # get type from request and default is Practice
+        if request.GET.get('type') is None:
+            tests = Test.objects.all()
+            serializer = TestSerializer(tests, many=True)
+            return Response(serializer.data)
+
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
         tests = Test.objects.prefetch_related(
@@ -357,28 +364,6 @@ class PartListView(APIView):
             'part_description').order_by('id')
 
         serializer = PartListSerializer(parts, many=True)
-        return Response(serializer.data)
-
-
-class QuestionListView(APIView):
-    def get(self, request):
-        questions = (Question.objects.all()
-                     .select_related('question_type')
-                     .order_by('id'))
-
-        # .only('id',
-        #       'question_number',
-        #       'question_text',
-        #       'answers',
-        #       'question_type__id',
-        #       'question_type__name'
-        #       )
-        # Kiểm tra nếu queryset trống
-        if not questions.exists():
-            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
-        serializer = QuestionDetailSerializer(questions, many=True)
         return Response(serializer.data)
 
 
@@ -616,7 +601,7 @@ class SearchTestsAPIView(APIView):
         #     search=SearchVector('name', config='english')
         # ).filter(search=query)
 
-            # Tìm kiếm theo name hoặc tag (case-insensitive)
+        # Tìm kiếm theo name hoặc tag (case-insensitive)
         tests = Test.objects.filter(
             Q(name__icontains=query_param) | Q(
                 tag__name__icontains=query_param)
@@ -810,3 +795,481 @@ class DetailTrainingView(APIView):
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = HistoryTrainingSerializer(history, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ListTestView(APIView):
+    # Chỉ người dùng đã đăng nh��p mới được phép truy cập
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Lấy danh sách bài kiểm tra.
+        """
+        tests = Test.objects.all().order_by(
+            '-id')  # Lấy tất cả các bài kiểm tra từ cơ sở dữ liệu
+        # Sử dụng serializer để chuyển đổi dữ liệu
+        serializer = TestListSerializer(tests, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# Tạo đề thi
+class TestCreateAPIView(APIView):
+    # Chỉ người dùng đã đăng nhập mới được phép truy cập
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = CreateTestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        Lấy thông tin chi tiết bài thi theo ID.
+        """
+        try:
+            test = Test.objects.get(id=id)
+            serializer = TestListSerializer(test)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TestUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập
+
+    def put(self, request, id, *args, **kwargs):
+        """
+            Cập nhật thông tin bài thi theo ID.
+            """
+        try:
+            test = Test.objects.get(id=id)
+            serializer = CreateTestSerializer(
+                test, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class TestDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+            Xóa bài thi theo ID.
+            """
+        try:
+            test = Test.objects.get(id=id)
+            test.delete()
+            return Response({'message': 'Test deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetPartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id=None, *args, **kwargs):
+        """
+        Lấy danh sách tất cả hoặc thông tin chi tiết của một phần (Part).
+        """
+        if id:
+            try:
+                part = Part.objects.get(id=id)
+                serializer = PartListSerializer(part)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Part.DoesNotExist:
+                return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            parts = Part.objects.all().order_by('-id')
+            serializer = PartListSerializer(parts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PartListQuestionsSetAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def _process_answers(self, answers):
+        """Helper method to uppercase answer values"""
+        if not answers:
+            return answers
+        return {
+            key.upper(): value if isinstance(value, str) else value
+            for key, value in answers.items()
+        }
+
+    def get(self, request, part_id, *args, **kwargs):
+        part = Part.objects.get(id=part_id)
+        if not part:
+            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        questions_set = QuestionSet.objects.filter(part=part).order_by('from_ques')
+
+        serializer = QuestionSetSerializer(questions_set, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, part_id, *args, **kwargs):
+        data = request.data
+        question_set_id = data.get('id')
+        audio = data.get('audio')
+        page = data.get('page')
+        image = data.get('image')
+        from_ques = data.get('from_ques')
+        to_ques = data.get('to_ques')
+        question_question_set = data.get('question_question_set', [])
+
+        try:
+            # get part
+            part = Part.objects.get(id=part_id)
+
+            # get question set
+            question_set = None
+            
+            if question_set_id:
+                question_set = QuestionSet.objects.get(id=question_set_id)
+                question_set.audio = audio
+                question_set.page = page
+                question_set.image = image
+                question_set.from_ques = int(from_ques)
+                question_set.to_ques = int(to_ques)
+                question_set.save()
+            else:
+                question_set = QuestionSet.objects.create(
+                    part=part,
+                    audio=audio,
+                    page=page,
+                    image=image,
+                    from_ques=int(from_ques),
+                    to_ques=int(to_ques),
+                )
+                question_set_id = question_set.id
+                
+
+            # Create a set of incoming question IDs
+            # incoming_question_ids = {
+            #     q.get('id') for q in question_question_set if q.get('id')}
+
+            # Create a dictionary of incoming questions for updates
+            question_updates = {
+                q.get('id'): q for q in question_question_set if q.get('id')
+            }
+            
+            question_add = [q for q in question_question_set if q.get('id') is None]
+            
+            # Delete questions that are not in the incoming set
+            question_not_delete = [q for q in question_question_set if q.get('id') is not None]
+            Question.objects.filter(question_set=question_set).exclude(
+                id__in=[question['id'] for question in question_not_delete]).delete()
+            
+            # Get existing questions
+            existing_questions = Question.objects.filter(
+                question_set=question_set)
+
+            # Update existing questions
+            for question in existing_questions:
+                if question.id in question_updates:
+                    update_data = question_updates[question.id]
+                    question.question_text = update_data.get('question_text', question.question_text)
+                    # Uppercase the answers
+                    answers = update_data.get('answers')
+                    question.answers = self._process_answers(answers)
+                    question.correct_answer = update_data.get('correct_answer', '').upper()
+                    question.question_number = update_data.get('question_number', question.question_number)
+                    question.difficulty_level = update_data.get('difficulty_level', question.difficulty_level)
+                    question.save()
+                    del question_updates[question.id]
+
+            # Create new questions for any remaining in question_updates
+            for new_question_data in question_add:
+                Question.objects.create(
+                    question_set=question_set,
+                    part=part,
+                    question_text=new_question_data.get('question_text'),
+                    # Uppercase the answers for new questions
+                    answers=self._process_answers(new_question_data.get('answers')),
+                    correct_answer=new_question_data.get('correct_answer', '').upper(),
+                    question_number=new_question_data.get('question_number'),
+                    difficulty_level=new_question_data.get('difficulty_level'),
+                )
+
+            # Refresh and serialize the updated question set
+            question_set_data = QuestionSet.objects.get(id=question_set_id)
+            serializer = QuestionSetSerializer(question_set_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Part.DoesNotExist:
+            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+        # except Exception as e:
+        #     return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EditQuestionsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _process_answers(self, answers):
+        """Helper method to uppercase answer values"""
+        if not answers:
+            return answers
+        return {
+            key.upper(): value if isinstance(value, str) else value
+            for key, value in answers.items()
+        }
+
+    def put(self, request, part_id, question_set_id, *args, **kwargs):
+        data = request.data
+        audio = data.get('audio')
+        page = data.get('page')
+        image = data.get('image')
+        from_ques = data.get('from_ques')
+        to_ques = data.get('to_ques')
+        question_question_set = data.get('question_question_set', [])
+
+        try:
+            # get part
+            part = Part.objects.get(id=part_id)
+
+            # get question set
+            question_set = QuestionSet.objects.get(id=question_set_id)
+            if question_set:
+                # update question set basic info
+                question_set.audio = audio
+                question_set.page = page
+                question_set.image = image
+                question_set.from_ques = int(from_ques)
+                question_set.to_ques = int(to_ques)
+                question_set.save()
+            else:
+                if data.get('id') is None:
+                    question_set = QuestionSet.objects.create(
+                        part=part,
+                        audio=audio,
+                        page=page,
+                        image=image,
+                        from_ques=int(from_ques),
+                        to_ques=int(to_ques),
+                    )
+                else:
+                    return Response({"error": "Question set not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+
+            # Create a set of incoming question IDs
+            # incoming_question_ids = {
+            #     q.get('id') for q in question_question_set if q.get('id')}
+
+            # Create a dictionary of incoming questions for updates
+            question_updates = {
+                q.get('id'): q for q in question_question_set if q.get('id')
+            }
+            
+            question_add = [q for q in question_question_set if q.get('id') is None]
+            
+            # Delete questions that are not in the incoming set
+            question_not_delete = [q for q in question_question_set if q.get('id') is not None]
+            Question.objects.filter(question_set=question_set).exclude(
+                id__in=[question['id'] for question in question_not_delete]).delete()
+            
+            # Get existing questions
+            existing_questions = Question.objects.filter(
+                question_set=question_set)
+
+            # Update existing questions
+            for question in existing_questions:
+                if question.id in question_updates:
+                    update_data = question_updates[question.id]
+                    question.question_text = update_data.get('question_text', question.question_text)
+                    # Uppercase the answers
+                    answers = update_data.get('answers')
+                    question.answers = self._process_answers(answers)
+                    question.correct_answer = update_data.get('correct_answer', '').upper()
+                    question.question_number = update_data.get('question_number', question.question_number)
+                    question.difficulty_level = update_data.get('difficulty_level', question.difficulty_level)
+                    question.save()
+                    del question_updates[question.id]
+
+            # Create new questions for any remaining in question_updates
+            for new_question_data in question_add:
+                Question.objects.create(
+                    question_set=question_set,
+                    part=part,
+                    question_text=new_question_data.get('question_text'),
+                    # Uppercase the answers for new questions
+                    answers=self._process_answers(new_question_data.get('answers')),
+                    correct_answer=new_question_data.get('correct_answer', '').upper(),
+                    question_number=new_question_data.get('question_number'),
+                    difficulty_level=new_question_data.get('difficulty_level'),
+                )
+
+            # Refresh and serialize the updated question set
+            question_set_data = QuestionSet.objects.get(id=question_set_id)
+            serializer = QuestionSetSerializer(question_set_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Part.DoesNotExist:
+            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreatePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, test_id, *args, **kwargs):
+        """
+        Tạo một phần (Part) mới.
+        """
+        part_number = request.data['part']
+
+        test = Test.objects.get(id=test_id)
+        partDescription = PartDescription.objects.filter(
+            part_name=f"Part {part_number}",
+        ).first()
+
+        if not test:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if not partDescription:
+            return Response({"error": "Part description not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        part = Part.objects.create(
+            part_description=partDescription,
+            test=test,
+        )
+
+        serializer = PartListSerializer(part)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, test_id, *args, **kwargs):
+        test = Test.objects.get(id=test_id)
+        if not test:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+        parts = Part.objects.filter(test=test)
+        serializer = PartListSerializer(parts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdatePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, id, *args, **kwargs):
+        """
+        Cập nhật thông tin một phần (Part) theo ID.
+        """
+        try:
+            part = Part.objects.get(id=id)
+            serializer = PartListSerializer(
+                part, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Part.DoesNotExist:
+            return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DeletePartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+        Delete (Part) theo ID.
+        """
+        try:
+            part = Part.objects.get(id=id)
+            serializer = PartListSerializer(part)
+            part.delete()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Part.DoesNotExist:
+            return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class QuestionListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        questions = (Question.objects.filter(deleted_at__isnull=True)
+                     .select_related('question_type')
+                     .order_by('id'))
+
+        # .only('id',
+        #       'question_number',
+        #       'question_text',
+        #       'answers',
+        #       'question_type__id',
+        #       'question_type__name'
+        #       )
+        # Kiểm tra nếu queryset trống
+        if not questions.exists():
+            return Response({"detail": "No questions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Sử dụng serializer để chuyển đổi queryset thành dữ liệu JSON
+        serializer = QuestionDetailSerializer(questions, many=True)
+        return Response(serializer.data)
+
+
+class CreateQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+               Tạo một câu hỏi mới.
+               """
+        serializer = QuestionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DetailQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id, *args, **kwargs):
+        """
+        Lấy chi tiết một câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id, deleted_at__isnull=True)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found or Question deleted'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = QuestionDetailSerializer(question)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, id, *args, **kwargs):
+        """
+        Cập nhật thông tin câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id, deleted_at__isnull=True)
+            serializer = QuestionDetailSerializer(
+                question, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found or Question deleted'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DeleteQuestionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id, *args, **kwargs):
+        """
+        Xóa một câu hỏi theo ID.
+        """
+        try:
+            question = Question.objects.get(id=id)
+            question.delete()
+            serializer = QuestionDetailSerializer(question)
+            return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        except Question.DoesNotExist:
+            return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
