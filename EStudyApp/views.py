@@ -110,7 +110,7 @@ class SubmitTestView(APIView):
                                 max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
 
-            # Chuyển đối tượng QuerySet thành danh sách dictionary
+            # Chuyển đổi QuerySet thành danh sách dictionary
 
             # Lưu lịch sử làm bài kiểm tra
             history = History.objects.create(
@@ -898,10 +898,102 @@ class PartListQuestionsSetAPIView(APIView):
         if not part:
             return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        questions_set = QuestionSet.objects.filter(part=part)
+        questions_set = QuestionSet.objects.filter(part=part).order_by('from_ques')
 
         serializer = QuestionSetSerializer(questions_set, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EditQuestionsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, part_id, question_set_id, *args, **kwargs):
+        data = request.data
+        audio = data.get('audio')
+        page = data.get('page')
+        image = data.get('image')
+        from_ques = data.get('from_ques')
+        to_ques = data.get('to_ques')
+        question_question_set = data.get('question_question_set', [])
+
+        try:
+            # get part
+            part = Part.objects.get(id=part_id)
+
+            # get question set
+            question_set = QuestionSet.objects.get(id=question_set_id)
+
+            # update question set basic info
+            question_set.audio = audio
+            question_set.page = page
+            question_set.image = image
+            question_set.from_ques = int(from_ques)
+            question_set.to_ques = int(to_ques)
+            question_set.save()
+
+            # Create a set of incoming question IDs
+            # incoming_question_ids = {
+            #     q.get('id') for q in question_question_set if q.get('id')}
+
+            # Create a dictionary of incoming questions for updates
+            question_updates = {
+                q.get('id'): q for q in question_question_set if q.get('id')
+            }
+            
+            question_add = [q for q in question_question_set if q.get('id') is None]
+            print(question_updates)
+            
+            # Delete questions that are not in the incoming set
+            question_not_delete = [q for q in question_question_set if q.get('id') is not None]
+            Question.objects.filter(question_set=question_set).exclude(
+                id__in=[question['id'] for question in question_not_delete]).delete()
+            
+            # Get existing questions
+            existing_questions = Question.objects.filter(
+                question_set=question_set)
+
+            # Update existing questions
+            for question in existing_questions:
+                if question.id in question_updates:
+                    # Update existing question
+                    update_data = question_updates[question.id]
+                    question.question_text = update_data.get(
+                        'question_text', question.question_text)
+                    question.answers = update_data.get(
+                        'answers', question.answers)
+                    question.correct_answer = update_data.get(
+                        'correct_answer', question.correct_answer)
+                    question.question_number = update_data.get(
+                        'question_number', question.question_number)
+                    question.difficulty_level = update_data.get(
+                        'difficulty_level', question.difficulty_level)
+                    question.save()
+                    # Remove from updates dict to track what's been processed
+                    del question_updates[question.id]
+
+            # Create new questions for any remaining in question_updates
+            for new_question_data in question_add:
+                Question.objects.create(
+                    question_set=question_set,
+                    part=part,
+                    question_text=new_question_data.get('question_text'),
+                    answers=new_question_data.get('answers'),
+                    correct_answer=new_question_data.get('correct_answer'),
+                    question_number=new_question_data.get('question_number'),
+                    difficulty_level=new_question_data.get('difficulty_level'),
+                )
+
+            # Refresh and serialize the updated question set
+            question_set_data = QuestionSet.objects.get(id=question_set_id)
+            serializer = QuestionSetSerializer(question_set_data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Part.DoesNotExist:
+            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+        except QuestionSet.DoesNotExist:
+            return Response({"error": "Question set not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreatePartAPIView(APIView):
@@ -1063,4 +1155,3 @@ class DeleteQuestionAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         except Question.DoesNotExist:
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
-
