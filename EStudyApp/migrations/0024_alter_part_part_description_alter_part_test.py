@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='part',
             name='part_description',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='part_part_description', to='EStudyApp.partdescription'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='part_part_description', to='EStudyApp.partdescription'),
         ),
         migrations.AlterField(
             model_name='part',
             name='test',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='part_test', to='EStudyApp.test'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='part_test', to='EStudyApp.test'),
         ),
     ]

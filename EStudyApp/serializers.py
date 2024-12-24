@@ -137,7 +137,7 @@ class TestSerializer(serializers.ModelSerializer):
 
 class PartListSerializer(serializers.ModelSerializer):
     part_description = PartDescriptionSerializer(read_only=True)
-
+    question_set_part = QuestionSetSerializer(many=True, read_only=True)
     class Meta:
         model = Part
         # fields = ['part_description']

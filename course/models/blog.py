@@ -25,10 +25,12 @@ class Blog(models.Model):
     )
     author = models.ForeignKey(User,
                                related_name='blog_user',
-                               on_delete=models.DO_NOTHING)
+                               on_delete=models.CASCADE,
+                               null=True
+                               )
     questions_set = models.ForeignKey(QuestionSet,
                                      related_name='blog_questions_set',
-                                     on_delete=models.DO_NOTHING,
+                                     on_delete=models.CASCADE,
                                      blank=True,
                                      null=True)
     publish_date = models.DateTimeField(blank=True, null=True)
@@ -45,13 +47,17 @@ class Blog(models.Model):
 class CommentBlog(models.Model):
     user = models.ForeignKey(User,
                              related_name='commentblog_user',
-                             on_delete=models.DO_NOTHING)
+                             on_delete=models.CASCADE,
+                             null=True
+                             )
     blog = models.ForeignKey(Blog,
                              related_name='commentblog_blog',
-                             on_delete=models.DO_NOTHING)
+                             on_delete=models.CASCADE,
+                             null=True
+                             )
     parent = models.ForeignKey('self',
                                related_name='replies',
-                               on_delete=models.DO_NOTHING,
+                               on_delete=models.CASCADE,
                                blank=True,
                                null=True
                                )

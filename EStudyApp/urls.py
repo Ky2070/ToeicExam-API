@@ -1,5 +1,5 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
+from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
@@ -34,6 +34,7 @@ urlpatterns = [
     path('parts/', GetPartAPIView.as_view(), name='part-list'),  # GET all
     path('parts/<int:id>/', GetPartAPIView.as_view(), name='part-detail'),  # GET theo ID
     path('parts/create/<int:test_id>/', CreatePartAPIView.as_view(), name='part-create'),  # POST
+    path('parts/create/<int:test_id>/auto', CreatePartAutoAPIView.as_view(), name='part-create-auto'),  # POST
     path('parts/update/<int:id>/', UpdatePartAPIView.as_view(), name='part-update'),  # PUT
     path('parts/delete/<int:id>/', DeletePartAPIView.as_view(), name='part-delete'),  # API xóa phần (DELETE)
     path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='part-api'),  # GET theo ID

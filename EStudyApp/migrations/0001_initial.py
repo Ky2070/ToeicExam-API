@@ -58,16 +58,16 @@ class Migration(migrations.Migration):
             name='Part',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('part_description', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='part_part_description', to='EStudyApp.partdescription')),
-                ('test', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='part_test', to='EStudyApp.test')),
+                ('part_description', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='part_part_description', to='EStudyApp.partdescription')),
+                ('test', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='part_test', to='EStudyApp.test')),
             ],
         ),
         migrations.CreateModel(
             name='PartQuestionSet',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('part', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='partquestionset_part', to='EStudyApp.part')),
-                ('question_set', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='partquestionset_question_set', to='EStudyApp.questionset')),
+                ('part', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='partquestionset_part', to='EStudyApp.part')),
+                ('question_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='partquestionset_question_set', to='EStudyApp.questionset')),
             ],
         ),
         migrations.CreateModel(
@@ -82,8 +82,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('update_at', models.DateTimeField(auto_now=True)),
                 ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('question_set', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_question_set', to='EStudyApp.questionset')),
-                ('question_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_question_type', to='EStudyApp.questiontype')),
+                ('question_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='question_question_set', to='EStudyApp.questionset')),
+                ('question_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_question_type', to='EStudyApp.questiontype')),
             ],
         ),
         migrations.CreateModel(
@@ -101,8 +101,8 @@ class Migration(migrations.Migration):
                 ('reading_score', models.DecimalField(blank=True, decimal_places=0, max_digits=3, null=True)),
                 ('complete', models.BooleanField(default=False)),
                 ('test_result', models.JSONField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='history_user', to=settings.AUTH_USER_MODEL)),
-                ('test', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='history_test', to='EStudyApp.test')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='history_user', to=settings.AUTH_USER_MODEL)),
+                ('test', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='history_test', to='EStudyApp.test')),
             ],
         ),
     ]
