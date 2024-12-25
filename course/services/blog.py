@@ -87,11 +87,20 @@ class BlogService:
 
             # Handle ordering
             if 'order_by' in filters:
-                query_params['order_by'] = filters['order_by']
+                # Support ordering by is_published
+                order_by = filters['order_by']
+                if order_by in ['is_published', '-is_published']:
+                    query_params['order_by'] = order_by
 
             # Handle is_published filter
-            if 'is_published' in filters:
-                query_params['is_published'] = filters['is_published']
+            is_published = filters.get('is_published') or filters.get('isPublished')
+            if is_published is not None:
+                # Convert string to boolean properly
+                if isinstance(is_published, str):
+                    is_published = is_published.lower() == 'true'
+                # Debug log
+                print(f"Service is_published value: {is_published}, type: {type(is_published)}")
+                query_params['is_published'] = is_published
 
         # Create query object
         query = BlogQuery(**query_params)

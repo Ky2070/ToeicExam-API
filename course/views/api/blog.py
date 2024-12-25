@@ -132,6 +132,18 @@ def edit_blog(request, id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def panel_blog_list(request):
+    """
+    Get list of blogs with filters and pagination
+    
+    Query Parameters:
+        - is_published: Filter by publish status (true/false)
+        - isPublished: Alias for is_published
+        - page: Page number
+        - per_page: Items per page
+        - order_by: Sort blogs by field
+            - 'is_published': Sort by publish status ascending
+            - '-is_published': Sort by publish status descending
+    """
     blog_service = BlogService()
     blogs = blog_service.get_blog_list(filters=request.query_params)
     return Response(blogs, status=status.HTTP_200_OK)

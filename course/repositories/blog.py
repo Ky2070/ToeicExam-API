@@ -10,6 +10,8 @@ class BlogOrderBy(OrderBy):
     _allows_fields = (
         "id", "-id",
         "title", "-title",
+        "content", "-content",
+        "is_published", "-is_published",
         "created_at", "-created_at",
         "updated_at", "-updated_at",
     )
@@ -96,7 +98,10 @@ class BlogQuery:
             query &= Q(updated_at__lte=self.updated_at__lte)
 
         if self.is_published is not None:
+            # Debug log
+            print(f"Building query for is_published: {self.is_published}")
             query &= Q(is_published=self.is_published)
+
         if self.is_published__in:
             query &= Q(is_published__in=self.is_published__in)
 
@@ -174,6 +179,12 @@ class BlogRepository:
         if q.created_at__lte:
             query = query.filter(created_at__lte=q.created_at__lte)
 
+        # Add is_published filter
+        if q.is_published is not None:
+            # Debug log
+            print(f"Filtering is_published: {q.is_published}, type: {type(q.is_published)}")
+            query = query.filter(is_published=q.is_published)
+
         # Get total count
         total = query.count()
 
@@ -186,6 +197,10 @@ class BlogRepository:
 
         # Apply pagination
         blogs = query[p.offset:p.offset + p.limit]
+
+        # Debug log
+        print(f"Query SQL: {query.query}")
+        print(f"Total blogs found: {total}")
 
         # Serialize the data
         serialized_data = BlogListSerializer(blogs, many=True).data
