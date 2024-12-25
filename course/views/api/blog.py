@@ -6,6 +6,11 @@ from course.models.blog import Blog
 from EStudyApp.models import Question, QuestionSet
 from course.serializer.blog import BlogSerializer
 from django.db.models import Prefetch
+from django.core.exceptions import ValidationError
+from rest_framework.views import APIView
+
+from course.services.blog import BlogService
+from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDeleteAPIView
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -121,3 +126,32 @@ def edit_blog(request, id):
     new_blog = Blog.objects.get(id=id)
     serializer = BlogSerializer(new_blog).data
     return Response(serializer, status=status.HTTP_200_OK)
+
+
+# panel blog list
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def panel_blog_list(request):
+    blog_service = BlogService()
+    blogs = blog_service.get_blog_list(filters=request.query_params)
+    return Response(blogs, status=status.HTTP_200_OK)
+
+# panel blog detail
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def panel_blog_detail(request, id):
+    blog_service = BlogService()
+    blog = blog_service.get_blog_detail(id)
+    return Response(blog, status=status.HTTP_200_OK)
+
+class BlogCreateView(BaseCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    service_class = BlogService
+
+class BlogUpdateView(BaseUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    service_class = BlogService
+
+class BlogDeleteView(BaseDeleteAPIView):
+    permission_classes = [IsAuthenticated]
+    service_class = BlogService

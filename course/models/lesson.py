@@ -2,9 +2,9 @@ from django.db import models
 from course.models.course import Course
 from Authentication.models import User
 from ckeditor.fields import RichTextField
+from course.models.base import BaseModel
 
-
-class Lesson(models.Model):
+class Lesson(BaseModel):
     objects = None
     course = models.ForeignKey(Course,
                                related_name='lesson_course',
@@ -25,17 +25,9 @@ class Lesson(models.Model):
         null=True
     )
     quiz = models.TextField()
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        null=True
-    )  # Thời gian bình luận được cập nhật
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True
-    )  # Thời gian bình luận được tạo
 
 
-class ReviewLesson(models.Model):
+class ReviewLesson(BaseModel):
     objects = None
     user = models.ForeignKey(
         User,
@@ -51,10 +43,6 @@ class ReviewLesson(models.Model):
     )  # Liên kết đến bài học (Lesson)
     content = models.TextField()  # Nội dung bình luận
     publish_date = models.DateTimeField(
-        auto_now_add=True)  # Thời gian bình luận được tạo
-    updated_at = models.DateTimeField(
-        auto_now=True)  # Thời gian bình luận được cập nhật
-    created_at = models.DateTimeField(
         auto_now_add=True)  # Thời gian bình luận được tạo
 
     def __str__(self):

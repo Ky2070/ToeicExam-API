@@ -1,9 +1,9 @@
 from django.db import models
 from Authentication.models import User
 from EStudyApp.models import QuestionSet
+from course.models.base import BaseModel
 
-
-class Blog(models.Model):
+class Blog(BaseModel):
     title = models.CharField(
         max_length=50,
         blank=True,
@@ -33,18 +33,10 @@ class Blog(models.Model):
                                      on_delete=models.CASCADE,
                                      blank=True,
                                      null=True)
-    publish_date = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        null=True
-    )  # Thời gian bình luận được cập nhật
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True
-    )  # Thời gian bình luận được tạo
+    is_published = models.BooleanField(default=False)
 
 
-class CommentBlog(models.Model):
+class CommentBlog(BaseModel):
     user = models.ForeignKey(User,
                              related_name='commentblog_user',
                              on_delete=models.CASCADE,
@@ -64,14 +56,7 @@ class CommentBlog(models.Model):
     content = models.TextField()
     publish_date = models.DateTimeField(
         auto_now_add=True)  # Thời gian bình luận được tạo
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        null=True
-    )  # Thời gian bình luận được cập nhật
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True
-    )  # Thời gian bình luận được tạo
+
 
     def __str__(self):
         return f'Comment by {self.user} on {self.blog}'
