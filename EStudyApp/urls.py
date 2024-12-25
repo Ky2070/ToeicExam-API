@@ -1,10 +1,9 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, \
-    TestDetailView, \
+from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
-    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
+    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestQuestionSetAPIView, TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
     StudentStatisticsAPIView, SystemStatisticsAPIView
@@ -23,6 +22,8 @@ urlpatterns = [
     path('tests/<int:id>/update/', TestUpdateAPIView.as_view(), name='test-update'),  # Sửa bài thi
     path('tests/<int:id>/delete/', TestDeleteAPIView.as_view(), name='test-delete'),  # Xóa bài thi
 
+    path('tests/<int:id>/question_set/', TestQuestionSetAPIView.as_view(), name='test-question-set'),
+
     path('tests/search-tests/', SearchTestsAPIView.as_view(), name='search_tests_api'),
 
     path('tests/<int:pk>/', TestDetailView.as_view(), name='test-detail'),  # API lấy thông tin chi tiết của một bài
@@ -36,6 +37,7 @@ urlpatterns = [
     path('parts/', GetPartAPIView.as_view(), name='part-list'),  # GET all
     path('parts/<int:id>/', GetPartAPIView.as_view(), name='part-detail'),  # GET theo ID
     path('parts/create/<int:test_id>/', CreatePartAPIView.as_view(), name='part-create'),  # POST
+    path('parts/create/<int:test_id>/auto', CreatePartAutoAPIView.as_view(), name='part-create-auto'),  # POST
     path('parts/update/<int:id>/', UpdatePartAPIView.as_view(), name='part-update'),  # PUT
     path('parts/delete/<int:id>/', DeletePartAPIView.as_view(), name='part-delete'),  # API xóa phần (DELETE)
     path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='part-api'),  # GET theo ID

@@ -74,7 +74,7 @@ class Test(models.Model):
         default=7
     )
     tag = models.ForeignKey(Tag, related_name='test_tag',
-                            on_delete=models.DO_NOTHING,
+                            on_delete=models.CASCADE,
                             null=True,
                             blank=True
                             )
@@ -96,10 +96,10 @@ class Test(models.Model):
 # class UserTestResult(models.Model):
 #     user = models.ForeignKey(User,
 #                              related_name='usertestresult_user',
-#                              on_delete=models.DO_NOTHING)
+#                              on_delete=models.CASCADE)
 #     test = models.ForeignKey(Test,
 #                              related_name='usertestresult_test',
-#                              on_delete=models.DO_NOTHING)
+#                              on_delete=models.CASCADE)
 #     test_date = models.DateTimeField()
 #     time_taken = models.TimeField()
 
@@ -159,6 +159,7 @@ class QuestionType(models.Model):
 class PartDescription(models.Model):
     part_name = models.CharField(max_length=10)
     part_description = models.TextField(null=True, blank=True)
+    part_number = models.IntegerField(null=True, blank=True)
 
     SKILL_CHOICES = [
         ('READING', 'Reading'),
@@ -193,26 +194,30 @@ class Part(models.Model):
     DoesNotExist = None
     objects = None
     part_description = models.ForeignKey(
-        PartDescription, related_name='part_part_description', on_delete=models.DO_NOTHING, null=False, blank=False)
+        PartDescription, related_name='part_part_description', on_delete=models.CASCADE, null=True, blank=False)
     test = models.ForeignKey(
-        Test, related_name='part_test', on_delete=models.DO_NOTHING, null=True, blank=True)
+        Test, related_name='part_test', on_delete=models.CASCADE, null=True, blank=True)
     pass
 
     def __str__(self):
         return f'{self.part_description} - {self.test}'
+    
+    @property
+    def part_number(self):
+        return self.part_description.part_number
 
 
 class QuestionSet(models.Model):
     objects = None
     test = models.ForeignKey(Test,
                              related_name='question_set_test',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              null=True,
                              blank=True
                              )
     part = models.ForeignKey(Part,
                              related_name='question_set_part',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              null=True,
                              blank=True
                              )
@@ -248,23 +253,23 @@ class Question(models.Model):
     objects = None
     test = models.ForeignKey(Test,
                              related_name='question_test',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              null=True,
                              blank=True
                              )
     question_set = models.ForeignKey(QuestionSet,
                                      related_name='question_question_set',
-                                     on_delete=models.DO_NOTHING,
+                                     on_delete=models.CASCADE,
                                      null=True,
                                      blank=True)
     question_type = models.ForeignKey(QuestionType,
                                       related_name='question_question_type',
-                                      on_delete=models.DO_NOTHING,
+                                      on_delete=models.CASCADE,
                                       null=True,
                                       blank=True)
     part = models.ForeignKey(Part,
                              related_name='question_part',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              null=True,
                              blank=True
                              )
@@ -324,9 +329,9 @@ class Question(models.Model):
 
 class PartQuestionSet(models.Model):
     part = models.ForeignKey(
-        Part, related_name='partquestionset_part', on_delete=models.DO_NOTHING)
+        Part, related_name='partquestionset_part', on_delete=models.CASCADE, null=True)
     question_set = models.ForeignKey(
-        QuestionSet, related_name='partquestionset_question_set', on_delete=models.DO_NOTHING)
+        QuestionSet, related_name='partquestionset_question_set', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.part} - {self.question_set}"
@@ -335,9 +340,9 @@ class PartQuestionSet(models.Model):
 class History(models.Model):
     objects = None
     user = models.ForeignKey(
-        User, related_name='history_user', on_delete=models.DO_NOTHING)
+        User, related_name='history_user', on_delete=models.CASCADE, null=True)
     test = models.ForeignKey(
-        Test, related_name='history_test', on_delete=models.DO_NOTHING)
+        Test, related_name='history_test', on_delete=models.CASCADE, null=True)
     score = models.DecimalField(
         max_digits=3, decimal_places=0, blank=True, null=True)
     start_time = models.DateTimeField(blank=True, null=True)
@@ -365,9 +370,9 @@ class History(models.Model):
 
 class HistoryTraining(models.Model):
     user = models.ForeignKey(
-        User, related_name='training_user', on_delete=models.DO_NOTHING)
+        User, related_name='training_user', on_delete=models.CASCADE, null=True)
     test = models.ForeignKey(
-        Test, related_name='training_test', on_delete=models.DO_NOTHING)
+        Test, related_name='training_test', on_delete=models.CASCADE, null=True)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     correct_answers = models.IntegerField(blank=True, null=True)
@@ -396,17 +401,19 @@ class TestComment(models.Model):
     user = models.ForeignKey(
         User,
         related_name='testcomment_user',
-        on_delete=models.DO_NOTHING
+        on_delete=models.CASCADE,
+        null=True
     )  # Người dùng bình luận
     test = models.ForeignKey(
         Test,
         related_name='testcomment_test',
-        on_delete=models.DO_NOTHING
+        on_delete=models.CASCADE,
+        null=True
     )  # Liên kết đến bài học (Lesson)
     parent = models.ForeignKey(
         'self',
         related_name='replies',
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         blank=True,
         null=True
     )  # Khóa ngoại đệ quy để hỗ trợ trả lời bình luận
@@ -429,7 +436,8 @@ class TestComment(models.Model):
 class Flashcard(models.Model):
     user = models.ForeignKey(User,
                              related_name='flashcard_user',
-                             on_delete=models.DO_NOTHING)
+                             on_delete=models.CASCADE,
+                             null=True)
     term = models.CharField(
         max_length=255,
         null=True,
@@ -452,11 +460,11 @@ class Flashcard(models.Model):
 class State(models.Model):
     user = models.ForeignKey(User,
                              related_name='state_user',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              blank=True,
                              null=True)
     test = models.ForeignKey(Test, related_name='state_test',
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              blank=True,
                              null=True
                              )

@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='part',
             name='part_description',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='part_part_description', to='EStudyApp.partdescription'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='part_part_description', to='EStudyApp.partdescription'),
         ),
     ]

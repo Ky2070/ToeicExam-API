@@ -10,7 +10,9 @@ class Course(models.Model):
     objects = None
     user = models.ForeignKey(User,
                              related_name='course_user',
-                             on_delete=models.DO_NOTHING)
+                             on_delete=models.CASCADE,
+                             null=True
+                             )
     title = models.TextField(
         blank=True,
         null=True

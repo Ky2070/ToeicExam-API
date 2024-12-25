@@ -16,22 +16,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='question',
             name='part',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_part', to='EStudyApp.part'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_part', to='EStudyApp.part'),
         ),
         migrations.AddField(
             model_name='question',
             name='test',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_test', to='EStudyApp.test'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_test', to='EStudyApp.test'),
         ),
         migrations.AddField(
             model_name='questionset',
             name='part',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_set_part', to='EStudyApp.part'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_set_part', to='EStudyApp.part'),
         ),
         migrations.AddField(
             model_name='questionset',
             name='test',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_set_test', to='EStudyApp.test'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_set_test', to='EStudyApp.test'),
         ),
         migrations.AlterField(
             model_name='question',
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='question',
             name='question_set',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='question_question_set', to='EStudyApp.questionset'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='question_question_set', to='EStudyApp.questionset'),
         ),
         migrations.CreateModel(
             name='Blog',
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(blank=True, max_length=50, null=True)),
                 ('content', models.TextField()),
                 ('publish_date', models.DateTimeField(blank=True, null=True)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='blog_user', to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blog_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -59,9 +59,9 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('content', models.TextField()),
                 ('publish_date', models.DateTimeField(auto_now_add=True)),
-                ('blog', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='commentblog_blog', to='EStudyApp.blog')),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='replies', to='EStudyApp.commentblog')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='commentblog_user', to=settings.AUTH_USER_MODEL)),
+                ('blog', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commentblog_blog', to='EStudyApp.blog')),
+                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='replies', to='EStudyApp.commentblog')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commentblog_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(blank=True, max_length=100, null=True)),
                 ('level', models.CharField(choices=[('BASIC', 'Basic'), ('ADVANCED', 'Advanced'), ('PRO', 'Pro')], default=('BASIC', 'Basic'), max_length=30)),
                 ('duration', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='course_user', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                 ('definition', models.TextField()),
                 ('level', models.CharField(choices=[('BASIC', 'Basic'), ('MEDIUM', 'Medium'), ('DIFFICULTY', 'Difficulty')], default=('BASIC', 'Basic'), max_length=30)),
                 ('example', models.TextField()),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='flashcard_user', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='flashcard_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(blank=True, max_length=50, null=True)),
                 ('content', models.TextField()),
                 ('quiz', models.TextField()),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='lesson_course', to='EStudyApp.course')),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lesson_course', to='EStudyApp.course')),
             ],
         ),
         migrations.CreateModel(
@@ -102,9 +102,9 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('content', models.TextField()),
                 ('publish_date', models.DateTimeField(auto_now_add=True)),
-                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='replies', to='EStudyApp.commentlesson')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='commentlesson_user', to=settings.AUTH_USER_MODEL)),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='commentlesson_lesson', to='EStudyApp.lesson')),
+                ('parent', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='replies', to='EStudyApp.commentlesson')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commentlesson_user', to=settings.AUTH_USER_MODEL)),
+                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commentlesson_lesson', to='EStudyApp.lesson')),
             ],
         ),
     ]

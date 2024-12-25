@@ -8,7 +8,9 @@ class Lesson(models.Model):
     objects = None
     course = models.ForeignKey(Course,
                                related_name='lesson_course',
-                               on_delete=models.DO_NOTHING)
+                               on_delete=models.CASCADE,
+                               null=True
+                               )
     title = models.TextField(
         blank=True,
         null=True
@@ -38,12 +40,14 @@ class ReviewLesson(models.Model):
     user = models.ForeignKey(
         User,
         related_name='reviewlesson_user',
-        on_delete=models.DO_NOTHING
+        on_delete=models.CASCADE,
+        null=True
     )  # Người dùng bình luận
     lesson = models.ForeignKey(
         Lesson,
         related_name='reviewlesson_lesson',
-        on_delete=models.DO_NOTHING
+        on_delete=models.CASCADE,
+        null=True
     )  # Liên kết đến bài học (Lesson)
     content = models.TextField()  # Nội dung bình luận
     publish_date = models.DateTimeField(
