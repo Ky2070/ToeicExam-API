@@ -51,8 +51,8 @@ class Migration(migrations.Migration):
                 ('publish_date', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='reviewlesson_lesson', to='course.lesson')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='reviewlesson_user', to=settings.AUTH_USER_MODEL)),
+                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviewlesson_lesson', to='course.lesson')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reviewlesson_user', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.DeleteModel(

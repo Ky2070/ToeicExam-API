@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='state',
             name='test',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='state_test', to='EStudyApp.test'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='state_test', to='EStudyApp.test'),
         ),
         migrations.AddField(
             model_name='state',
@@ -26,6 +26,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='state',
             name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='state_user', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='state_user', to=settings.AUTH_USER_MODEL),
         ),
     ]

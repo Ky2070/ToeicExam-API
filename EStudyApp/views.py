@@ -1,4 +1,7 @@
 from datetime import datetime, timezone, timedelta
+import random
+from Authentication.permissions import IsTeacher
+from utils.standard_part import PART_STRUCTURE
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.db.models import Prefetch, Q
@@ -110,7 +113,7 @@ class SubmitTestView(APIView):
                                 max(listening_total + reading_total, 1)) * 100
             unanswer_questions = 200 - (listening_total + reading_total)
 
-            # Chuyển ��ổi QuerySet thành danh sách dictionary
+            # Chuyển đổi QuerySet thành danh sách dictionary
 
             # Lưu lịch sử làm bài kiểm tra
             history = History.objects.create(
@@ -276,7 +279,7 @@ class FixedTestPagination(PageNumberPagination):
     Phân trang với giới hạn cố định 6 bài kiểm tra mỗi trang.
     """
     page_size = 6  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
-    page_size_query_param = None  # Không cho phép người dùng thay ��ổi số lượng
+    page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
     max_page_size = 6  # Giới hạn cứng
 
 
@@ -295,10 +298,17 @@ class TestListView(APIView):
 
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
+
         tests = Test.objects.prefetch_related(
             Prefetch(
                 'part_test',
                 queryset=Part.objects.all()
+            ),
+            Prefetch(
+                'history_test',
+                queryset=History.objects.filter(
+                    user=request.user).order_by('-end_time'),
+                to_attr='user_histories'
             )
         ).filter(publish=True, types=type).select_related(
             'tag').order_by('id')  # Sắp xếp theo `id`
@@ -330,13 +340,13 @@ class TestPartDetailView(APIView):
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
-                                    'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
+                                    'question_question_set',  # S���p xếp câu hỏi trong bộ câu hỏi
                                     queryset=Question.objects.order_by(
                                         'question_number')
                                 )
                             )
                         )
-                    ).order_by('id')  # Sắp xếp các phần theo `id`
+                    ).order_by('part_description__part_number')  # Sắp xếp các phần theo `id`
                 ),
                 Prefetch(
                     'question_test',
@@ -798,7 +808,7 @@ class DetailTrainingView(APIView):
 
 
 class ListTestView(APIView):
-    # Chỉ người dùng đã đăng nh��p mới được phép truy cập
+    # Chỉ người dùng đã đăng nhập mới được phép truy cập
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -870,6 +880,22 @@ class TestDeleteAPIView(APIView):
             return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class TestQuestionSetAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def get(self, request, id, *args, **kwargs):
+        try:
+            test = Test.objects.get(id=id)
+            question_set = QuestionSet.objects.filter(
+                test=test).order_by('from_ques')
+            serializer = QuestionSetSerializer(question_set, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class GetPartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -892,7 +918,7 @@ class GetPartAPIView(APIView):
 
 class PartListQuestionsSetAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def _process_answers(self, answers):
         """Helper method to uppercase answer values"""
         if not answers:
@@ -907,11 +933,12 @@ class PartListQuestionsSetAPIView(APIView):
         if not part:
             return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        questions_set = QuestionSet.objects.filter(part=part).order_by('from_ques')
+        questions_set = QuestionSet.objects.filter(
+            part=part).order_by('from_ques')
 
         serializer = QuestionSetSerializer(questions_set, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def put(self, request, part_id, *args, **kwargs):
         data = request.data
         question_set_id = data.get('id')
@@ -921,6 +948,8 @@ class PartListQuestionsSetAPIView(APIView):
         from_ques = data.get('from_ques')
         to_ques = data.get('to_ques')
         question_question_set = data.get('question_question_set', [])
+        test_id = data.get('test_id')
+        test = Test.objects.get(id=test_id)
 
         try:
             # get part
@@ -928,7 +957,7 @@ class PartListQuestionsSetAPIView(APIView):
 
             # get question set
             question_set = None
-            
+
             if question_set_id:
                 question_set = QuestionSet.objects.get(id=question_set_id)
                 question_set.audio = audio
@@ -936,6 +965,7 @@ class PartListQuestionsSetAPIView(APIView):
                 question_set.image = image
                 question_set.from_ques = int(from_ques)
                 question_set.to_ques = int(to_ques)
+                question_set.test = test
                 question_set.save()
             else:
                 question_set = QuestionSet.objects.create(
@@ -945,9 +975,9 @@ class PartListQuestionsSetAPIView(APIView):
                     image=image,
                     from_ques=int(from_ques),
                     to_ques=int(to_ques),
+                    test=test,
                 )
                 question_set_id = question_set.id
-                
 
             # Create a set of incoming question IDs
             # incoming_question_ids = {
@@ -957,14 +987,16 @@ class PartListQuestionsSetAPIView(APIView):
             question_updates = {
                 q.get('id'): q for q in question_question_set if q.get('id')
             }
-            
-            question_add = [q for q in question_question_set if q.get('id') is None]
-            
+
+            question_add = [
+                q for q in question_question_set if q.get('id') is None]
+
             # Delete questions that are not in the incoming set
-            question_not_delete = [q for q in question_question_set if q.get('id') is not None]
+            question_not_delete = [
+                q for q in question_question_set if q.get('id') is not None]
             Question.objects.filter(question_set=question_set).exclude(
                 id__in=[question['id'] for question in question_not_delete]).delete()
-            
+
             # Get existing questions
             existing_questions = Question.objects.filter(
                 question_set=question_set)
@@ -973,13 +1005,19 @@ class PartListQuestionsSetAPIView(APIView):
             for question in existing_questions:
                 if question.id in question_updates:
                     update_data = question_updates[question.id]
-                    question.question_text = update_data.get('question_text', question.question_text)
+                    question.question_text = update_data.get(
+                        'question_text', question.question_text)
                     # Uppercase the answers
                     answers = update_data.get('answers')
                     question.answers = self._process_answers(answers)
-                    question.correct_answer = update_data.get('correct_answer', '').upper()
-                    question.question_number = update_data.get('question_number', question.question_number)
-                    question.difficulty_level = update_data.get('difficulty_level', question.difficulty_level)
+                    question.correct_answer = update_data.get(
+                        'correct_answer', '').upper()
+                    question.question_number = update_data.get(
+                        'question_number', question.question_number)
+                    question.difficulty_level = update_data.get(
+                        'difficulty_level', question.difficulty_level)
+                    question.test = test
+                    question.part = part
                     question.save()
                     del question_updates[question.id]
 
@@ -990,10 +1028,13 @@ class PartListQuestionsSetAPIView(APIView):
                     part=part,
                     question_text=new_question_data.get('question_text'),
                     # Uppercase the answers for new questions
-                    answers=self._process_answers(new_question_data.get('answers')),
-                    correct_answer=new_question_data.get('correct_answer', '').upper(),
+                    answers=self._process_answers(
+                        new_question_data.get('answers')),
+                    correct_answer=new_question_data.get(
+                        'correct_answer', '').upper(),
                     question_number=new_question_data.get('question_number'),
                     difficulty_level=new_question_data.get('difficulty_level'),
+                    test=test,
                 )
 
             # Refresh and serialize the updated question set
@@ -1054,7 +1095,6 @@ class EditQuestionsAPIView(APIView):
                     )
                 else:
                     return Response({"error": "Question set not found"}, status=status.HTTP_404_NOT_FOUND)
-                
 
             # Create a set of incoming question IDs
             # incoming_question_ids = {
@@ -1064,14 +1104,16 @@ class EditQuestionsAPIView(APIView):
             question_updates = {
                 q.get('id'): q for q in question_question_set if q.get('id')
             }
-            
-            question_add = [q for q in question_question_set if q.get('id') is None]
-            
+
+            question_add = [
+                q for q in question_question_set if q.get('id') is None]
+
             # Delete questions that are not in the incoming set
-            question_not_delete = [q for q in question_question_set if q.get('id') is not None]
+            question_not_delete = [
+                q for q in question_question_set if q.get('id') is not None]
             Question.objects.filter(question_set=question_set).exclude(
                 id__in=[question['id'] for question in question_not_delete]).delete()
-            
+
             # Get existing questions
             existing_questions = Question.objects.filter(
                 question_set=question_set)
@@ -1080,13 +1122,17 @@ class EditQuestionsAPIView(APIView):
             for question in existing_questions:
                 if question.id in question_updates:
                     update_data = question_updates[question.id]
-                    question.question_text = update_data.get('question_text', question.question_text)
+                    question.question_text = update_data.get(
+                        'question_text', question.question_text)
                     # Uppercase the answers
                     answers = update_data.get('answers')
                     question.answers = self._process_answers(answers)
-                    question.correct_answer = update_data.get('correct_answer', '').upper()
-                    question.question_number = update_data.get('question_number', question.question_number)
-                    question.difficulty_level = update_data.get('difficulty_level', question.difficulty_level)
+                    question.correct_answer = update_data.get(
+                        'correct_answer', '').upper()
+                    question.question_number = update_data.get(
+                        'question_number', question.question_number)
+                    question.difficulty_level = update_data.get(
+                        'difficulty_level', question.difficulty_level)
                     question.save()
                     del question_updates[question.id]
 
@@ -1097,8 +1143,10 @@ class EditQuestionsAPIView(APIView):
                     part=part,
                     question_text=new_question_data.get('question_text'),
                     # Uppercase the answers for new questions
-                    answers=self._process_answers(new_question_data.get('answers')),
-                    correct_answer=new_question_data.get('correct_answer', '').upper(),
+                    answers=self._process_answers(
+                        new_question_data.get('answers')),
+                    correct_answer=new_question_data.get(
+                        'correct_answer', '').upper(),
                     question_number=new_question_data.get('question_number'),
                     difficulty_level=new_question_data.get('difficulty_level'),
                 )
@@ -1128,6 +1176,11 @@ class CreatePartAPIView(APIView):
             part_name=f"Part {part_number}",
         ).first()
 
+        existing_part = Part.objects.filter(
+            part_description=partDescription, test=test).first()
+        if existing_part:
+            return Response({"error": "Part already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -1147,9 +1200,94 @@ class CreatePartAPIView(APIView):
         test = Test.objects.get(id=test_id)
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
-        parts = Part.objects.filter(test=test)
+        parts = Part.objects.filter(test=test).order_by('part_description__part_number')
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreatePartAutoAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _create_part(self, part_number, test, part_description, part):
+        try:
+            # Save the part instance first to get a primary key
+            part.save()
+
+            part_structures = PART_STRUCTURE[f'PART_{part_number}']
+            for from_ques, to_ques in part_structures['sets']:
+                existing_question_sets = QuestionSet.objects.filter(
+                    from_ques=from_ques,
+                    to_ques=to_ques,
+                )  # Prefetch related questions
+
+                # random divide existing_question_sets
+                random_question_set = random.choice(existing_question_sets)
+
+                # Create new question set
+                new_question_set = QuestionSet.objects.create(
+                    part=part,
+                    from_ques=from_ques,
+                    to_ques=to_ques,
+                    audio=random_question_set.audio,
+                    page=random_question_set.page,
+                    image=random_question_set.image,
+                    test=test,
+                )
+
+                # Duplicate questions
+                existing_questions = Question.objects.filter(
+                    question_set=random_question_set)
+                for question in existing_questions:
+                    Question.objects.create(
+                        question_set=new_question_set,
+                        part=part,
+                        test=test,
+                        question_text=question.question_text,
+                        answers=question.answers,
+                        correct_answer=question.correct_answer,
+                        question_number=question.question_number,
+                        difficulty_level=question.difficulty_level,
+                    )
+
+            return part
+
+        except Exception as e:
+            # If anything fails, delete the part and raise the error
+            if part.id:
+                part.delete()
+            raise e
+
+    def post(self, request, test_id, *args, **kwargs):
+        try:
+            part_number = request.data['part']
+            # check if part is exist
+            part_description = PartDescription.objects.get(
+                part_name=f"Part {part_number}")
+            part = Part.objects.filter(
+                part_description=part_description, test_id=test_id).first()
+            if part:
+                return Response({"error": "Part already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+            test = Test.objects.get(id=test_id)
+
+            if not test:
+                return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            if not part_description:
+                return Response({"error": "Part description not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            new_part = Part(
+                part_description=part_description,
+                test=test,
+            )
+
+            created_part = self._create_part(
+                part_number, test, part_description, new_part)
+            serializer = PartListSerializer(created_part)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UpdatePartAPIView(APIView):
@@ -1176,15 +1314,26 @@ class DeletePartAPIView(APIView):
 
     def delete(self, request, id, *args, **kwargs):
         """
-        Delete (Part) theo ID.
+        Delete Part and all related objects by ID.
         """
         try:
+            # Get the part
             part = Part.objects.get(id=id)
+
+            # Serialize the part data before deletion
             serializer = PartListSerializer(part)
+            response_data = serializer.data
+
+            # Delete the part after serializing
             part.delete()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+            # Return the serialized data of the deleted part
+            return Response(response_data, status=status.HTTP_200_OK)
+
         except Part.DoesNotExist:
             return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class QuestionListView(APIView):
