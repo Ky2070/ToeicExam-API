@@ -301,6 +301,11 @@ class TestListView(APIView):
             Prefetch(
                 'part_test',
                 queryset=Part.objects.all()
+            ),
+            Prefetch(
+                'history_test',
+                queryset=History.objects.filter(user=request.user).order_by('-end_time'),
+                to_attr='user_histories'
             )
         ).filter(publish=True, types=type).select_related(
             'tag').order_by('id')  # Sắp xếp theo `id`

@@ -127,12 +127,32 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TestSerializer(serializers.ModelSerializer):
-    tag = TagSerializer(read_only=True)
-
+    tag = TagSerializer()
+    latest_history = serializers.SerializerMethodField()
+    
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'types',
-                  'part_test', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'types', 'test_date',
+                 'duration', 'question_count', 'part_count', 'tag',
+                 'publish', 'latest_history', 'created_at', 'updated_at']
+
+    def get_latest_history(self, obj):
+        try:
+            # Get the prefetched histories
+            histories = getattr(obj, 'user_histories', [])
+            # Return the first (most recent) history if it exists
+            if histories:
+                history = histories[0]
+                return {
+                    'id': history.id,
+                    'score': history.score,
+                    'end_time': history.end_time,
+                    'listening_score': history.listening_score,
+                    'reading_score': history.reading_score,
+                }
+        except Exception:
+            pass
+        return None
 
 
 class PartListSerializer(serializers.ModelSerializer):
