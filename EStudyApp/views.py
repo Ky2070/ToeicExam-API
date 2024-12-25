@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
 import random
+from Authentication.permissions import IsTeacher
 from utils.standard_part import PART_STRUCTURE
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
@@ -297,6 +298,7 @@ class TestListView(APIView):
 
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
+
         tests = Test.objects.prefetch_related(
             Prefetch(
                 'part_test',
@@ -304,7 +306,8 @@ class TestListView(APIView):
             ),
             Prefetch(
                 'history_test',
-                queryset=History.objects.filter(user=request.user).order_by('-end_time'),
+                queryset=History.objects.filter(
+                    user=request.user).order_by('-end_time'),
                 to_attr='user_histories'
             )
         ).filter(publish=True, types=type).select_related(
@@ -343,7 +346,7 @@ class TestPartDetailView(APIView):
                                 )
                             )
                         )
-                    ).order_by('id')  # Sắp xếp các phần theo `id`
+                    ).order_by('part_description__part_number')  # Sắp xếp các phần theo `id`
                 ),
                 Prefetch(
                     'question_test',
@@ -877,6 +880,22 @@ class TestDeleteAPIView(APIView):
             return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class TestQuestionSetAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def get(self, request, id, *args, **kwargs):
+        try:
+            test = Test.objects.get(id=id)
+            question_set = QuestionSet.objects.filter(
+                test=test).order_by('from_ques')
+            serializer = QuestionSetSerializer(question_set, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Test.DoesNotExist:
+            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class GetPartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -929,6 +948,8 @@ class PartListQuestionsSetAPIView(APIView):
         from_ques = data.get('from_ques')
         to_ques = data.get('to_ques')
         question_question_set = data.get('question_question_set', [])
+        test_id = data.get('test_id')
+        test = Test.objects.get(id=test_id)
 
         try:
             # get part
@@ -944,6 +965,7 @@ class PartListQuestionsSetAPIView(APIView):
                 question_set.image = image
                 question_set.from_ques = int(from_ques)
                 question_set.to_ques = int(to_ques)
+                question_set.test = test
                 question_set.save()
             else:
                 question_set = QuestionSet.objects.create(
@@ -953,6 +975,7 @@ class PartListQuestionsSetAPIView(APIView):
                     image=image,
                     from_ques=int(from_ques),
                     to_ques=int(to_ques),
+                    test=test,
                 )
                 question_set_id = question_set.id
 
@@ -993,6 +1016,8 @@ class PartListQuestionsSetAPIView(APIView):
                         'question_number', question.question_number)
                     question.difficulty_level = update_data.get(
                         'difficulty_level', question.difficulty_level)
+                    question.test = test
+                    question.part = part
                     question.save()
                     del question_updates[question.id]
 
@@ -1009,6 +1034,7 @@ class PartListQuestionsSetAPIView(APIView):
                         'correct_answer', '').upper(),
                     question_number=new_question_data.get('question_number'),
                     difficulty_level=new_question_data.get('difficulty_level'),
+                    test=test,
                 )
 
             # Refresh and serialize the updated question set
@@ -1149,8 +1175,9 @@ class CreatePartAPIView(APIView):
         partDescription = PartDescription.objects.filter(
             part_name=f"Part {part_number}",
         ).first()
-        
-        existing_part = Part.objects.filter(part_description=partDescription, test=test).first()
+
+        existing_part = Part.objects.filter(
+            part_description=partDescription, test=test).first()
         if existing_part:
             return Response({"error": "Part already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -1173,7 +1200,7 @@ class CreatePartAPIView(APIView):
         test = Test.objects.get(id=test_id)
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
-        parts = Part.objects.filter(test=test)
+        parts = Part.objects.filter(test=test).order_by('part_description__part_number')
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -1185,7 +1212,7 @@ class CreatePartAutoAPIView(APIView):
         try:
             # Save the part instance first to get a primary key
             part.save()
-            
+
             part_structures = PART_STRUCTURE[f'PART_{part_number}']
             for from_ques, to_ques in part_structures['sets']:
                 existing_question_sets = QuestionSet.objects.filter(
@@ -1195,7 +1222,7 @@ class CreatePartAutoAPIView(APIView):
 
                 # random divide existing_question_sets
                 random_question_set = random.choice(existing_question_sets)
-                
+
                 # Create new question set
                 new_question_set = QuestionSet.objects.create(
                     part=part,
@@ -1206,9 +1233,10 @@ class CreatePartAutoAPIView(APIView):
                     image=random_question_set.image,
                     test=test,
                 )
-                
+
                 # Duplicate questions
-                existing_questions = Question.objects.filter(question_set=random_question_set)
+                existing_questions = Question.objects.filter(
+                    question_set=random_question_set)
                 for question in existing_questions:
                     Question.objects.create(
                         question_set=new_question_set,
@@ -1220,9 +1248,9 @@ class CreatePartAutoAPIView(APIView):
                         question_number=question.question_number,
                         difficulty_level=question.difficulty_level,
                     )
-                    
+
             return part
-            
+
         except Exception as e:
             # If anything fails, delete the part and raise the error
             if part.id:
@@ -1233,11 +1261,13 @@ class CreatePartAutoAPIView(APIView):
         try:
             part_number = request.data['part']
             # check if part is exist
-            part_description = PartDescription.objects.get(part_name=f"Part {part_number}")
-            part = Part.objects.filter(part_description=part_description, test_id=test_id).first()
+            part_description = PartDescription.objects.get(
+                part_name=f"Part {part_number}")
+            part = Part.objects.filter(
+                part_description=part_description, test_id=test_id).first()
             if part:
                 return Response({"error": "Part already exists"}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             test = Test.objects.get(id=test_id)
 
             if not test:
@@ -1250,11 +1280,12 @@ class CreatePartAutoAPIView(APIView):
                 part_description=part_description,
                 test=test,
             )
-            
-            created_part = self._create_part(part_number, test, part_description, new_part)
+
+            created_part = self._create_part(
+                part_number, test, part_description, new_part)
             serializer = PartListSerializer(created_part)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -1288,17 +1319,17 @@ class DeletePartAPIView(APIView):
         try:
             # Get the part
             part = Part.objects.get(id=id)
-            
+
             # Serialize the part data before deletion
             serializer = PartListSerializer(part)
             response_data = serializer.data
-            
+
             # Delete the part after serializing
             part.delete()
-            
+
             # Return the serialized data of the deleted part
             return Response(response_data, status=status.HTTP_200_OK)
-            
+
         except Part.DoesNotExist:
             return Response({'error': 'Part not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

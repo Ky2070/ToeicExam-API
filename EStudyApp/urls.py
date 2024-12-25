@@ -3,7 +3,7 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
-    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
+    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestQuestionSetAPIView, TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView
 
@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('tests/<int:id>/update/', TestUpdateAPIView.as_view(), name='test-update'),  # Sửa bài thi
     path('tests/<int:id>/delete/', TestDeleteAPIView.as_view(), name='test-delete'),  # Xóa bài thi
+
+    path('tests/<int:id>/question_set/', TestQuestionSetAPIView.as_view(), name='test-question-set'),
 
     path('tests/search-tests/', SearchTestsAPIView.as_view(), name='search_tests_api'),
 

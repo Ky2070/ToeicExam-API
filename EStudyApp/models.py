@@ -160,6 +160,7 @@ class QuestionType(models.Model):
 class PartDescription(models.Model):
     part_name = models.CharField(max_length=10)
     part_description = models.TextField(null=True, blank=True)
+    part_number = models.IntegerField(null=True, blank=True)
 
     SKILL_CHOICES = [
         ('READING', 'Reading'),
@@ -201,6 +202,10 @@ class Part(models.Model):
 
     def __str__(self):
         return f'{self.part_description} - {self.test}'
+    
+    @property
+    def part_number(self):
+        return self.part_description.part_number
 
 
 class QuestionSet(models.Model):
