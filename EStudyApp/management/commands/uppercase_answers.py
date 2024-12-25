@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from EStudyApp.models import Question
 
+
 class Command(BaseCommand):
     help = 'Uppercase all answer keys in Question model'
 
@@ -13,17 +14,17 @@ class Command(BaseCommand):
                 try:
                     # Convert answer keys to uppercase
                     new_answers = {
-                        key.upper(): value 
+                        key.upper(): value
                         for key, value in question.answers.items()
                     }
-                    
+
                     # Update the question only if answers changed
                     if new_answers != question.answers:
                         question.answers = new_answers
                         question.correct_answer = question.correct_answer.upper() if question.correct_answer else None
                         question.save()
                         updated_count += 1
-                        
+
                 except Exception as e:
                     self.stdout.write(
                         self.style.ERROR(
@@ -35,4 +36,4 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f'Successfully updated {updated_count} questions'
             )
-        ) 
+        )

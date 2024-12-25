@@ -89,9 +89,8 @@ class Test(models.Model):
         null=True
     )  # Thời gian bình luận được tạo
 
-
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 # class UserTestResult(models.Model):

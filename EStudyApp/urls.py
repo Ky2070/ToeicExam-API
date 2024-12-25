@@ -1,11 +1,13 @@
 from django.urls import path
-from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
+from EStudyApp.views import DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, \
+    TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
     TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
-    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView
+    CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
+    StudentStatisticsAPIView, SystemStatisticsAPIView
 
 urlpatterns = [
     # Tag for Test-list
@@ -66,4 +68,9 @@ urlpatterns = [
     path('delete/comments/<int:pk>/', TestCommentView.as_view(), name='comment-delete'),
 
     # path('courses/', CourseListView.as_view(), name='course-list'),
+
+
+    path('statistics/', StudentStatisticsAPIView.as_view(), name='student-statistics'),
+
+    path('system/statistics/', SystemStatisticsAPIView.as_view(), name='system-statistics'),
 ]
