@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from EStudyApp.models import Question, QuestionSet
 
+
 class Command(BaseCommand):
     help = 'add from_ques and to_ques to question_set'
 
@@ -16,9 +17,9 @@ class Command(BaseCommand):
                     f'Successfully updated {question_set_obj.id} question_set'
                 )
             )
-            
+
         self.stdout.write(
             self.style.SUCCESS(
                 f'Successfully updated {question_sets.count()} question_sets'
             )
-        ) 
+        )

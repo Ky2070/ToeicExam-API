@@ -244,3 +244,10 @@ class TestByTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = ['id', 'name', 'description', 'duration', 'question_count', 'part_count', 'tag']
+
+
+class StudentStatisticsSerializer(serializers.Serializer):
+    avg_score = serializers.FloatField()
+    max_score = serializers.FloatField()
+    min_score = serializers.FloatField()
+    total_tests = serializers.IntegerField()

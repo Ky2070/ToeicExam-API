@@ -565,6 +565,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
     difficulty_icon.short_description = "Mức độ"
     list_display = (
+        'id',
         'test',
         'question_set',
         'short_question_type',  # Hiển thị loại câu hỏi
@@ -689,7 +690,8 @@ class QuestionAdmin(admin.ModelAdmin):
         for obj in queryset:
             writer.writerow(
                 [obj.id, obj.test, obj.question_set, obj.question_type.name if obj.question_type else '',
-                 obj.part.part_description if obj.part else '', obj.question_number, obj.question_text, obj.difficulty_level,
+                 obj.part.part_description if obj.part else '', obj.question_number, obj.question_text,
+                 obj.difficulty_level,
                  obj.deleted_at])
         return response
 
