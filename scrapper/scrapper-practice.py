@@ -92,8 +92,10 @@
 # finally:
 #     # Đóng driver
 #     driver.close()
-
+import json
 import os
+
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -214,10 +216,14 @@ try:
             username_field = driver.find_element(By.ID, 'email')
             password_field = driver.find_element(By.ID, 'pass')
 
-            # Đọc thông tin đăng nhập từ file TXT
-            with open('login.txt', 'r') as file:
-                username = file.readline().strip()  # Đọc email
-                password = file.readline().strip()  # Đọc mật khẩu
+            # Tải các biến môi trường từ file .env
+            load_dotenv('C:/Users/nguye/PycharmProjects/EnglishTest/scrapper/.env')
+
+            # Đọc thông tin đăng nhập từ biến môi trường
+            username = os.getenv('GMAIL')
+            print(username)
+            password = os.getenv('PASSWORD')
+            print(password)
 
             # Sử dụng các giá trị đã đọc để nhập vào các trường username và password
             username_field.send_keys(username)
@@ -249,24 +255,28 @@ try:
             print("Lỗi: Không tìm thấy trang đăng nhập Facebook hoặc các phần tử cần thiết. Bỏ qua.")
             continue
 
+        # Đường dẫn tới file JSON
+        DATA_FILE = "data.json"
+
 
         def load_existing_urls(file_path):
-            """Đọc và trả về danh sách URL từ file."""
+            """Tải dữ liệu từ file JSON."""
             if os.path.exists(file_path):
                 with open(file_path, 'r') as file:
-                    return set(file.read().splitlines())  # Sử dụng set để tránh trùng lặp
-            return set()
+                    return json.load(file)
+            return {"audio": [], "images": []}
 
 
-        def save_url_if_not_exists(file_path, url):
-            """Lưu URL vào file nếu nó chưa tồn tại."""
-            existing_urls = load_existing_urls(file_path)
-            if url not in existing_urls:
-                with open(file_path, 'a') as file:
-                    file.write(f"{url}\n")
-                print(f"Đã lưu URL {url} vào file '{file_path}'.")
+        def save_url_if_not_exists(file_path, url, key):
+            """Lưu URL vào danh mục (audio hoặc images) nếu chưa tồn tại."""
+            data = load_existing_urls(file_path)
+            if url not in data[key]:
+                data[key].append(url)
+                with open(file_path, 'w') as file:
+                    json.dump(data, file, indent=4)
+                print(f"Đã lưu URL {url} vào danh mục '{key}'.")
             else:
-                print(f"URL {url} đã tồn tại trong file '{file_path}'.")
+                print(f"URL {url} đã tồn tại trong danh mục '{key}'.")
 
 
         try:
@@ -281,7 +291,7 @@ try:
                     source_element = audio_element.find_element(By.TAG_NAME, 'source')
                     audio_url = source_element.get_attribute('src')
                     print(f"URL của audio: {audio_url}")
-                    save_url_if_not_exists('audio_urls.txt', audio_url)
+                    save_url_if_not_exists(DATA_FILE, audio_url, "audio")
                 except Exception as e:
                     print(f"Lỗi khi lấy URL audio từ phần tử audio: {e}")
 
@@ -295,7 +305,7 @@ try:
                 try:
                     img_url = img_element.get_attribute('src')
                     print(f"URL của ảnh: {img_url}")
-                    save_url_if_not_exists('image_urls.txt', img_url)
+                    save_url_if_not_exists(DATA_FILE, img_url, "images")
                 except Exception as e:
                     print(f"Lỗi khi lấy URL ảnh từ phần tử img: {e}")
 
