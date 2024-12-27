@@ -248,6 +248,27 @@ try:
         except TimeoutException:
             print("Lỗi: Không tìm thấy trang đăng nhập Facebook hoặc các phần tử cần thiết. Bỏ qua.")
             continue
+
+
+        def load_existing_urls(file_path):
+            """Đọc và trả về danh sách URL từ file."""
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    return set(file.read().splitlines())  # Sử dụng set để tránh trùng lặp
+            return set()
+
+
+        def save_url_if_not_exists(file_path, url):
+            """Lưu URL vào file nếu nó chưa tồn tại."""
+            existing_urls = load_existing_urls(file_path)
+            if url not in existing_urls:
+                with open(file_path, 'a') as file:
+                    file.write(f"{url}\n")
+                print(f"Đã lưu URL {url} vào file '{file_path}'.")
+            else:
+                print(f"URL {url} đã tồn tại trong file '{file_path}'.")
+
+
         try:
             # Đợi tất cả các phần tử audio xuất hiện
             audio_elements = WebDriverWait(driver, 20).until(
@@ -257,15 +278,10 @@ try:
             # Lặp qua tất cả các phần tử audio để lấy URL của mỗi nguồn âm thanh
             for audio_element in audio_elements:
                 try:
-                    # Lấy nguồn âm thanh từ thẻ <source> trong mỗi thẻ <audio>
                     source_element = audio_element.find_element(By.TAG_NAME, 'source')
                     audio_url = source_element.get_attribute('src')
                     print(f"URL của audio: {audio_url}")
-
-                    # Lưu URL vào file txt
-                    with open('audio_urls.txt', 'a') as file:
-                        file.write(f"{audio_url}\n")
-                        print(f"Đã lưu URL {audio_url} vào file 'audio_urls.txt'.")
+                    save_url_if_not_exists('audio_urls.txt', audio_url)
                 except Exception as e:
                     print(f"Lỗi khi lấy URL audio từ phần tử audio: {e}")
 
@@ -277,29 +293,26 @@ try:
             # Lặp qua tất cả các phần tử img để lấy URL của mỗi ảnh
             for img_element in img_elements:
                 try:
-                    # Lấy URL của ảnh từ thuộc tính src của thẻ <img>
                     img_url = img_element.get_attribute('src')
                     print(f"URL của ảnh: {img_url}")
-
-                    # Lưu URL vào file txt
-                    with open('image_urls.txt', 'a') as file:
-                        file.write(f"{img_url}\n")
-                        print(f"Đã lưu URL {img_url} vào file 'image_urls.txt'.")
+                    save_url_if_not_exists('image_urls.txt', img_url)
                 except Exception as e:
                     print(f"Lỗi khi lấy URL ảnh từ phần tử img: {e}")
 
         except TimeoutException:
             print("Lỗi: Không tìm thấy phần tử audio hoặc img trên trang này.")
 
-        driver.back()
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, 'testitem-wrapper')))
+        driver.get('https://study4.com/tests/toeic/')
+        try:
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'testitem-wrapper'))
+            )
+            print("Đã trở về trang chủ thành công.")
+        except TimeoutException:
+            print("Lỗi: Không thể quay về trang chủ.")
 except Exception as e:
     print(f"Đã xảy ra lỗi không mong muốn: {e}")
 finally:
     # Đóng driver
     driver.close()
-
-
-
-
-
+    print("Đã đóng driver thành công.")
