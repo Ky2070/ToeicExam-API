@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -62,8 +62,9 @@ def create_blog(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def blog_list(request):
-    blogs = Blog.objects.all().order_by('-created_at')
+    blogs = Blog.objects.filter(is_published=True, deleted_at=None).order_by('-created_at')
     serializer = BlogSerializer(blogs, many=True).data
     return Response(serializer, status=status.HTTP_200_OK)
 

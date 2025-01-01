@@ -4,6 +4,7 @@ from Authentication.models import User
 from ckeditor.fields import RichTextField
 from course.models.base import BaseModel
 
+
 class Lesson(BaseModel):
     objects = None
     course = models.ForeignKey(Course,
@@ -29,6 +30,12 @@ class Lesson(BaseModel):
 
 class ReviewLesson(BaseModel):
     objects = None
+    parent = models.ForeignKey('self',
+                               related_name='replies',
+                               on_delete=models.CASCADE,
+                               blank=True,
+                               null=True
+                               )
     user = models.ForeignKey(
         User,
         related_name='reviewlesson_user',

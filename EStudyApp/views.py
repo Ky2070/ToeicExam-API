@@ -287,6 +287,8 @@ class FixedTestPagination(PageNumberPagination):
 
 
 class TestListView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     """
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
