@@ -48,8 +48,6 @@ staticfiles/
 .env
 
 # Ignore Django migrations
-**/migrations/*
-!**/migrations/__init__.py
 
 # Pytest
 .pytest_cache/
@@ -86,8 +84,6 @@ venv.bak/
 venv.bak2/
 .venv/
 
-migrations/
 __pycache__/
-__init__.py
 
 

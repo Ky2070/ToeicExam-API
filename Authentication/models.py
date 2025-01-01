@@ -36,7 +36,8 @@ class User(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
         ('user', 'User'),
-        ('teacher', 'Teacher')
+        ('teacher', 'Teacher'),
+        ('student', 'Student')
     )
     role = models.CharField(max_length=20, choices=ROLES, default='user')
     text = models.TextField(blank=True, null=True)
@@ -45,4 +46,14 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.email
+        email_str = str(self.email)  # Ép kiểu email về chuỗi nếu cần
+        return email_str.split('@')[0]  # Chỉ hiển thị phần trước dấu "@"
+
+    @property
+    def is_teacher(self):
+        return self.role == 'teacher'
+
+    @property
+    def is_student(self):
+        return self.role == 'student'
+
