@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+from django.db.models import Avg, Max, Min, Count
 import random
 from Authentication.permissions import IsTeacher
 from utils.standard_part import PART_STRUCTURE
@@ -16,10 +17,12 @@ from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
     HistoryTraining, Tag
-from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, TestDetailSerializer, TestSerializer, \
+from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, \
+    TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
-    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer
+    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer, \
+    StudentStatisticsSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -242,7 +245,7 @@ class TestDetailView(APIView):
             test = Test.objects.prefetch_related(
                 Prefetch(
                     'part_test',  # Phần trong bài kiểm tra
-                    queryset=Part.objects.prefetch_related(
+                    queryset=Part.objects.order_by('part_description__part_number').prefetch_related(
                         Prefetch(
                             'question_set_part',  # Bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
@@ -284,6 +287,8 @@ class FixedTestPagination(PageNumberPagination):
 
 
 class TestListView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
     """
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
@@ -335,13 +340,14 @@ class TestPartDetailView(APIView):
             test = Test.objects.prefetch_related(
                 Prefetch(
                     'part_test',
-                    queryset=Part.objects.filter(id__in=parts).prefetch_related(
+                    queryset=Part.objects.filter(id__in=parts).order_by('part_description__part_number').prefetch_related(
                         Prefetch(
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
                                     'question_question_set',  # S���p xếp câu hỏi trong bộ câu hỏi
-                                    queryset=Question.objects.order_by(
+                                    queryset=Question.objects.filter(
+                                        part_id__in=parts).order_by(
                                         'question_number')
                                 )
                             )
@@ -1200,7 +1206,8 @@ class CreatePartAPIView(APIView):
         test = Test.objects.get(id=test_id)
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
-        parts = Part.objects.filter(test=test).order_by('part_description__part_number')
+        parts = Part.objects.filter(test=test).order_by(
+            'part_description__part_number')
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -1422,3 +1429,28 @@ class DeleteQuestionAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         except Question.DoesNotExist:
             return Response({'error': 'Question not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class StudentStatisticsAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Yêu cầu đăng nhập
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        stats = {
+            "avg_score": History.objects.filter(user=user).aggregate(Avg('score'))['score__avg'],
+            "max_score": History.objects.filter(user=user).aggregate(Max('score'))['score__max'],
+            "min_score": History.objects.filter(user=user).aggregate(Min('score'))['score__min'],
+            "total_tests": History.objects.filter(user=user, complete=True).count(),
+        }
+        serializer = StudentStatisticsSerializer(stats)
+        return Response(serializer.data)
+
+
+class SystemStatisticsAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        stats = {
+            "total_tests": Test.objects.count(),
+            "total_completed_tests": History.objects.filter(complete=True).count(),
+            "avg_score": History.objects.aggregate(Avg('score'))['score__avg'],
+        }
+        return Response(stats)

@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,6 +6,12 @@ from course.models.blog import Blog
 from EStudyApp.models import Question, QuestionSet
 from course.serializer.blog import BlogSerializer
 from django.db.models import Prefetch
+from django.core.exceptions import ValidationError
+from rest_framework.views import APIView
+
+from course.services.blog import BlogService
+from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDeleteAPIView
+from Authentication.permissions import IsTeacher
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -56,8 +62,9 @@ def create_blog(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def blog_list(request):
-    blogs = Blog.objects.all().order_by('-created_at')
+    blogs = Blog.objects.filter(is_published=True, deleted_at=None).order_by('-created_at')
     serializer = BlogSerializer(blogs, many=True).data
     return Response(serializer, status=status.HTTP_200_OK)
 
@@ -121,3 +128,44 @@ def edit_blog(request, id):
     new_blog = Blog.objects.get(id=id)
     serializer = BlogSerializer(new_blog).data
     return Response(serializer, status=status.HTTP_200_OK)
+
+
+# panel blog list
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def panel_blog_list(request):
+    """
+    Get list of blogs with filters and pagination
+    
+    Query Parameters:
+        - is_published: Filter by publish status (true/false)
+        - isPublished: Alias for is_published
+        - page: Page number
+        - per_page: Items per page
+        - order_by: Sort blogs by field
+            - 'is_published': Sort by publish status ascending
+            - '-is_published': Sort by publish status descending
+    """
+    blog_service = BlogService()
+    blogs = blog_service.get_blog_list(filters=request.query_params)
+    return Response(blogs, status=status.HTTP_200_OK)
+
+# panel blog detail
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def panel_blog_detail(request, id):
+    blog_service = BlogService()
+    blog = blog_service.get_blog_detail(id)
+    return Response(blog, status=status.HTTP_200_OK)
+
+class BlogCreateView(BaseCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    service_class = BlogService
+
+class BlogUpdateView(BaseUpdateAPIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+    service_class = BlogService
+
+class BlogDeleteView(BaseDeleteAPIView):
+    permission_classes = [IsAuthenticated, IsTeacher]
+    service_class = BlogService

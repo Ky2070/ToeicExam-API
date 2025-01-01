@@ -3,10 +3,10 @@ from django.utils import timezone
 from Authentication.models import User
 from ckeditor.fields import RichTextField
 from django.contrib.postgres.fields import ArrayField
-
+from course.models.base import BaseModel
 
 # Create your models here.
-class Course(models.Model):
+class Course(BaseModel):
     objects = None
     user = models.ForeignKey(User,
                              related_name='course_user',
@@ -58,8 +58,6 @@ class Course(models.Model):
     )
 
     duration = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.title
