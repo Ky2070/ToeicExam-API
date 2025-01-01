@@ -3,11 +3,12 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 
 from Authentication.models import User  # type: ignore
+from EStudyApp.base_model import BaseModel
 
 
 # Create your models here.
 
-class Tag(models.Model):
+class Tag(BaseModel):
     DoesNotExist = None
     objects = None
     name = models.CharField(
@@ -25,7 +26,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Test(models.Model):
+class Test(BaseModel):
     DoesNotExist = None
     objects = None
     TYPE_TEST_CHOICES = [
@@ -80,18 +81,8 @@ class Test(models.Model):
                             )
     publish = models.BooleanField(default=False)
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        null=True
-    )  # Thời gian bình luận được cập nhật
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        null=True
-    )  # Thời gian bình luận được tạo
-
-
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 # class UserTestResult(models.Model):
@@ -105,7 +96,7 @@ def __str__(self):
 #     time_taken = models.TimeField()
 
 
-class QuestionType(models.Model):
+class QuestionType(BaseModel):
     objects = None
     name = models.CharField(
         max_length=100,
@@ -157,7 +148,7 @@ class QuestionType(models.Model):
 #     def __str__(self):
 #         return self.part_name
 
-class PartDescription(models.Model):
+class PartDescription(BaseModel):
     part_name = models.CharField(max_length=10)
     part_description = models.TextField(null=True, blank=True)
     part_number = models.IntegerField(null=True, blank=True)
@@ -249,7 +240,7 @@ class QuestionSet(models.Model):
         return "No Page Content"
 
 
-class Question(models.Model):
+class Question(BaseModel):
     DoesNotExist = None
     objects = None
     test = models.ForeignKey(Test,
@@ -307,9 +298,6 @@ class Question(models.Model):
         blank=True
     )
     answers = models.JSONField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def soft_delete(self):
         """Soft delete: cập nhật ngày xóa thay vì xóa hẳn trong DB"""
@@ -328,7 +316,7 @@ class Question(models.Model):
         return self.part.id
 
 
-class PartQuestionSet(models.Model):
+class PartQuestionSet(BaseModel):
     part = models.ForeignKey(
         Part, related_name='partquestionset_part', on_delete=models.CASCADE, null=True)
     question_set = models.ForeignKey(
@@ -338,7 +326,7 @@ class PartQuestionSet(models.Model):
         return f"{self.part} - {self.question_set}"
 
 
-class History(models.Model):
+class History(BaseModel):
     objects = None
     user = models.ForeignKey(
         User, related_name='history_user', on_delete=models.CASCADE, null=True)
@@ -369,7 +357,7 @@ class History(models.Model):
         return round(delta.total_seconds())
 
 
-class HistoryTraining(models.Model):
+class HistoryTraining(BaseModel):
     user = models.ForeignKey(
         User, related_name='training_user', on_delete=models.CASCADE, null=True)
     test = models.ForeignKey(
@@ -398,7 +386,7 @@ class HistoryTraining(models.Model):
         return round(delta.total_seconds())
 
 
-class TestComment(models.Model):
+class TestComment(BaseModel):
     user = models.ForeignKey(
         User,
         related_name='testcomment_user',
@@ -434,7 +422,7 @@ class TestComment(models.Model):
         return self.replies.all()
 
 
-class Flashcard(models.Model):
+class Flashcard(BaseModel):
     user = models.ForeignKey(User,
                              related_name='flashcard_user',
                              on_delete=models.CASCADE,
@@ -458,7 +446,7 @@ class Flashcard(models.Model):
     example = models.TextField()
 
 
-class State(models.Model):
+class State(BaseModel):
     user = models.ForeignKey(User,
                              related_name='state_user',
                              on_delete=models.CASCADE,
@@ -486,5 +474,3 @@ class State(models.Model):
     used = models.BooleanField(
         default=False
     )
-    created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
