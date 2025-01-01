@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from course.services.blog import BlogService
 from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDeleteAPIView
+from Authentication.permissions import IsTeacher
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -161,9 +162,9 @@ class BlogCreateView(BaseCreateAPIView):
     service_class = BlogService
 
 class BlogUpdateView(BaseUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacher]
     service_class = BlogService
 
 class BlogDeleteView(BaseDeleteAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacher]
     service_class = BlogService

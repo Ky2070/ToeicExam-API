@@ -45,18 +45,23 @@ class BaseCreateAPIView(BaseAPIView):
             return self.handle_exception(e)
 
 class BaseUpdateAPIView(BaseAPIView):
-    def post(self, request, id):
-        return self.update(request, id)
+    def post(self, request, **kwargs):
+        return self.update(request, **kwargs)
         
-    def put(self, request, id):
-        return self.update(request, id)
+    def put(self, request, **kwargs):
+        return self.update(request, **kwargs)
     
-    def update(self, request, id):
+    def update(self, request, **kwargs):
         service = self.get_service()
         
         try:
+            # Get ID from kwargs, supporting both 'id' and custom field names
+            id_value = kwargs.get('id') or kwargs.get('blog_id')
+            if not id_value:
+                raise ValidationError("ID not provided")
+                
             data = service.update(
-                id=id,
+                id=id_value,
                 data=request.data,
                 author=request.user
             )
@@ -71,19 +76,21 @@ class BaseUpdateAPIView(BaseAPIView):
             return self.handle_exception(e)
 
 class BaseDeleteAPIView(BaseAPIView):
-    def delete(self, request, id):
+    def delete(self, request, **kwargs):
         service = self.get_service()
         
         try:
-            service.delete(
-                id=id,
+            # Get ID from kwargs, supporting both 'id' and custom field names
+            id_value = kwargs.get('id') or kwargs.get('blog_id')
+            if not id_value:
+                raise ValidationError("ID not provided")
+                
+            response = service.delete(
+                id=id_value,
                 author=request.user
             )
             
-            return Response({
-                'status': 'success',
-                'message': 'Deleted successfully'
-            })
+            return Response(response, status=status.HTTP_200_OK)
             
         except Exception as e:
             return self.handle_exception(e) 

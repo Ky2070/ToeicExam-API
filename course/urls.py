@@ -32,7 +32,7 @@ urlpatterns = [
     # Panel
     path('panel/blogs/', panel_blog_list, name='panel_blog_list'),
     path('panel/blogs/create/', BlogCreateView.as_view(), name='panel_blog_create'),
-    path('panel/blogs/<int:blog_id>/update/', BlogUpdateView.as_view(), name='panel_blog_update'),
-    path('panel/blogs/<int:blog_id>/delete/', BlogDeleteView.as_view(), name='panel_blog_delete'),
+    path('panel/blogs/<int:id>/update/', BlogUpdateView.as_view(), name='panel_blog_update'),
+    path('panel/blogs/<int:id>/delete/', BlogDeleteView.as_view(), name='panel_blog_delete'),
     path('panel/blogs/<int:id>/', panel_blog_detail, name='panel_blog_detail'),
 ]

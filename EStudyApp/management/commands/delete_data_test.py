@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         try:
             test = Test.objects.get(id=test_id)
-            print(test)
+            # print(test)
         except Test.DoesNotExist:
             self.stdout.write(self.style.ERROR(f'Test with ID {test_id} not found'))
             return

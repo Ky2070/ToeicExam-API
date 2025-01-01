@@ -99,7 +99,7 @@ class BlogService:
                 if isinstance(is_published, str):
                     is_published = is_published.lower() == 'true'
                 # Debug log
-                print(f"Service is_published value: {is_published}, type: {type(is_published)}")
+                # print(f"Service is_published value: {is_published}, type: {type(is_published)}")
                 query_params['is_published'] = is_published
 
         # Create query object
@@ -208,23 +208,23 @@ class BlogService:
                 questions_set.delete()
             raise ValidationError(f'Failed to create blog: {str(e)}')
 
-    def update_blog(self, blog_id: int, data: Dict[str, Any], author: Any) -> Dict[str, Any]:
+    def update_blog(self, id: int, data: Dict[str, Any], author: Any) -> Dict[str, Any]:
         """
         Update an existing blog and its question set
         
         Args:
-            blog_id: ID of blog to update
+            id: ID of blog to update
             data: Dictionary containing updated blog and question set data
             author: User object who is updating the blog
         """
         try:
             # Get existing blog
-            blog_data = self.blog_repository.get_one(BlogQuery(id=blog_id))
+            blog_data = self.blog_repository.get_one(BlogQuery(id=id))
             if not blog_data:
                 raise ValidationError('Blog not found')
 
-            # Check ownership
-            if blog_data['author']['id'] != author.id:
+            # Check ownership unless user is teacher
+            if not author.is_teacher and blog_data['author']['id'] != author.id:
                 raise ValidationError("You don't have permission to edit this blog")
 
             # Prepare update data
@@ -311,7 +311,7 @@ class BlogService:
                 update_data['questions_set'] = questions_set
 
             # Update blog using repository
-            affected_rows, updated_blog = self.blog_repository.update(blog_id, update_data)
+            affected_rows, updated_blog = self.blog_repository.update(id, update_data)
             
             if affected_rows == 0:
                 raise ValidationError('Failed to update blog')
@@ -321,37 +321,31 @@ class BlogService:
         except Exception as e:
             raise ValidationError(f'Failed to update blog: {str(e)}')
 
-    def delete_blog(self, blog_id: int, author: Any) -> bool:
+    def delete_blog(self, id: int, author: Any) -> bool:
         """
-        Delete a blog (soft delete)
+        Delete a blog
         
         Args:
-            blog_id: ID of blog to delete
+            id: ID of blog to delete
             author: User object who is deleting the blog
-            
-        Returns:
-            True if deleted successfully
-            
-        Raises:
-            ValidationError: If blog not found or user doesn't have permission
         """
         try:
             # Get existing blog
-            blog_data = self.blog_repository.get_one(BlogQuery(id=blog_id))
+            blog_data = self.blog_repository.get_one(BlogQuery(id=id))
             if not blog_data:
                 raise ValidationError('Blog not found')
 
-            # Check ownership
-            if blog_data['author']['id'] != author.id:
+            # Check ownership unless user is teacher
+            if not author.is_teacher and blog_data['author']['id'] != author.id:
                 raise ValidationError("You don't have permission to delete this blog")
 
             # Delete blog using repository
-            affected_rows = self.blog_repository.delete(blog_id)
+            affected_rows = self.blog_repository.delete(id)
             
             if affected_rows == 0:
                 raise ValidationError('Failed to delete blog')
             
-            return True
+            return blog_data
 
         except Exception as e:
             raise ValidationError(f'Failed to delete blog: {str(e)}')
@@ -362,8 +356,8 @@ class BlogService:
 
     def update(self, id: int, data: Dict[str, Any], author: Any) -> Dict[str, Any]:
         """Alias for update_blog to match base interface"""
-        return self.update_blog(blog_id=id, data=data, author=author)
+        return self.update_blog(id, data, author)
 
     def delete(self, id: int, author: Any) -> bool:
         """Alias for delete_blog to match base interface"""
-        return self.delete_blog(blog_id=id, author=author)
+        return self.delete_blog(id, author)
