@@ -42,7 +42,7 @@ urlpatterns = [
     path('parts/delete/<int:id>/', DeletePartAPIView.as_view(), name='part-delete'),  # API xóa phần (DELETE)
     path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='part-api'),  # GET theo ID
     
-    path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='edit-questions'),  # GET theo ID
+    # path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='edit-questions'),  # GET theo ID
 
     # Question API
 

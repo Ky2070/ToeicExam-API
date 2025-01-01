@@ -24,6 +24,8 @@ from course.views.api.comment import (
     reply_to_comment,
     manage_comment
 )
+from course.views.api.rating import rate_course
+from course.views.api.like import toggle_like_blog, get_blog_likes, check_user_like
 
 urlpatterns = [
     path('create-course/', create_course, name='create-course'),
@@ -57,4 +59,12 @@ urlpatterns = [
     path('blogs/<int:blog_id>/comments/create/', create_comment, name='create-comment'),
     path('comments/<int:comment_id>/reply/', reply_to_comment, name='reply-to-comment'),
     path('comments/<int:comment_id>/', manage_comment, name='manage-comment'),
+    
+    # Rating
+    path('rate/course/<int:course_id>/', rate_course, name='rate-course'),
+
+    # Blog Likes
+    path('blogs/<int:blog_id>/toggle-like/', toggle_like_blog, name='toggle-blog-like'),
+    path('blogs/<int:blog_id>/likes/', get_blog_likes, name='blog-likes'),
+    path('blogs/<int:blog_id>/check-like/', check_user_like, name='check-blog-like'),
 ]
