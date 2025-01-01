@@ -245,7 +245,7 @@ class TestDetailView(APIView):
             test = Test.objects.prefetch_related(
                 Prefetch(
                     'part_test',  # Phần trong bài kiểm tra
-                    queryset=Part.objects.prefetch_related(
+                    queryset=Part.objects.order_by('part_description__part_number').prefetch_related(
                         Prefetch(
                             'question_set_part',  # Bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
@@ -340,7 +340,7 @@ class TestPartDetailView(APIView):
             test = Test.objects.prefetch_related(
                 Prefetch(
                     'part_test',
-                    queryset=Part.objects.filter(id__in=parts).prefetch_related(
+                    queryset=Part.objects.filter(id__in=parts).order_by('part_description__part_number').prefetch_related(
                         Prefetch(
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
@@ -1205,7 +1205,8 @@ class CreatePartAPIView(APIView):
         test = Test.objects.get(id=test_id)
         if not test:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
-        parts = Part.objects.filter(test=test).order_by('part_description__part_number')
+        parts = Part.objects.filter(test=test).order_by(
+            'part_description__part_number')
         serializer = PartListSerializer(parts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

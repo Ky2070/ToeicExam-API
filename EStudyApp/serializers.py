@@ -68,7 +68,7 @@ class QuestionDetailSerializer(serializers.ModelSerializer):
                   'question_type',
                   'part_id',
                   'created_at',
-                  'update_at',
+                  'updated_at',
                   'deleted_at',
                   ]
 
