@@ -26,7 +26,7 @@ try:
     test_items = driver.find_elements(By.CLASS_NAME, 'testitem-wrapper')
 
     # Lặp qua các phần tử và xử lý từng bài thi
-    for index, test_item in enumerate(test_items, start=1):
+    for index, test_item in enumerate(test_items, start=2):
         a_tag = test_item.find_element(By.TAG_NAME, 'a')
         link = a_tag.get_attribute('href')
         print(f"{index}. {link}")
@@ -68,7 +68,7 @@ try:
                 print("Đã chọn đủ 7 checkbox. Tiếp tục cuộn để tìm nút Submit.")
             else:
                 # Cuộn thêm
-                driver.execute_script("window.scrollBy(0, window.innerHeight / 0.01);")
+                driver.execute_script("window.scrollBy(0, window.innerHeight / 0.05);")
                 WebDriverWait(driver, 15).until(
                     lambda d: d.execute_script("return document.readyState") == "complete"
                 )
@@ -79,7 +79,7 @@ try:
 
         # Cuộn đến nút Submit và gửi form luyện tập
         submit_button_found = False
-        for _ in range(10):  # Thử cuộn tối đa 10 lần
+        for _ in range(5):  # Thử cuộn tối đa 10 lần
             try:
                 # Tìm lại nút Submit sau mỗi lần cuộn
                 submit_button = WebDriverWait(driver, 15).until(
@@ -93,7 +93,7 @@ try:
                 break
             except (TimeoutException, ElementClickInterceptedException, StaleElementReferenceException) as e:
                 print(f"Lỗi khi bấm nút 'Luyện tập': {e}. Cuộn thêm.")
-                driver.execute_script("window.scrollBy(0, window.innerHeight / 0.01);")
+                driver.execute_script("window.scrollBy(0, window.innerHeight / 0.05);")
 
         if not submit_button_found:
             print("Không thể bấm nút 'Luyện tập'. Bỏ qua bài thi này.")
@@ -232,6 +232,7 @@ try:
                     # Trích xuất các câu hỏi trong phần này
                     question_wrapper = part_content.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
                     question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
+
                     for wrapper in question_elements:
                         try:
                             # Lấy số thứ tự câu hỏi
@@ -242,7 +243,7 @@ try:
                             try:
                                 question_text_element = wrapper.find_element(By.CSS_SELECTOR, '.question-text')
                                 question_text = question_text_element.text.strip()
-                            except Exception as e:
+                            except Exception:
                                 question_text = None  # Nếu không tìm thấy, gán là None
 
                             # Lấy danh sách các đáp án
@@ -251,54 +252,37 @@ try:
                                 answer_element.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip()
                                 for answer_element in answers_elements
                             ]
+                            print(part['id'])
+                            # Chỉ xử lý thêm nội dung cho Part 6 và Part 7
+                            if part['id'] in ['pills-734-tab', 'pills-735-tab']:
+                                try:
+                                    # Tìm tất cả các phần tử 'question-twocols-left'
+                                    question_twocols_left_elements = part_content.find_elements(By.CSS_SELECTOR,
+                                                                                                '.question-twocols-left')
+                                    all_paragraphs_content = []
 
-                            """Trích xuất nội dung của các thẻ <p> trong phần tử 'question-twocols-left'."""
-                            try:
-                                # Tìm tất cả các phần tử có lớp 'question-twocols-left' chỉ trong Part 6 và Part 7
-                                if part['id'] in ['pills-734-tab',
-                                                  'pills-735-tab']:  # Chỉ xử lý khi ở Part 6 và Part 7
-                                    question_twocols_left_elements = driver.find_elements(By.CSS_SELECTOR,
-                                                                                          '.question-twocols-left')
+                                    for element in question_twocols_left_elements:
+                                        try:
+                                            # Debug: In HTML của phần tử hiện tại
+                                            print("HTML hiện tại:", element.get_attribute('outerHTML'))
 
-                                    # Kiểm tra nếu tìm thấy các phần tử
-                                    if question_twocols_left_elements:
-                                        all_paragraphs_content = []
-
-                                        # Duyệt qua từng phần tử 'question-twocols-left'
-                                        for element in question_twocols_left_elements:
-                                            try:
-                                                parent_element = element.find_element(By.XPATH, './ancestor::*[@id]')
-                                                part_id = parent_element.get_attribute('content_id')
-
-                                                # Kiểm tra điều kiện cho Part 6 và Part 7
-                                                if part_id in ['partcontent-734',
-                                                               'partcontent-735']:  # Chỉ xử lý Part 6 và Part 7
-                                                    # Tìm thẻ <p> đầu tiên trong phần tử hiện tại
-                                                    paragraphs = element.find_elements(By.CSS_SELECTOR,
-                                                                                       '.context-wrapper '
-                                                                                       '.context-content p')
-                                                    # Kiểm tra xem có thẻ <p> nào không
-                                                    if paragraphs:
-                                                        for paragraph in paragraphs:
-                                                            paragraph_html = paragraph.get_attribute(
-                                                                'outerHTML').strip()
-                                                            all_paragraphs_content.append(paragraph_html)
-
-                                            except Exception as e:
-                                                print(f"Lỗi khi xử lý phần tử question-twocols-left: {e}")
-
-                                        # Gán nội dung đã tìm thấy vào biến nếu danh sách không rỗng
-                                        if all_paragraphs_content:
-                                            additional_content = all_paragraphs_content
-                            except Exception as e:
-                                print(f"Lỗi khi tìm phần tử question-twocols-left: {e}")
+                                            # paragraph = element.find_element(By.XPATH,
+                                            #                                  './/div[@class="context-content text-highlightable"]/div/p')
+                                            all_paragraphs_content.append(element.get_attribute('outerHTML').strip())
+                                        except Exception as inner_e:
+                                            print(f"Lỗi khi tìm thẻ <p>: {inner_e}")
+                                    # Nếu có nội dung thẻ <p>, lưu trữ
+                                    if all_paragraphs_content:
+                                        additional_content = all_paragraphs_content
+                                except Exception as e:
+                                    print(f"Lỗi khi xử lý 'question-twocols-left': {e}")
 
                             # Lưu thông tin câu hỏi vào JSON
                             question_data = {
                                 "question_number": question_number,
                                 "question_text": question_text,
                                 "answers": answers,
-                                "page": additional_content  # Thêm nội dung thẻ <p> nếu có
+                                "page": None  # Thêm nội dung thẻ <p> nếu có
                             }
                             save_question_data(DATA_FILE, question_data)
 
@@ -306,6 +290,7 @@ try:
                             print(f"Lỗi khi xử lý câu hỏi trong question-wrapper: {e}")
                 except Exception as e:
                     print(f"Lỗi khi xử lý phần {part['content_id']}: {e}")
+
 
         def extract_audio_urls(driver):
             """Trích xuất URL audio từ trang web."""
@@ -341,6 +326,8 @@ try:
                 extract_questions_from_parts(driver)
             except Exception as e:
                 print(f"Lỗi khi chạy script: {e}")
+
+
         run_extraction(driver)
 
         driver.get('https://study4.com/tests/toeic/')
@@ -357,4 +344,3 @@ finally:
     # Đóng driver
     driver.close()
     print("Đã đóng driver thành công.")
-

@@ -590,9 +590,9 @@ class QuestionAdmin(admin.ModelAdmin):
         'correct_answer',
         'answers',
         'created_at',
-        'update_at',
+        'updated_at',
     )
-    readonly_fields = ('created_at', 'update_at')  # Chỉ đọc thời gian tạo/cập nhật
+    readonly_fields = ('created_at', 'updated_at')  # Chỉ đọc thời gian tạo/cập nhật
 
     # 1. Hiển thị nội dung ngắn gọn của câu hỏi
     def short_question_text(self, obj):
