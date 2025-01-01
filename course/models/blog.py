@@ -35,6 +35,10 @@ class Blog(BaseModel):
                                      null=True)
     is_published = models.BooleanField(default=False)
 
+    @property
+    def likes_count(self):
+        return self.blog_likes.count()
+
 
 class CommentBlog(BaseModel):
     user = models.ForeignKey(User,

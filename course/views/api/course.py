@@ -30,7 +30,7 @@ class CourseListView(APIView):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def course_detail(request, id):
-    course = Course.objects.get(id=id)
+    course = Course.objects.prefetch_related('course_rating').get(id=id)
     serializer = CourseDetailSerializer(course).data
     return Response(serializer, status=status.HTTP_200_OK)
 
