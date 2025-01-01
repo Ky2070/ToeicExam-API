@@ -346,7 +346,8 @@ class TestPartDetailView(APIView):
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
                                     'question_question_set',  # S���p xếp câu hỏi trong bộ câu hỏi
-                                    queryset=Question.objects.order_by(
+                                    queryset=Question.objects.filter(
+                                        part_id__in=parts).order_by(
                                         'question_number')
                                 )
                             )

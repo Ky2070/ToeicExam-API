@@ -234,7 +234,7 @@ class TestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = [
-            'name', 'description', 'types'
+            'name', 'description', 'types', 'publish'
         ]
 
 
