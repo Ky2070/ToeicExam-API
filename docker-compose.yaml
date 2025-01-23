@@ -1,6 +1,8 @@
 services:
   englishapp:
     build: .
+    volumes:
+      - .:/app
     environment:
       ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_NEON: ${DATABASE_NEON}
@@ -17,3 +19,4 @@ services:
       PORT: 8000
     ports:
       - 8000:8000
+    command: gunicorn --bind 0.0.0.0:8000 EnglishApp.wsgi:application
