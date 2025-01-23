@@ -1,14 +1,20 @@
 services:
-  postgres:
-    image: postgres:16.4-alpine
-    ports:
-      - ${DATABASE_PORT}:5432
-    volumes:
-      - toeic-db:/var/lib/postgresql/data
+  englishapp:
+    build: .
     environment:
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
-
-volumes:
-  toeic-db:
+      DEBUG: True
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_NEON: ${DATABASE_NEON}
+      DATABASE_TYPE: ${DATABASE_TYPE}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
+      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS}
+      DATABASE_SSL_ENABLED: ${DATABASE_SSL_ENABLED}
+      DATABASE_REJECT_UNAUTHORIZED: ${DATABASE_REJECT_UNAUTHORIZED}
+      PORT: 8000
+    ports:
+      - 8000:8000
