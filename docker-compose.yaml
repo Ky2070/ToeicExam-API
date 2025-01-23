@@ -2,7 +2,6 @@ services:
   englishapp:
     build: .
     environment:
-      DEBUG: True
       ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_NEON: ${DATABASE_NEON}
       DATABASE_TYPE: ${DATABASE_TYPE}
