@@ -94,7 +94,9 @@ class BlogListSerializer(BaseSerializer):
             'to_ques',
             'author',
             'questions_set',
-            'is_published'
+            'is_published',
+            'deleted_at',
+            'status'
         ]
 
 class BlogDetailWithCommentsSerializer(BlogListSerializer):

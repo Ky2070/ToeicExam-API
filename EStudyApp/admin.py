@@ -720,13 +720,13 @@ class HistoryAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'test__name')
 
     # Thêm tính năng lọc theo các trường
-    list_filter = ('user',)
+    list_filter = ('user', 'test', 'created_at')
 
     # Tùy chỉnh hiển thị các trường chi tiết khi chỉnh sửa
     fields = ('user', 'test', 'score', 'start_time', 'end_time',
               'correct_answers', 'wrong_answers', 'unanswer_questions',
               'percentage_score', 'listening_score', 'reading_score',
-              'complete', 'test_result')
+              'complete', 'test_result', 'created_at')
 
     # Đảm bảo hiển thị completion_time đúng cách
     def completion_time(self, obj):
@@ -763,7 +763,7 @@ class HistoryAdmin(admin.ModelAdmin):
     list_display = (
         'user', 'test', 'formatted_score',
         'correct_answers', 'wrong_answers', 'unanswer_questions',
-        'formatted_percentage', 'complete', 'completion_time'
+        'formatted_percentage', 'complete', 'completion_time', 'created_at'
     )
 
     # Tùy chỉnh các trường không cho phép chỉnh sửa (readonly)

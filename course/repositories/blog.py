@@ -104,6 +104,17 @@ class BlogQuery:
 
         if self.is_published__in:
             query &= Q(is_published__in=self.is_published__in)
+        
+        if self.status:
+            query &= Q(status=self.status)
+            
+        if self.deleted_at:
+            query &= Q(deleted_at=self.deleted_at)
+        if self.deleted_at__isnull:
+            query &= Q(deleted_at__isnull=self.deleted_at__isnull)
+        
+        if self.order_by:
+            query &= Q(order_by=self.order_by)
 
         return query
 
@@ -124,7 +135,7 @@ class BlogRepository:
     def get_one(q: BlogQuery) -> Optional[Dict[str, Any]]:
         """Get a single blog by query and return serialized data"""
         try:
-            query = Blog.objects.filter(deleted_at__isnull=True)
+            query = Blog.objects.filter()
             
             if q.id:
                 query = query.filter(id=q.id)
@@ -141,7 +152,7 @@ class BlogRepository:
     @staticmethod
     def get_list(q: BlogQuery, p: Pagination) -> Tuple[List[Dict[str, Any]], int]:
         """Get a list of blogs with pagination and return serialized data"""
-        query = Blog.objects.filter(deleted_at__isnull=True)
+        query = Blog.objects.filter()
 
         # Build query filters
         if q.id__in:
