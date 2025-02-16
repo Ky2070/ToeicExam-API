@@ -47,7 +47,7 @@ class BlogService:
         """
         # Initialize query params
         query_params = {}
-        
+
         if filters:
             # Handle search across title and content
             if 'search' in filters:
@@ -101,6 +101,14 @@ class BlogService:
                 # Debug log
                 # print(f"Service is_published value: {is_published}, type: {type(is_published)}")
                 query_params['is_published'] = is_published
+
+            # Handle status filter
+            status = filters.get('status')
+            if status is not None:
+                query_params['status'] = status
+                
+            if 'order_by' in filters:
+                query_params['order_by'] = filters['order_by']
 
         # Create query object
         query = BlogQuery(**query_params)
@@ -243,6 +251,9 @@ class BlogService:
                 update_data['to_ques'] = data['to_ques']
             if 'is_published' in data:
                 update_data['is_published'] = data['is_published']
+                
+            if 'status' in data:
+                update_data['status'] = data['status']
 
             # Handle QuestionSet update
             if 'questions_set' in data:

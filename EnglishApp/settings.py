@@ -86,7 +86,7 @@ REST_FRAMEWORK = {
 INSTALLED_APPS = [
     # 'material',  # Thêm Material
     # 'grappelli',
-    'admin_black.apps.AdminBlackConfig',
+    # 'admin_black.apps.AdminBlackConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -34,6 +34,16 @@ class Blog(BaseModel):
                                      blank=True,
                                      null=True)
     is_published = models.BooleanField(default=False)
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('INACTIVE', 'Inactive'),
+        ('DELETED', 'Deleted')
+    ]
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default='INACTIVE'
+    )
 
     @property
     def likes_count(self):
