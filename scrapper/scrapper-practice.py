@@ -19,17 +19,25 @@ driver = webdriver.Chrome(service=service)
 
 # Mở trang web
 driver.get('https://study4.com/tests/toeic/')
+driver.maximize_window()
 print(driver.title)
 
 try:
-    # Tìm tất cả các thẻ div chứa bài thi
-    test_items = driver.find_elements(By.CLASS_NAME, 'testitem-wrapper')
+    # Tìm tất cả các bài thi
+    test_items = WebDriverWait(driver, 10).until(
+        EC.presence_of_all_elements_located((By.CLASS_NAME, 'testitem-wrapper '))
+    )
 
     # Lặp qua các phần tử và xử lý từng bài thi
-    for index, test_item in enumerate(test_items, start=2):
-        a_tag = test_item.find_element(By.TAG_NAME, 'a')
-        link = a_tag.get_attribute('href')
-        print(f"{index}. {link}")
+    for index, test_item in enumerate(test_items, start=1):
+        title = test_item.find_element(By.CSS_SELECTOR, 'testitem-title')
+        title_text = title.text.strip()
+
+        # Tìm liên kết của bài thi
+        link_element = test_item.find_element(By.CSS_SELECTOR, 'a.text-dark')
+        link = link_element.get_attribute('href')
+        # In thông tin bài thi
+        print(f"{index}. Title: {title_text}, Link: {link}")
 
         # Chuyển đến trang chi tiết bài thi
         driver.get(link)
@@ -160,7 +168,7 @@ try:
             continue
 
         # Đường dẫn tới file JSON
-        DATA_FILE = "data.json"
+        DATA_FILE = "economy-test.json"
 
 
         def load_existing_data(file_path):
@@ -207,13 +215,13 @@ try:
             """Trích xuất câu hỏi từ các phần khác nhau (Part 1 đến Part 7)."""
             additional_content = None
             parts = [
-                {'id': 'pills-729-tab', 'content_id': 'partcontent-729'},  # Part 1
-                {'id': 'pills-730-tab', 'content_id': 'partcontent-730'},  # Part 2
-                {'id': 'pills-731-tab', 'content_id': 'partcontent-731'},  # Part 3
-                {'id': 'pills-732-tab', 'content_id': 'partcontent-732'},  # Part 4
-                {'id': 'pills-733-tab', 'content_id': 'partcontent-733'},  # Part 5
-                {'id': 'pills-734-tab', 'content_id': 'partcontent-734'},  # Part 6
-                {'id': 'pills-735-tab', 'content_id': 'partcontent-735'},  # Part 7
+                {'id': 'pills-736-tab', 'content_id': 'partcontent-736'},  # Part 1
+                {'id': 'pills-737-tab', 'content_id': 'partcontent-737'},  # Part 2
+                {'id': 'pills-738-tab', 'content_id': 'partcontent-738'},  # Part 3
+                {'id': 'pills-739-tab', 'content_id': 'partcontent-739'},  # Part 4
+                {'id': 'pills-740-tab', 'content_id': 'partcontent-740'},  # Part 5
+                {'id': 'pills-741-tab', 'content_id': 'partcontent-741'},  # Part 6
+                {'id': 'pills-742-tab', 'content_id': 'partcontent-742'},  # Part 7
             ]
             for part in parts:
                 try:
@@ -254,7 +262,7 @@ try:
                             ]
                             print(part['id'])
                             # Chỉ xử lý thêm nội dung cho Part 6 và Part 7
-                            if part['id'] in ['pills-734-tab', 'pills-735-tab']:
+                            if part['id'] in ['pills-741-tab', 'pills-742-tab']:
                                 try:
                                     # Tìm tất cả các phần tử 'question-twocols-left'
                                     question_twocols_left_elements = part_content.find_elements(By.CSS_SELECTOR,
@@ -266,9 +274,9 @@ try:
                                             # Debug: In HTML của phần tử hiện tại
                                             print("HTML hiện tại:", element.get_attribute('outerHTML'))
 
-                                            # paragraph = element.find_element(By.XPATH,
-                                            #                                  './/div[@class="context-content text-highlightable"]/div/p')
-                                            all_paragraphs_content.append(element.get_attribute('outerHTML').strip())
+                                            paragraph = element.find_element(By.XPATH,
+                                                                             './/div[@class="context-content text-highlightable"]/div/p')
+                                            all_paragraphs_content.append(element.get_attribute('p').strip())
                                         except Exception as inner_e:
                                             print(f"Lỗi khi tìm thẻ <p>: {inner_e}")
                                     # Nếu có nội dung thẻ <p>, lưu trữ

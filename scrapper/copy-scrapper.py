@@ -143,6 +143,7 @@ def extract_test_parts(driver):
             print("Tiêu đề bài kiểm tra rỗng!")
     except Exception as e:
         print(f"Lỗi khi trích xuất tiêu đề bài kiểm tra: {e}")
+
     # Hàm hỗ trợ trích xuất audio và hình ảnh từ mỗi phần
     def extract_audio_and_images_from_part(part_content):
         audio_urls = []
@@ -235,6 +236,7 @@ def extract_test_10_parts(driver):
         print(f"Test Title: {test_title}")
     except Exception as e:
         print(f"Lỗi khi trích xuất tiêu đề bài kiểm tra: {e}")
+
     # Hàm hỗ trợ trích xuất audio và hình ảnh từ mỗi phần
 
     def extract_audio_and_images_from_part(part_content):

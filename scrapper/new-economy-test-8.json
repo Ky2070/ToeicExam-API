@@ -1,0 +1,2076 @@
+{
+    "questions": [
+        {
+            "question_number": "1",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "2",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "3",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "4",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "5",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "6",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C.",
+                "D."
+            ]
+        },
+        {
+            "question_number": "7",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "8",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "9",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "10",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "11",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "12",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "13",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "14",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "15",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "16",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "17",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "18",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "19",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "20",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "21",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "22",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "23",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "24",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "25",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "26",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "27",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "28",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "29",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "30",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "31",
+            "question_text": null,
+            "answers": [
+                "A.",
+                "B.",
+                "C."
+            ]
+        },
+        {
+            "question_number": "32",
+            "question_text": "Who is the man?",
+            "answers": [
+                "A. A hotel guest",
+                "B. A janitor",
+                "C. A night manager",
+                "D. A receptionist"
+            ]
+        },
+        {
+            "question_number": "33",
+            "question_text": "Why is Mr. Carter unavailable?",
+            "answers": [
+                "A. He is meeting a client.",
+                "B. He is on vacation.",
+                "C. He has not arrived at work yet.",
+                "D. He is giving a presentation."
+            ]
+        },
+        {
+            "question_number": "34",
+            "question_text": "What will the man do next?",
+            "answers": [
+                "A. Watch training videos",
+                "B. Conduct an interview",
+                "C. Contact Mr. Carter",
+                "D. Fill out paperwork"
+            ]
+        },
+        {
+            "question_number": "35",
+            "question_text": "What are the speakers discussing?",
+            "answers": [
+                "A. Preparations for a meeting",
+                "B. A keynote speech",
+                "C. A seminar agenda",
+                "D. Meeting locations"
+            ]
+        },
+        {
+            "question_number": "36",
+            "question_text": "What does the man say that he is relieved about?",
+            "answers": [
+                "A. A product is selling well.",
+                "B. A trip was not delayed.",
+                "C. A new employee was hired.",
+                "D. A meeting room is available."
+            ]
+        },
+        {
+            "question_number": "37",
+            "question_text": "What does the woman offer to do?",
+            "answers": [
+                "A. Act as an interpreter during a meeting",
+                "B. Inform the man ahead of time",
+                "C. Call Mr. Takahashi's secretary",
+                "D. Listen to a weather report"
+            ]
+        },
+        {
+            "question_number": "38",
+            "question_text": "What does the woman ask the man about?",
+            "answers": [
+                "A. The status of a project",
+                "B. The location of a store",
+                "C. The list of clients",
+                "D. The cause of a problem"
+            ]
+        },
+        {
+            "question_number": "39",
+            "question_text": "Why was the man unable to complete his work?",
+            "answers": [
+                "A. He didn't have enough time.",
+                "B. His car wouldn't start.",
+                "C. He was busy with other projects.",
+                "D. His computer malfunctioned."
+            ]
+        },
+        {
+            "question_number": "40",
+            "question_text": "What is the woman planning to do?",
+            "answers": [
+                "A. Terminate a contract",
+                "B. Ask for a deadline extension",
+                "C. Meet with a company executive",
+                "D. Hire a new designer"
+            ]
+        },
+        {
+            "question_number": "41",
+            "question_text": "What problem does the man report?",
+            "answers": [
+                "A. Internet access has been disconnected.",
+                "B. A delivery has not arrived yet.",
+                "C. A power outage occurred.",
+                "D. Some equipment has malfunctioned."
+            ]
+        },
+        {
+            "question_number": "42",
+            "question_text": "Where most likely does the woman work?",
+            "answers": [
+                "A. At an electronics store",
+                "B. At a power company",
+                "C. At a toy factory",
+                "D. At a communications provider"
+            ]
+        },
+        {
+            "question_number": "43",
+            "question_text": "What does the woman suggest the man do?",
+            "answers": [
+                "A. Take shelter elsewhere",
+                "B. Report the incident to the police",
+                "C. Restart his computer",
+                "D. Arrive ahead of schedule"
+            ]
+        },
+        {
+            "question_number": "44",
+            "question_text": "Where does the man work?",
+            "answers": [
+                "A. At an immigration office",
+                "B. At a public school",
+                "C. At a post office",
+                "D. At a travel agency"
+            ]
+        },
+        {
+            "question_number": "45",
+            "question_text": "Why is the woman in a hurry?",
+            "answers": [
+                "A. She is late to work.",
+                "B. She forgot an important event.",
+                "C. She must meet a deadline.",
+                "D. She has another appointment."
+            ]
+        },
+        {
+            "question_number": "46",
+            "question_text": "What does the man recommend?",
+            "answers": [
+                "A. Making a phone call",
+                "B. Visiting a different business",
+                "C. Sending an e-mail",
+                "D. Canceling a subscription"
+            ]
+        },
+        {
+            "question_number": "47",
+            "question_text": "What type of business does the man work for?",
+            "answers": [
+                "A. An auto repair shop",
+                "B. An insurance company",
+                "C. An automobile dealership",
+                "D. A construction contractor"
+            ]
+        },
+        {
+            "question_number": "48",
+            "question_text": "What does the woman say is her top priority when she makes a purchase?",
+            "answers": [
+                "A. Affordability",
+                "B. Popularity",
+                "C. Design",
+                "D. Safety"
+            ]
+        },
+        {
+            "question_number": "49",
+            "question_text": "What does the man suggest doing?",
+            "answers": [
+                "A. Replacing a broken part",
+                "B. Evaluating a different model",
+                "C. Visiting a new branch",
+                "D. Paying a deposit"
+            ]
+        },
+        {
+            "question_number": "50",
+            "question_text": "What are the speakers mainly discussing?",
+            "answers": [
+                "A. High sales figures",
+                "B. A staff conflict",
+                "C. Low sales figures",
+                "D. New training manual"
+            ]
+        },
+        {
+            "question_number": "51",
+            "question_text": "What does the woman mean when she says I'm actually on my way to a meeting?",
+            "answers": [
+                "A. She doesn't have a lot of time to talk.",
+                "B. She can stay and chat for a long time.",
+                "C. She is asking the man out to lunch.",
+                "D. She will send him an e-mail later on."
+            ]
+        },
+        {
+            "question_number": "52",
+            "question_text": "What possible solution does the man suggest?",
+            "answers": [
+                "A. To employ more staff members",
+                "B. That the woman should be fired",
+                "C. They should have lunch together",
+                "D. The woman might have to fire someone"
+            ]
+        },
+        {
+            "question_number": "53",
+            "question_text": "What is the problem?",
+            "answers": [
+                "A. The person who was supposed to give the speech is sick.",
+                "B. The person who was giving the speech said they don't want to.",
+                "C. There is no keynote speech anymore.",
+                "D. The keynote speech is cancelled."
+            ]
+        },
+        {
+            "question_number": "54",
+            "question_text": "What does the woman ask the man?",
+            "answers": [
+                "A. She asks him to find someone to do the speech.",
+                "B. She says she will deliver the speech.",
+                "C. She asks him to deliver the keynote speech.",
+                "D. She says the board is not happy."
+            ]
+        },
+        {
+            "question_number": "55",
+            "question_text": "What does the man imply when he says \"Thanks, but I'll have to pass on it\"?",
+            "answers": [
+                "A. He will deliver the speech.",
+                "B. He doesn't want to deliver the speech.",
+                "C. He will talk to the board of directors.",
+                "D. He needs some more information."
+            ]
+        },
+        {
+            "question_number": "56",
+            "question_text": "Why is the man calling Tristar Logistics?",
+            "answers": [
+                "A. To reschedule a delivery",
+                "B. To cancel his order",
+                "C. To change his address",
+                "D. To update his details"
+            ]
+        },
+        {
+            "question_number": "57",
+            "question_text": "What does he imply when he says That won't work for me?",
+            "answers": [
+                "A. It contains important documents.",
+                "B. He will pay with a money order.",
+                "C. He doesn't want them to leave it with someone at the office.",
+                "D. He wants it left at the office."
+            ]
+        },
+        {
+            "question_number": "58",
+            "question_text": "What does the woman say she wants?",
+            "answers": [
+                "A. The office address",
+                "B. His cell phone number",
+                "C. The order number",
+                "D. His building number"
+            ]
+        },
+        {
+            "question_number": "59",
+            "question_text": "What are the speakers mainly discussing?",
+            "answers": [
+                "A. The delivery of some furniture",
+                "B. The signing of a rental contract",
+                "C. The drafting of a document",
+                "D. The delivery of computer equipment"
+            ]
+        },
+        {
+            "question_number": "60",
+            "question_text": "What problem do the speakers have?",
+            "answers": [
+                "A. They don't need the equipment.",
+                "B. They will miss some important deadlines.",
+                "C. They need to train their new staff.",
+                "D. They haven't found the documents."
+            ]
+        },
+        {
+            "question_number": "61",
+            "question_text": "What does the woman suggest they do?",
+            "answers": [
+                "A. Accept the late order",
+                "B. Cancel the order",
+                "C. Call another supplier",
+                "D. Rent some equipment"
+            ]
+        },
+        {
+            "question_number": "62",
+            "question_text": "Who most likely are the speakers?",
+            "answers": [
+                "A. Store clerks",
+                "B. Artists",
+                "C. Painters",
+                "D. Electricians"
+            ]
+        },
+        {
+            "question_number": "63",
+            "question_text": "Look at the graphic. Where is the man currently working?",
+            "answers": [
+                "A. Swanson and Sons",
+                "B. Harlington Accounting",
+                "C. Jersey Construction",
+                "D. Grounds LTD."
+            ]
+        },
+        {
+            "question_number": "64",
+            "question_text": "What does the woman recommend to the man?",
+            "answers": [
+                "A. To bring more paint",
+                "B. To bring one ladder",
+                "C. To bring at least three ladders",
+                "D. To paint the roof first"
+            ]
+        },
+        {
+            "question_number": "65",
+            "question_text": "What does the woman say she will do tomorrow?",
+            "answers": [
+                "A. Go out for a dinner",
+                "B. Visit her family",
+                "C. Host an award show",
+                "D. Attend an award ceremony"
+            ]
+        },
+        {
+            "question_number": "66",
+            "question_text": "Look at the graphic. What is the gown made of?",
+            "answers": [
+                "A. Cotton",
+                "B. Wool",
+                "C. Denim",
+                "D. Cypress"
+            ]
+        },
+        {
+            "question_number": "67",
+            "question_text": "What does the woman say she will do?",
+            "answers": [
+                "A. Pick it up at 9 PM",
+                "B. Send her husband to pick it up",
+                "C. Send her intern to pick it up",
+                "D. Cancel the order"
+            ]
+        },
+        {
+            "question_number": "68",
+            "question_text": "According to the woman, what is causing people to arrive late to work?",
+            "answers": [
+                "A. An electrical storm",
+                "B. A parking lot is closed",
+                "C. A protest",
+                "D. Some new traffic rules"
+            ]
+        },
+        {
+            "question_number": "69",
+            "question_text": "Look at the graphic. Where is the sign most likely located?",
+            "answers": [
+                "A. On Swinton Road",
+                "B. The Cranson Lot",
+                "C. Menzies Street",
+                "D. Prunkel Street"
+            ]
+        },
+        {
+            "question_number": "70",
+            "question_text": "What does the man suggest they do?",
+            "answers": [
+                "A. Go home",
+                "B. Buy some parking tickets",
+                "C. Have an early dinner",
+                "D. Walk to work"
+            ]
+        },
+        {
+            "question_number": "71",
+            "question_text": "Where does the announcement most likely take place?",
+            "answers": [
+                "A. On a train",
+                "B. On a bus",
+                "C. On a plane",
+                "D. On a ship"
+            ]
+        },
+        {
+            "question_number": "72",
+            "question_text": "What is the speaker waiting for?",
+            "answers": [
+                "A. An itinerary",
+                "B. Authorization to depart",
+                "C. Some passengers to board",
+                "D. A parking permit"
+            ]
+        },
+        {
+            "question_number": "73",
+            "question_text": "What does the speaker suggest listeners do?",
+            "answers": [
+                "A. Have their tickets reissued",
+                "B. Transfer to another line",
+                "C. Stay near a departure gate",
+                "D. Modify their plans"
+            ]
+        },
+        {
+            "question_number": "74",
+            "question_text": "What type of business does the speaker work for?",
+            "answers": [
+                "A. An electronics store",
+                "B. A furniture outlet",
+                "C. A clothing store",
+                "D. A theater company"
+            ]
+        },
+        {
+            "question_number": "75",
+            "question_text": "What improvement is mentioned?",
+            "answers": [
+                "A. Product selection will be increased.",
+                "B. More staff will be able to help.",
+                "C. Free parking will be offered.",
+                "D. Store hours will be extended."
+            ]
+        },
+        {
+            "question_number": "76",
+            "question_text": "When can customers receive a discount?",
+            "answers": [
+                "A. On Tuesday",
+                "B. On Wednesday",
+                "C. On Thursday",
+                "D. On Friday"
+            ]
+        },
+        {
+            "question_number": "77",
+            "question_text": "What is being advertised?",
+            "answers": [
+                "A. A security system",
+                "B. A rented house",
+                "C. A gardening tool",
+                "D. An insulating product"
+            ]
+        },
+        {
+            "question_number": "78",
+            "question_text": "What is mentioned about the product?",
+            "answers": [
+                "A. It is domestically produced.",
+                "B. It reduces the cost of living.",
+                "C. It won several awards.",
+                "D. It received positive reviews."
+            ]
+        },
+        {
+            "question_number": "79",
+            "question_text": "What must listeners do to receive a discount?",
+            "answers": [
+                "A. Buy a certain amount of products",
+                "B. Apply for a membership card",
+                "C. Talk about the advertisement",
+                "D. Make a payment in cash"
+            ]
+        },
+        {
+            "question_number": "80",
+            "question_text": "What event is ending?",
+            "answers": [
+                "A. A grand opening",
+                "B. A consumer electronics expo",
+                "C. A product demonstration",
+                "D. A museum tour"
+            ]
+        },
+        {
+            "question_number": "81",
+            "question_text": "What is required of volunteers?",
+            "answers": [
+                "A. Relevant experience",
+                "B. A degree in engineering",
+                "C. Availability to work on weekends",
+                "D. Fluency in two languages"
+            ]
+        },
+        {
+            "question_number": "82",
+            "question_text": "What are potential volunteers cautioned about?",
+            "answers": [
+                "A. Missing a deadline",
+                "B. Leaking confidential information",
+                "C. Damaging a device",
+                "D. Interrupting a presenter"
+            ]
+        },
+        {
+            "question_number": "83",
+            "question_text": "What is the company recruiting?",
+            "answers": [
+                "A. Programmer",
+                "B. Chef",
+                "C. Interns",
+                "D. Factory workers"
+            ]
+        },
+        {
+            "question_number": "84",
+            "question_text": "What does the man imply when he says, \"Have you seen the interview questions we use?\"",
+            "answers": [
+                "A. He is postponing an appointment.",
+                "B. He needs a record of the report.",
+                "C. He wants her to help him with the questions.",
+                "D. He will recruit some accountants."
+            ]
+        },
+        {
+            "question_number": "85",
+            "question_text": "Why does the man want to meet with the woman?",
+            "answers": [
+                "A. To get some assistance from her",
+                "B. To ask her for some records",
+                "C. To get a new letter head",
+                "D. To plan an orientation"
+            ]
+        },
+        {
+            "question_number": "86",
+            "question_text": "What is the purpose of the announcement?",
+            "answers": [
+                "A. To announce winning firm of the year",
+                "B. To announce a rise in sales",
+                "C. To announce a new team member",
+                "D. To complete a project"
+            ]
+        },
+        {
+            "question_number": "87",
+            "question_text": "What does the woman imply when she says \"So let's keep moving up!\"?",
+            "answers": [
+                "A. They need to continue working hard.",
+                "B. They are moving buildings.",
+                "C. She is renovating the office.",
+                "D. They are going on a business trip."
+            ]
+        },
+        {
+            "question_number": "88",
+            "question_text": "What does the woman ask the staff to do?",
+            "answers": [
+                "A. Study the new hand book",
+                "B. Prepare a report",
+                "C. Study the material on corporate law",
+                "D. Write a memo"
+            ]
+        },
+        {
+            "question_number": "89",
+            "question_text": "Why is the woman calling?",
+            "answers": [
+                "A. To say thank you",
+                "B. To ask a favor",
+                "C. To discuss travel plans",
+                "D. To request a form"
+            ]
+        },
+        {
+            "question_number": "90",
+            "question_text": "What does the woman imply when she says, \"you have to show me the design sometime!\"?",
+            "answers": [
+                "A. She wants to learn how to make it.",
+                "B. She wasn't sure about the details.",
+                "C. She needs a dentist recommendation.",
+                "D. She is writing a design manual."
+            ]
+        },
+        {
+            "question_number": "91",
+            "question_text": "What will the women do next week?",
+            "answers": [
+                "A. Plan for the Grayson wedding",
+                "B. Plan for the Christmas party",
+                "C. Design a new invitation",
+                "D. Meet for coffee"
+            ]
+        },
+        {
+            "question_number": "92",
+            "question_text": "What is indicated about Springdale Music Club?",
+            "answers": [
+                "A. They love all music equally.",
+                "B. They take pride in location.",
+                "C. They specialize in country music.",
+                "D. They have never carried world music before."
+            ]
+        },
+        {
+            "question_number": "93",
+            "question_text": "Look at the graphic. What can you infer about the bands?",
+            "answers": [
+                "A. They will be great.",
+                "B. They are jazz musicians.",
+                "C. The acts following Djubai Djinn play rock and roll.",
+                "D. It will be loud."
+            ]
+        },
+        {
+            "question_number": "94",
+            "question_text": "Why does Springdale Music Club ask you to bring your money?",
+            "answers": [
+                "A. The concert will be expensive.",
+                "B. There is a bar.",
+                "C. To help support Djubai Djinn's US tour",
+                "D. To pay for your meats"
+            ]
+        },
+        {
+            "question_number": "95",
+            "question_text": "Who most likely are the listeners?",
+            "answers": [
+                "A. Residents",
+                "B. Tourists",
+                "C. Park employees",
+                "D. Forest rangers"
+            ]
+        },
+        {
+            "question_number": "96",
+            "question_text": "Look at the map. What place are the listeners unable to go to?",
+            "answers": [
+                "A. Lake Kitano",
+                "B. Eastgate",
+                "C. Kilmore Cliff",
+                "D. Paradise Garden"
+            ]
+        },
+        {
+            "question_number": "97",
+            "question_text": "What does the woman mention about Kilmore Cliff?",
+            "answers": [
+                "A. It is dangerous.",
+                "B. The views are spectacular.",
+                "C. People who fear heights may not enjoy it.",
+                "D. It is 50 meters from the final destination."
+            ]
+        },
+        {
+            "question_number": "98",
+            "question_text": "Look at the graphic. Which department filled out the order form?",
+            "answers": [
+                "A. Finance",
+                "B. IT",
+                "C. Public Relations",
+                "D. Human Resources"
+            ]
+        },
+        {
+            "question_number": "99",
+            "question_text": "What does the speaker anticipate may happen?",
+            "answers": [
+                "A. Some departments may go over budget.",
+                "B. The warehouse may not have enough supplies.",
+                "C. The orders may not arrive on time.",
+                "D. The departments may forget some items."
+            ]
+        },
+        {
+            "question_number": "100",
+            "question_text": "What does the speaker request of Lima?",
+            "answers": [
+                "A. To fax over the orders",
+                "B. To file the papers",
+                "C. To arrange a meeting",
+                "D. To contact him"
+            ]
+        },
+        {
+            "question_number": "101",
+            "question_text": "Our spokesperson will explain an ------- opportunity for property investors.",
+            "answers": [
+                "A. excitedly",
+                "B. excitement",
+                "C. excited",
+                "D. exciting"
+            ]
+        },
+        {
+            "question_number": "102",
+            "question_text": "Some of the leather used in this handbag must ------- from Italy.",
+            "answers": [
+                "A. will import",
+                "B. be imported",
+                "C. to import",
+                "D. have imported"
+            ]
+        },
+        {
+            "question_number": "103",
+            "question_text": "Rockwell Bank's automated teller machines are ------- located in various sections of the city.",
+            "answers": [
+                "A. abruptly",
+                "B. conveniently",
+                "C. fluently",
+                "D. periodically"
+            ]
+        },
+        {
+            "question_number": "104",
+            "question_text": "As soon as both sides reach ------- terms, the licensing contract will be signed.",
+            "answers": [
+                "A. agreeable",
+                "B. agree",
+                "C. agreement",
+                "D. agreed"
+            ]
+        },
+        {
+            "question_number": "105",
+            "question_text": "Anyone who cannot ------- one of the safety training workshops before September 1 should inform a manager.",
+            "answers": [
+                "A. impress",
+                "B. employ",
+                "C. attend",
+                "D. reply"
+            ]
+        },
+        {
+            "question_number": "106",
+            "question_text": "------- for using the hotel's spa and dining services have appeared on the final invoice.",
+            "answers": [
+                "A. Charge",
+                "B. Charges",
+                "C. Charging",
+                "D. Charged"
+            ]
+        },
+        {
+            "question_number": "107",
+            "question_text": "Members of the security team have been instructed to report ------- unattended bag to the local police department.",
+            "answers": [
+                "A. any",
+                "B. much",
+                "C. most",
+                "D. all"
+            ]
+        },
+        {
+            "question_number": "108",
+            "question_text": "The head chef has the restaurant manager ------- the order for the ingredients every evening.",
+            "answers": [
+                "A. authoritative",
+                "B. authority",
+                "C. authorities",
+                "D. authorize"
+            ]
+        },
+        {
+            "question_number": "109",
+            "question_text": "The automotive company------- pursued technologies that would improve the efficiency of its engines.",
+            "answers": [
+                "A. aggressive",
+                "B. aggressiveness",
+                "C. aggressively",
+                "D. aggression"
+            ]
+        },
+        {
+            "question_number": "110",
+            "question_text": "On the first day of the painting course, students should provide the teacher with proof of -------.",
+            "answers": [
+                "A. registration",
+                "B. proposal",
+                "C. accumulation",
+                "D. copyright"
+            ]
+        },
+        {
+            "question_number": "111",
+            "question_text": "The furniture in this apartment is not ------- but belongs to the landlord and must be returned at the end of the lease.",
+            "answers": [
+                "A. ours",
+                "B. we",
+                "C. our",
+                "D. us"
+            ]
+        },
+        {
+            "question_number": "112",
+            "question_text": "The driver------- Mr. Dwight is expected to arrive at the conference venue 20 minutes prior to the ending time.",
+            "answers": [
+                "A. unti",
+                "B. in",
+                "C. for",
+                "D. among"
+            ]
+        },
+        {
+            "question_number": "113",
+            "question_text": "Three of the new chemists, who ------- developed the material, will be recognized by the CEO at Saturday's ceremony.",
+            "answers": [
+                "A. collaborating",
+                "B. collaborate",
+                "C. collaboratively",
+                "D. collaborative"
+            ]
+        },
+        {
+            "question_number": "114",
+            "question_text": "The goal of the program is to make health services readily available to those in both rural and urban -------.",
+            "answers": [
+                "A. purposes",
+                "B. settings",
+                "C. monuments",
+                "D. standards"
+            ]
+        },
+        {
+            "question_number": "115",
+            "question_text": "Please send a check in the amount of £550 ------- the document that needs to be checked by our agency.",
+            "answers": [
+                "A. despite",
+                "B. while",
+                "C. with",
+                "D. through"
+            ]
+        },
+        {
+            "question_number": "116",
+            "question_text": "Using a fingerprint system is generally ------- as the primary means of security at laboratories in this country.",
+            "answers": [
+                "A. to accept",
+                "B. accept",
+                "C. accepting",
+                "D. accepted"
+            ]
+        },
+        {
+            "question_number": "117",
+            "question_text": "Living further from the city center will ------- your rental costs, but it affects your commute .",
+            "answers": [
+                "A. shorten",
+                "B. misplace",
+                "C. lower",
+                "D. collapse"
+            ]
+        },
+        {
+            "question_number": "118",
+            "question_text": "FryMate brand cookware can be purchased directly from the company's Web site or at a retailer------- you.",
+            "answers": [
+                "A. against",
+                "B. to",
+                "C. along",
+                "D. near"
+            ]
+        },
+        {
+            "question_number": "119",
+            "question_text": "Weekly ------- of the facility help to ensure that minor maintenance issues are discovered and resolved early.",
+            "answers": [
+                "A. investigations",
+                "B. investigated",
+                "C. investigative",
+                "D. investigates"
+            ]
+        },
+        {
+            "question_number": "120",
+            "question_text": "Patients should call the emergency line immediately if they experience ------- changes in temperature.",
+            "answers": [
+                "A. sudden",
+                "B. contemporary",
+                "C. ideal",
+                "D. reasonable"
+            ]
+        },
+        {
+            "question_number": "121",
+            "question_text": "Participants who are taking part in the half- day historical tour should be at the meeting point------- than 7:45 A.M .",
+            "answers": [
+                "A. as for",
+                "B. particularly",
+                "C. whenever",
+                "D. no later"
+            ]
+        },
+        {
+            "question_number": "122",
+            "question_text": "The supervisor allowed Mr. Martin to take three additional vacation days because of his ------- achievement.",
+            "answers": [
+                "A. no later",
+                "B. noteworthy",
+                "C. identical",
+                "D. satisfied"
+            ]
+        },
+        {
+            "question_number": "123",
+            "question_text": "Ms. Stevens ------- acknowledged that she was unable to complete the task in the specified time frame.",
+            "answers": [
+                "A. regretfully",
+                "B. regret",
+                "C. regrets",
+                "D. regretful"
+            ]
+        },
+        {
+            "question_number": "124",
+            "question_text": "The customer's steak was ------- undercooked, so he requested that it be sent back to the kitchen.",
+            "answers": [
+                "A. rather",
+                "B. such",
+                "C. many",
+                "D. rarely"
+            ]
+        },
+        {
+            "question_number": "125",
+            "question_text": "The contact details provided on this survey are for in-house purposes and will not be ------- to a third party.",
+            "answers": [
+                "A. suspended",
+                "B. responded",
+                "C. equipped",
+                "D. released"
+            ]
+        },
+        {
+            "question_number": "126",
+            "question_text": "Mr. Brannon can assemble the shelves for the booth ------- as long as he has a set of tools.",
+            "answers": [
+                "A. his",
+                "B. himself",
+                "C. him",
+                "D. his own"
+            ]
+        },
+        {
+            "question_number": "127",
+            "question_text": "Ms. Stevenson contacted the real estate agent ------- name and phone number appeared on the advertisement.",
+            "answers": [
+                "A. what",
+                "B. which",
+                "C. whose",
+                "D. who"
+            ]
+        },
+        {
+            "question_number": "128",
+            "question_text": "The home's sale becomes------- when the official document is recorded at the county office.",
+            "answers": [
+                "A. finally",
+                "B. finalize",
+                "C. finals",
+                "D. final"
+            ]
+        },
+        {
+            "question_number": "129",
+            "question_text": "The main activity performed at the workshop required team members to ------- with each other.",
+            "answers": [
+                "A. cooperate",
+                "B. oversee",
+                "C. shrink",
+                "D. encounter"
+            ]
+        },
+        {
+            "question_number": "130",
+            "question_text": "According to the physician, Ms. Oliver's pain ------- within two hours of taking the medication.",
+            "answers": [
+                "A. alleviated",
+                "B. will be alleviated",
+                "C. is alleviating",
+                "D. should alleviate"
+            ]
+        },
+        {
+            "question_number": "131",
+            "question_text": null,
+            "answers": [
+                "A. promotion",
+                "B. promoting",
+                "C. to promote",
+                "D. have promoted"
+            ]
+        },
+        {
+            "question_number": "132",
+            "question_text": null,
+            "answers": [
+                "A. represented",
+                "B. expressed",
+                "C. delivered",
+                "D. revealed"
+            ]
+        },
+        {
+            "question_number": "133",
+            "question_text": null,
+            "answers": [
+                "A. to",
+                "B. for",
+                "C. from",
+                "D. with"
+            ]
+        },
+        {
+            "question_number": "134",
+            "question_text": null,
+            "answers": [
+                "A. Ice creams will not be allowed on the premises.",
+                "B. You can sample items as you browse.",
+                "C. You'll have a chance to promote you r food of choice.",
+                "D. Apply for a booth now before they're all taken ."
+            ]
+        },
+        {
+            "question_number": "135",
+            "question_text": null,
+            "answers": [
+                "A. has began",
+                "B. will begin",
+                "C. beginning",
+                "D. begun"
+            ]
+        },
+        {
+            "question_number": "136",
+            "question_text": null,
+            "answers": [
+                "A. Furthermore",
+                "B. As a consequence",
+                "C. Because",
+                "D. Therefore"
+            ]
+        },
+        {
+            "question_number": "137",
+            "question_text": null,
+            "answers": [
+                "A. If it takes longer, we will notify you.",
+                "B. All business will be suspended until the renovations end.",
+                "C. During this time, your temporary workspace will be the first floor conference room.",
+                "D. Your office space will look new and improved after the renovations."
+            ]
+        },
+        {
+            "question_number": "138",
+            "question_text": null,
+            "answers": [
+                "A. service",
+                "B. association",
+                "C. connection",
+                "D. cooperation"
+            ]
+        },
+        {
+            "question_number": "139",
+            "question_text": null,
+            "answers": [
+                "A. working",
+                "B. work",
+                "C. to work",
+                "D. worked"
+            ]
+        },
+        {
+            "question_number": "140",
+            "question_text": null,
+            "answers": [
+                "A. Government experience would also be a plus.",
+                "B. Working with children would help your resume.",
+                "C. Experience with animals is essential.",
+                "D. Working with disabled people is a bonus."
+            ]
+        },
+        {
+            "question_number": "141",
+            "question_text": null,
+            "answers": [
+                "A. perform",
+                "B. achieve",
+                "C. allow",
+                "D. transform"
+            ]
+        },
+        {
+            "question_number": "142",
+            "question_text": null,
+            "answers": [
+                "A. you",
+                "B. I",
+                "C. us",
+                "D. they"
+            ]
+        },
+        {
+            "question_number": "143",
+            "question_text": null,
+            "answers": [
+                "A. message",
+                "B. to write",
+                "C. writing",
+                "D. looking"
+            ]
+        },
+        {
+            "question_number": "144",
+            "question_text": null,
+            "answers": [
+                "A. experience",
+                "B. knowledge",
+                "C. working",
+                "D. knowing"
+            ]
+        },
+        {
+            "question_number": "145",
+            "question_text": null,
+            "answers": [
+                "A. I am a certified level 5 speaker of Spanish",
+                "B. Spanish people can be hard to work with",
+                "C. I don't know any Spanish, but I could study",
+                "D. Spanish speakers are good workers"
+            ]
+        },
+        {
+            "question_number": "146",
+            "question_text": null,
+            "answers": [
+                "A. in",
+                "B. to",
+                "C. for",
+                "D. will"
+            ]
+        },
+        {
+            "question_number": "147",
+            "question_text": "Where would the information most likely appear?",
+            "answers": [
+                "A. In an instruction manual",
+                "B. On a product receipt",
+                "C. In a promotional flyer",
+                "D. In a telephone directory"
+            ]
+        },
+        {
+            "question_number": "148",
+            "question_text": "What is mentioned as a convenient feature of the product?",
+            "answers": [
+                "A. Its simple set-up procedure",
+                "B. Its long warranty period",
+                "C. Its compatibility with other devices",
+                "D. Its detailed instructions"
+            ]
+        },
+        {
+            "question_number": "149",
+            "question_text": "What is suggested about Mr. Hewitt?",
+            "answers": [
+                "A. He is late for a lunch appointment.",
+                "B. He has accepted a new position.",
+                "C. He is in a taxi .",
+                "D. He is on his way to a presentation."
+            ]
+        },
+        {
+            "question_number": "150",
+            "question_text": "At 12:14, what does Mr. Hewitt mean when he writes, \"Exactly\"?",
+            "answers": [
+                "A. He would like to know where they're having lunch.",
+                "B. He is looking forward to meeting Anderson & Wright.",
+                "C. He is on his way back to the office.",
+                "D. That he would also like Anderson & Wright to join the project."
+            ]
+        },
+        {
+            "question_number": "151",
+            "question_text": "How would Mr. Tepper's latest book most likely be classified?",
+            "answers": [
+                "A. Romance",
+                "B. Historical fiction",
+                "C. Fantasy",
+                "D. Poetry"
+            ]
+        },
+        {
+            "question_number": "152",
+            "question_text": "Where are copies available this week?",
+            "answers": [
+                "A. At all major bookstores",
+                "B. On a Web site",
+                "C. At a literary event",
+                "D. In select public libraries"
+            ]
+        },
+        {
+            "question_number": "153",
+            "question_text": "What is the purpose of the e-mail?",
+            "answers": [
+                "A. To offer a discounted subscription rate",
+                "B. To advertise a new online shopping mall",
+                "C. To introduce a digital publication",
+                "D. To remind some subscribers to renew their subscription"
+            ]
+        },
+        {
+            "question_number": "154",
+            "question_text": "What can subscribers find in a paper edition in July?",
+            "answers": [
+                "A. A discount coupon",
+                "B. A special supplement",
+                "C. An exclusive interview",
+                "D. An access code"
+            ]
+        },
+        {
+            "question_number": "155",
+            "question_text": "What is the purpose of the article?",
+            "answers": [
+                "A. To report changes in public transportation",
+                "B. To describe the city during the holidays",
+                "C. To inform the public about traffic delays",
+                "D. To advertise new shopping centers"
+            ]
+        },
+        {
+            "question_number": "156",
+            "question_text": "What is suggested about Mr. Reiner?",
+            "answers": [
+                "A. He is happy with the mayor.",
+                "B. He may stage a protest.",
+                "C. He seems satisfied with the working conditions.",
+                "D. He would like some time off for the holidays ."
+            ]
+        },
+        {
+            "question_number": "157",
+            "question_text": "What is stated about the city during the holiday season?",
+            "answers": [
+                "A. It closes down for the holidays.",
+                "B. Many visitors come from out of town.",
+                "C. More taxi drivers lose their business.",
+                "D. The citizens travel to other cities."
+            ]
+        },
+        {
+            "question_number": "158",
+            "question_text": "In which of the positions marked [1], [2], [3] and [4] does the following sentence belong? \"Overall, the city seems prepared for the influx of tourists and holiday shoppers as Christmas draws near.\"",
+            "answers": [
+                "A. [1]",
+                "B. [2]",
+                "C. [3]",
+                "D. [4]"
+            ]
+        },
+        {
+            "question_number": "159",
+            "question_text": "What is the focus of the channel?",
+            "answers": [
+                "A. Food",
+                "B. Sports",
+                "C. Nature",
+                "D. Childen"
+            ]
+        },
+        {
+            "question_number": "160",
+            "question_text": "According to the schedule, who is a scientist?",
+            "answers": [
+                "A. Pat Russell",
+                "B. Dan Reed",
+                "C. Kerry Peterson",
+                "D. Ken Ruskin"
+            ]
+        },
+        {
+            "question_number": "161",
+            "question_text": "Which program will teach viewers about survival skills?",
+            "answers": [
+                "A. Anatomy of a Dinosaur",
+                "B. Amazing Sights of Africa",
+                "C. Blue Ocean",
+                "D. Rocky"
+            ]
+        },
+        {
+            "question_number": "162",
+            "question_text": "What is the discussion mainly about?",
+            "answers": [
+                "A. Those who can't attend a party",
+                "B. The best caterers",
+                "C. Becoming vegan",
+                "D. Ordering food for a party"
+            ]
+        },
+        {
+            "question_number": "163",
+            "question_text": "At 5:39, what does Patrick Stone mean by I'm going to take a pass this year?",
+            "answers": [
+                "A. He'll stop by for a short time.",
+                "B. He'll decline this time.",
+                "C. He can't make it.",
+                "D. He wants to get a free pass."
+            ]
+        },
+        {
+            "question_number": "164",
+            "question_text": "What is mentioned about Four-Leaf Catering?",
+            "answers": [
+                "A. It offers vegan food.",
+                "B. It has only vegan options.",
+                "C. It has catered previous office parties.",
+                "D. It specializes in special orders."
+            ]
+        },
+        {
+            "question_number": "165",
+            "question_text": "What will Eva Sanderson most likely do next?",
+            "answers": [
+                "A. Work on the menu",
+                "B. Contact the caterers",
+                "C. Confirm a meeting",
+                "D. Order some lunch"
+            ]
+        },
+        {
+            "question_number": "166",
+            "question_text": "What did Ms. Sullivan do on March 13?",
+            "answers": [
+                "A. Purchased a home security system",
+                "B. Returned a product",
+                "C. Signed up for Internet service",
+                "D. Made an appointment"
+            ]
+        },
+        {
+            "question_number": "167",
+            "question_text": "What is suggested about Ms. Sullivan?",
+            "answers": [
+                "A. She teaches a computer training class.",
+                "B. She had trouble installing some software.",
+                "C. She will have access to watching movies.",
+                "D. She has recently moved in."
+            ]
+        },
+        {
+            "question_number": "168",
+            "question_text": "What is indicated about Midas Touch Internet Provider?",
+            "answers": [
+                "A. It dispatches its employees for installation work.",
+                "B. It sells computer accessories.",
+                "C. Its headquarters are located in Parsons.",
+                "D. It offers Web site developing services."
+            ]
+        },
+        {
+            "question_number": "169",
+            "question_text": "What is suggested about Marion?",
+            "answers": [
+                "A. It will restore an old building soon.",
+                "B. It has closed a park for repairs.",
+                "C. It is planning a music festival.",
+                "D. Its population is decreasing."
+            ]
+        },
+        {
+            "question_number": "170",
+            "question_text": "What is the purpose of Marion Hall?",
+            "answers": [
+                "A. To serve as a play center for children",
+                "B. To hold city council meetings",
+                "C. To offer public education classes",
+                "D. To provide cultural events"
+            ]
+        },
+        {
+            "question_number": "171",
+            "question_text": "What will happen in April?",
+            "answers": [
+                "A. A famous speaker will give a presentation.",
+                "B. A new mayor will be elected.",
+                "C. Some public facilities will be improved.",
+                "D. A new play will be performed."
+            ]
+        },
+        {
+            "question_number": "172",
+            "question_text": "What is true about CC Wheel Delivery?",
+            "answers": [
+                "A. A contract of theirs has just been canceled.",
+                "B. Legal action is being taking against them.",
+                "C. The president of CC Wheel delivery has stepped down.",
+                "D. Two of their trucks were in an accident."
+            ]
+        },
+        {
+            "question_number": "173",
+            "question_text": "What is indicated about the company that the speaker works for?",
+            "answers": [
+                "A. It is financially insecure.",
+                "B. It has recently been created",
+                "C. It will be closing.",
+                "D. It is a delivery company."
+            ]
+        },
+        {
+            "question_number": "174",
+            "question_text": "Why does the man wish to stop working with CC Wheel Delivery?",
+            "answers": [
+                "A. To protect his company from financial damage",
+                "B. To cut production costs over the next four months",
+                "C. To lower the price of an individual product",
+                "D. To avoid legal trouble in the future"
+            ]
+        },
+        {
+            "question_number": "175",
+            "question_text": "In which of the marked positions [1], [2], [3], or [4] does this sentence best belong? \"Yes, we've worked with them for a long time.\"",
+            "answers": [
+                "A. [1]",
+                "B. [2]",
+                "C. [3]",
+                "D. [4]"
+            ]
+        },
+        {
+            "question_number": "176",
+            "question_text": "What is the main purpose of the article?",
+            "answers": [
+                "A. To publicize an upcoming book",
+                "B. To provide advice for professional chefs",
+                "C. To advertise a new restaurant",
+                "D. To describe a television show"
+            ]
+        },
+        {
+            "question_number": "177",
+            "question_text": "According to Ms. Lee, what is the secret to successful cooking?",
+            "answers": [
+                "A. Following a recipe book",
+                "B. Using quality ingredients",
+                "C. Balancing all the flavors",
+                "D. Choosing the correct spices"
+            ]
+        },
+        {
+            "question_number": "178",
+            "question_text": "What is the first thing to do in order to become a fan club member?",
+            "answers": [
+                "A. Access a Web site",
+                "B. Call a hotline",
+                "C. Visit Ms. Lee's restaurant",
+                "D. Purchase a book"
+            ]
+        },
+        {
+            "question_number": "179",
+            "question_text": "In the e-mail, what does Suzie Sanders say about the article?",
+            "answers": [
+                "A. It was written by a famous journalist.",
+                "B. It was featured on a popular cooking Web site.",
+                "C. It helped increase fan club membership.",
+                "D. It contained excerpts from Ms. Lee's book."
+            ]
+        },
+        {
+            "question_number": "180",
+            "question_text": "What is suggested about next month's newsletter?",
+            "answers": [
+                "A. It will be mailed behind schedule.",
+                "B. It will feature a column about healthy eating habits",
+                "C. It will contain an article on desserts.",
+                "D. It will include a copy of Ms. Lee's book."
+            ]
+        },
+        {
+            "question_number": "181",
+            "question_text": "What is indicated about the Titus Conference Center?",
+            "answers": [
+                "A. It recently improved its facilities.",
+                "B. It demands full payment at the time of reservation.",
+                "C. It is located next to an international airport.",
+                "D. It currently has no vacancies for the month."
+            ]
+        },
+        {
+            "question_number": "182",
+            "question_text": "What is NOT mentioned as a benefit of using the Titus Conference Center?",
+            "answers": [
+                "A. Convenient transportation",
+                "B. Complimentary meals",
+                "C. A printing service",
+                "D. Presentation supplies"
+            ]
+        },
+        {
+            "question_number": "183",
+            "question_text": "When will Ms. Rose most likely arrive at the Titus Conference Center?",
+            "answers": [
+                "A. On August 7",
+                "B. On August 14",
+                "C. On August 15",
+                "D. On August 16"
+            ]
+        },
+        {
+            "question_number": "184",
+            "question_text": "What is the main purpose of the second e-mail?",
+            "answers": [
+                "A. To reserve tickets for an upcoming conference",
+                "B. To request help in making a payment",
+                "C. To confirm a reservation",
+                "D. To inquire about payment options"
+            ]
+        },
+        {
+            "question_number": "185",
+            "question_text": "What does Ms. Rose suggest about the Titus Conference Center?",
+            "answers": [
+                "A. It will be their first time working together.",
+                "B. It will relocate in August.",
+                "C. It has several locations in the country.",
+                "D. It failed to satisfy some guests last year."
+            ]
+        },
+        {
+            "question_number": "186",
+            "question_text": "What is indicated about Carl Ennens?",
+            "answers": [
+                "A. He is a senior in high school",
+                "B. He is a junior in college",
+                "C. He will graduate in two years",
+                "D. He is a senior in college"
+            ]
+        },
+        {
+            "question_number": "187",
+            "question_text": "What is indicated about Dr. Alcobar?",
+            "answers": [
+                "A. Nobody knows who he is.",
+                "B. People do not appreciate his opinion.",
+                "C. He is respected by John Masterson.",
+                "D. He has done a lot of prominent research."
+            ]
+        },
+        {
+            "question_number": "188",
+            "question_text": "In the second e-mail, the term \"headquarters\" in the fourth line, is closest in meaning to what word or term?",
+            "answers": [
+                "A. base",
+                "B. main office",
+                "C. warehouse",
+                "D. distribution center"
+            ]
+        },
+        {
+            "question_number": "189",
+            "question_text": "According to the memorandum, what will Carl Ennens be expected to do?",
+            "answers": [
+                "A. fluid dynamic research",
+                "B. cook",
+                "C. help wherever is needed",
+                "D. watch and learn"
+            ]
+        },
+        {
+            "question_number": "190",
+            "question_text": "What position does John Masterson have in the company?",
+            "answers": [
+                "A. Chief Executive Officer",
+                "B. Chief Financial Officer",
+                "C. Sales Executive",
+                "D. Owner"
+            ]
+        },
+        {
+            "question_number": "191",
+            "question_text": "What does Dr. Keenan suggest about Xtreme 7?",
+            "answers": [
+                "A. It is the most effective cream on the market.",
+                "B. It is worth the high price tag.",
+                "C. It is both effective and cheap.",
+                "D. It is the only cream that doctors would recommend."
+            ]
+        },
+        {
+            "question_number": "192",
+            "question_text": "What is suggested about Brand-X?",
+            "answers": [
+                "A. Products are currently only available in Europe.",
+                "B. It is Europe's most popular brand.",
+                "C. It is a luxury skincare company.",
+                "D. The company was first launched 10 years ago."
+            ]
+        },
+        {
+            "question_number": "193",
+            "question_text": "According to the article, what does Brand-X plan to do?",
+            "answers": [
+                "A. Sell more products in Europe",
+                "B. Expand outside of Europe",
+                "C. Develop a makeup line",
+                "D. Build a factory in America"
+            ]
+        },
+        {
+            "question_number": "194",
+            "question_text": "What is indicated in the advertisement?",
+            "answers": [
+                "A. All positions don't require previous work experience.",
+                "B. Applicants must be bilingual.",
+                "C. Experience in certain fields can lead to management positions.",
+                "D. The available positions are only temporary."
+            ]
+        },
+        {
+            "question_number": "195",
+            "question_text": "For what position was Jacqueline most likely hired?",
+            "answers": [
+                "A. Management",
+                "B. Dermatology",
+                "C. Marketing",
+                "D. Customer Service"
+            ]
+        },
+        {
+            "question_number": "196",
+            "question_text": "How did Laurie Wheeler learn about Action?",
+            "answers": [
+                "A. From a friend",
+                "B. Through a client",
+                "C. In a newspaper",
+                "D. Searching the Internet"
+            ]
+        },
+        {
+            "question_number": "197",
+            "question_text": "What is indicated about Action?",
+            "answers": [
+                "A. They do not promote a religion.",
+                "B. They are Christian.",
+                "C. They are just building their brand.",
+                "D. They are moving to a new location."
+            ]
+        },
+        {
+            "question_number": "198",
+            "question_text": "According to the graphic, what is NOT mentioned as an option for customers?",
+            "answers": [
+                "A. Off Site courses",
+                "B. Classes for 10",
+                "C. A 4 hour course",
+                "D. Courses to build positivity"
+            ]
+        },
+        {
+            "question_number": "199",
+            "question_text": "What course will Laurie Wheeler likely sign up for?",
+            "answers": [
+                "A. Stay in the Moment!",
+                "B. New You Everyday",
+                "C. Stay Positive for the Team!",
+                "D. Blessed are We All"
+            ]
+        },
+        {
+            "question_number": "200",
+            "question_text": "What is indicated about Competitive Excellence?",
+            "answers": [
+                "A. They are struggling with employee sales.",
+                "B. The mood in the office is not good.",
+                "C. They are having a booming year of sales.",
+                "D. They want to try to change their business focus."
+            ]
+        }
+    ],
+    "audio": [
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q1.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q2.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q3.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q4.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q5.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q6.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q7.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q8.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q9.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q10.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q11.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q12.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q13.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q14.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q15.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q16.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q17.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q18.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q19.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q20.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q21.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q22.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q23.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q24.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q25.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q26.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q27.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q28.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q29.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q30.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q31.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q32-34.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q35-37.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q38-40.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q41-43.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q44-46.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q47-49.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q50-52.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q53-55.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q56-58.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q59-61.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q62-64.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q65-67.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q68-70.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q71-73.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q74-76.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q77-79.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q80-82.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q83-85.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q86-88.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q89-91.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q92-94.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q95-97.mp3",
+        "https://s4-media1.study4.com/media/economy1000/test8_audios/q98-100.mp3"
+    ],
+    "images": [
+        "https://s4-media1.study4.com/media/gg_imgs/test/db53a8ecd4c544c7df0503cd26663c67eeb6d141.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/860e10cc27754e70466674e9294d7b205481a978.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/cefabdbd570ade54f235fbab8cc1eae92939bce0.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/e328c2bf092f3e8918de056442a6efbdbd7cff65.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/dba9ef785eee4f6c2bb6b27719836af3f11cc7fe.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/a2c41beff97972bc67fd04247be59dd784240943.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/61ea7f953a784d3dd3978979375e1e23074d8d01.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/6fac18792019e74853e94ede75048aefa1f87d7b.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/6cd4bda4d66d20e14e1b8f4dfccf3b58514b8f53.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/80ef6c130f8fa34b88387a13b5365053f0844052.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/877cb4de17cf1602e9a07e3680964deb897d6d92.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/ba8bceae18d50478f6a7286b18ed6fcea887c468.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/02d3133b29b9d48c79c191b0059f247ae2bb4e3e.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/d0163c2ab5dc26aa47d8aaf9d428931ff70f0839.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/2b3cabd1587075d22ba0dd32933dcbeb03ae3662.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/5be10970d0ac979307cc076580f20e11e2189655.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/08e443e4cffc1735e752bc13fe0b99b97c78adda.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/c0ba3eb614ecd342a58d21cbde93141440330ace.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/2dd6d311548015d3aaebd810a8990280c0232c7e.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/6e22ea1b461e6e01e20292380c502dab68474ac2.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/7d27a5da493ece85a1bdbea02702f5f167c16d3b.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/336e68a95ee91b3c7d6c69f76e85eea639aade82.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/85b4d68da9db65d665cee561b6a979b8a8e9c1ca.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/47b7920ecfd7e16aa16194cd4ee2d52005652c16.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/dabecb01400c7a1112bbe81286876e71149c3e32.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/2174e8af02a6d295893c3f802f7203c943018aa6.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/06b52904e52de88a077b8beb769069959a5ef87e.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/be8c371e7966c01afdffd3711337e82821026582.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/2203ca918c9a296bb0b80e5b59e98febe3d3173e.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/5ab997cbe4ee1247e04b9f8da9e37aab04edbf36.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/79e407ec4141246c36656710d63858f98c9d9d2f.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/f1d3280a7aa7e84d219135586ad2a47682fa7023.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/69d15e955fd12d5c44aa378af267c2fe1a4f5d19.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/5a510dc2676d421bbfc91624490b767c56d88717.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/eddf83413ea91259e53f5e9585c7f91722c04ee7.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/023af8925fa28dad4492233aaa159b563b130977.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/b23734d3b6e1364149502d4e14ae93a068aef313.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/d52e27fa77bc7963d87460783d81572165f4628f.jpg",
+        "https://s4-media1.study4.com/media/gg_imgs/test/3811f8cde6f98a080fe28eb6858da410f43b47d1.jpg"
+    ]
+}

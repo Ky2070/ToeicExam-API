@@ -86,7 +86,7 @@ REST_FRAMEWORK = {
 INSTALLED_APPS = [
     # 'material',  # Thêm Material
     # 'grappelli',
-    'admin_black.apps.AdminBlackConfig',
+    # 'admin_black.apps.AdminBlackConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'ckeditor',
     'ckeditor_uploader',
+    'toeicAI',
 ]
 
 MIDDLEWARE = [
@@ -130,9 +131,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://englishapp-client.vercel.app",
     "http://localhost:3001",
 ]
-LOGIN_REDIRECT_URL = '/admin'
-LOGOUT_REDIRECT_URL = '/'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# LOGIN_REDIRECT_URL = '/admin'
+# LOGOUT_REDIRECT_URL = '/'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CACHES = {
     'default': {

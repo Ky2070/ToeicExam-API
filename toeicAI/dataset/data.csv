@@ -1,0 +1,54 @@
+question_text,audio,image,part
+"Which of the following best describes the picture?",audio/audio1.mp3,images/image1.jpg,Part 1
+,None,audio/audio2.mp3,None,Part 2
+"What is the main purpose of the email?",,images/image2.jpg,Part 7
+"She _______ to the meeting yesterday.",,,Part 5
+,None,audio/audio3.mp3,None,Part 4
+"What does the man imply about his schedule?",audio/audio4.mp3,,Part 3
+,None,audio/audio5.mp3,None,Part 2
+"How many people are visible in the image?",audio/audio6.mp3,images/image3.jpg,Part 1
+"The project is ______ on track.",,,Part 5
+"Why did the customer call the hotline?",audio/audio7.mp3,,Part 4
+"What is the topic of the presentation?",audio/audio8.mp3,,Part 3
+,None,audio/audio9.mp3,None,Part 2
+"What does the graph illustrate?",,images/image4.jpg,Part 7
+"The company has ______ its profits.",,,Part 6
+,None,audio/audio10.mp3,images/image5.jpg,Part 1
+"What is the woman requesting in the conversation?",audio/audio11.mp3,,Part 3
+"Based on the passage, what can be inferred about the company?",,,Part 7
+"He ______ finished the report before the deadline.",,,Part 5
+,None,audio/audio12.mp3,None,Part 2
+"Identify the object in the picture.",audio/audio13.mp3,images/image6.jpg,Part 1
+"What is the purpose of the announcement?",audio/audio14.mp3,,Part 4
+,None,audio/audio15.mp3,None,Part 2
+"What is happening in the picture?",audio/audio16.mp3,images/image7.jpg,Part 1
+"How many objects can you see in the image?",audio/audio17.mp3,images/image8.jpg,Part 1
+,None,audio/audio18.mp3,None,Part 2
+,None,audio/audio19.mp3,None,Part 2
+"What is the woman talking about?",audio/audio20.mp3,,Part 3
+"What problem does the man mention?",audio/audio21.mp3,,Part 3
+,None,audio/audio22.mp3,None,Part 2
+"What does the speaker say about the upcoming event?",audio/audio23.mp3,,Part 4
+"What time is the meeting scheduled for?",audio/audio24.mp3,,Part 4
+,None,audio/audio25.mp3,None,Part 2
+"The new policy _______ effective next month.",,,Part 5
+"She _______ completed the assignment on time.",,,Part 5
+"Choose the correct form: The employees ______ about the new regulations.",,,Part 6
+,None,audio/audio26.mp3,images/image9.jpg,Part 1
+"What is the main idea of the passage?",,,Part 7
+"What is the primary purpose of the memo?",,,Part 7
+,None,audio/audio27.mp3,None,Part 2
+"Look at the image. What can be inferred?",,images/image10.jpg,Part 7
+"What does the bar chart represent?",,images/image11.jpg,Part 7
+"Complete the sentence: The company is ______ to expand internationally.",,,Part 6
+"Why is the speaker making this announcement?",audio/audio28.mp3,,Part 4
+,None,audio/audio29.mp3,None,Part 2
+"What is the topic of the discussion?",audio/audio30.mp3,,Part 3
+"What does the woman suggest the man should do?",audio/audio31.mp3,,Part 3
+"Which option best completes the sentence: The manager ______ the decision yesterday.",,,Part 5
+,None,audio/audio32.mp3,None,Part 2
+"Identify the action taking place in the image.",audio/audio33.mp3,images/image12.jpg,Part 1
+"What advice does the speaker give?",audio/audio34.mp3,,Part 4
+,None,audio/audio35.mp3,None,Part 2
+"What is the purpose of the advertisement?",,images/image13.jpg,Part 7
+"The company _______ a new product next year.",,,Part 6

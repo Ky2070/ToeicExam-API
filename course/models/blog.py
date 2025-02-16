@@ -3,6 +3,7 @@ from Authentication.models import User
 from EStudyApp.models import QuestionSet
 from course.models.base import BaseModel
 
+
 class Blog(BaseModel):
     title = models.CharField(
         max_length=50,
@@ -56,7 +57,6 @@ class CommentBlog(BaseModel):
     content = models.TextField()
     publish_date = models.DateTimeField(
         auto_now_add=True)  # Thời gian bình luận được tạo
-
 
     def __str__(self):
         return f'Comment by {self.user} on {self.blog}'

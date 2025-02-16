@@ -1,8 +1,10 @@
 from ckeditor.widgets import CKEditorWidget
 from django.contrib import admin
 from django import forms
-from course.models import Course, Lesson, ReviewLesson
+from course.models import Course, Lesson, ReviewLesson, Blog
 from django.contrib.postgres.forms import SimpleArrayField
+
+from course.models.blog import CommentBlog
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -100,5 +102,41 @@ class ReviewLessonAdmin(admin.ModelAdmin):
         }),
         ('Time Information', {
             'fields': ('publish_date', 'created_at', 'updated_at')
+        }),
+    )
+
+
+@admin.register(Blog)
+class BlogAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'is_published', 'created_at', 'updated_at','deleted_at')
+    list_filter = ('is_published', 'created_at', 'updated_at')
+    search_fields = ('title', 'content', 'author__username')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Blog Information', {
+            'fields': ('title', 'content', 'part_info', 'from_ques', 'to_ques', 'author', 'questions_set', 'is_published')
+        }),
+        ('Time Information', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+
+
+@admin.register(CommentBlog)
+class CommentBlogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'blog', 'publish_date', 'created_at', 'updated_at', 'deleted_at')
+    list_filter = ('publish_date', 'created_at')
+    search_fields = ('content', 'blog__title', 'user__username')
+    readonly_fields = ('publish_date', 'created_at', 'updated_at')
+    ordering = ('-publish_date',)
+
+    fieldsets = (
+        ('Comment Information', {
+            'fields': ('user', 'blog', 'parent', 'content')
+        }),
+        ('Time Information', {
+            'fields': ('publish_date', 'created_at', 'updated_at','deleted_at')
         }),
     )
