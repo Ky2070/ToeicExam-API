@@ -28,7 +28,7 @@ urlpatterns = [
     path("api/v1/app/", include("EStudyApp.urls")),
     path("api/v1/course/", include("course.urls")),
     # path('', include('admin_black.urls')),
-    path('api/', include('toeic_ai.urls')),
+    path('api/v1/AI/', include('toeicAI.urls')),
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

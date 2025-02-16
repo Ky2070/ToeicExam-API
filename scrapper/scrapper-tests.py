@@ -229,7 +229,7 @@ def extract_test_data(driver):
 
 
 def save_data_to_json(data):
-    file_path = "new-economy-test-10.json"
+    file_path = "data-test/new-economy-test-10.json"
 
     # Initialize the data structure if the file is empty
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
