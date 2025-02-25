@@ -83,6 +83,16 @@ class Test(BaseModel):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def part_total(self):
+        return Part.objects.filter(test=self).count()
+    
+    @property
+    def question_total(self):
+        question_total = Question.objects.filter(test=self).count()
+            
+        return question_total
 
 
 # class UserTestResult(models.Model):

@@ -117,7 +117,7 @@ class TestDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'test_date', 'duration', 'part_test', 'question_test']
+        fields = ['id', 'name', 'description', 'part_total', 'question_total', 'test_date', 'duration', 'part_test', 'question_test']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -134,7 +134,7 @@ class TestSerializer(serializers.ModelSerializer):
         model = Test
         fields = ['id', 'name', 'description', 'types', 'test_date',
                  'duration', 'question_count', 'part_count', 'tag',
-                 'publish', 'latest_history', 'created_at', 'updated_at']
+                 'publish', 'latest_history', 'created_at', 'updated_at', 'part_total', 'question_total']
 
     def get_latest_history(self, obj):
         try:
