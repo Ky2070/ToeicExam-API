@@ -1,0 +1,70 @@
+{% load static %}
+<div class="answers-widget">
+    <div class="answer-row">
+        <div class="answer-label">A.</div>
+        <div class="answer-input">
+            <input type="text" name="{{ widget.name }}_a" value="{% if answers.A %}{{ answers.A }}{% endif %}" class="vTextField" placeholder="Enter answer A">
+        </div>
+    </div>
+    <div class="answer-row">
+        <div class="answer-label">B.</div>
+        <div class="answer-input">
+            <input type="text" name="{{ widget.name }}_b" value="{% if answers.B %}{{ answers.B }}{% endif %}" class="vTextField" placeholder="Enter answer B">
+        </div>
+    </div>
+    <div class="answer-row">
+        <div class="answer-label">C.</div>
+        <div class="answer-input">
+            <input type="text" name="{{ widget.name }}_c" value="{% if answers.C %}{{ answers.C }}{% endif %}" class="vTextField" placeholder="Enter answer C">
+        </div>
+    </div>
+    <div class="answer-row">
+        <div class="answer-label">D.</div>
+        <div class="answer-input">
+            <input type="text" name="{{ widget.name }}_d" value="{% if answers.D %}{{ answers.D }}{% endif %}" class="vTextField" placeholder="Enter answer D">
+        </div>
+    </div>
+</div>
+
+<style>
+    .answers-widget {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 10px;
+        max-width: 600px;
+    }
+    .answer-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 5px 0;
+    }
+    .answer-label {
+        min-width: 25px;
+        font-weight: bold;
+        font-size: 14px;
+        padding-top: 5px;
+    }
+    .answer-input {
+        flex: 1;
+    }
+    .answer-input input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .answer-input input:focus {
+        border-color: #79aec8;
+        outline: none;
+        box-shadow: 0 0 5px rgba(121, 174, 200, 0.5);
+    }
+    /* Django admin theme integration */
+    .answer-input input.vTextField {
+        box-sizing: border-box;
+        margin: 0;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+</style> 

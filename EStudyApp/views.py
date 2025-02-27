@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from django.db.models import Avg, Max, Min, Count
 import random
 from Authentication.permissions import IsTeacher
+from question_bank.models import QuestionBank, QuestionSetBank
 from utils.standard_part import PART_STRUCTURE
 
 from django.contrib.postgres.search import SearchQuery, SearchVector
@@ -1221,7 +1222,7 @@ class CreatePartAutoAPIView(APIView):
 
             part_structures = PART_STRUCTURE[f'PART_{part_number}']
             for from_ques, to_ques in part_structures['sets']:
-                existing_question_sets = QuestionSet.objects.filter(
+                existing_question_sets = QuestionSetBank.objects.filter(
                     from_ques=from_ques,
                     to_ques=to_ques,
                 )  # Prefetch related questions
@@ -1241,7 +1242,7 @@ class CreatePartAutoAPIView(APIView):
                 )
 
                 # Duplicate questions
-                existing_questions = Question.objects.filter(
+                existing_questions = QuestionBank.objects.filter(
                     question_set=random_question_set)
                 for question in existing_questions:
                     Question.objects.create(
