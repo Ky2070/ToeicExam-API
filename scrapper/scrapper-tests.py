@@ -1,5 +1,8 @@
 import json
 import os
+import winreg
+from pathlib import Path
+
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -11,8 +14,10 @@ from selenium.common.exceptions import TimeoutException, ElementClickIntercepted
     StaleElementReferenceException, NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Load environment variables for credentials
-load_dotenv('C:/Users/Administrator/Documents/ToeicExam-API/scrapper/.env')
+# Xác định đường dẫn thư mục chứa script và file .env
+env_path = Path(__file__).parent / '.env'
+# Load biến môi trường từ file .env
+load_dotenv(env_path)
 
 # # Setup paths for Chromedriver
 # base_path = r'C:\Users\nguye\PycharmProjects\EnglishTest\scrapper\chromedriver-win64'
@@ -23,9 +28,41 @@ load_dotenv('C:/Users/Administrator/Documents/ToeicExam-API/scrapper/.env')
 # driver = webdriver.Chrome(service=service)
 # Cung cấp đường dẫn đến Chrome binary
 
-chrome_options = Options()
-chrome_options.binary_location = r'G:\VK Tools\Chrome\chrome.exe'  # Đảm bảo đường dẫn đúng
+def find_chrome_from_registry():
+    # Các đường dẫn trong registry để tìm chrome.exe
+    registry_paths = [
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 64-bit hệ điều hành
+        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 32-bit hệ điều hành
+    ]
 
+    for registry_path in registry_paths:
+        try:
+            # Mở registry key
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
+            chrome_path, _ = winreg.QueryValueEx(registry_key, None)
+            winreg.CloseKey(registry_key)
+
+            # Kiểm tra sự tồn tại của file chrome.exe
+            if os.path.exists(chrome_path):
+                return chrome_path
+        except FileNotFoundError:
+            continue
+
+    # Nếu không tìm thấy chrome trong registry, trả về None
+    return None
+
+
+# Tìm Chrome từ registry
+chrome_path = find_chrome_from_registry()
+
+if chrome_path:
+    print(f"Chrome found at: {chrome_path}")
+    # Cấu hình Selenium để sử dụng Chrome đã tìm được
+    chrome_options = Options()
+    chrome_options.binary_location = chrome_path
+else:
+    print("Chrome executable could not be found!")
+    exit()  # Thoát chương trình nếu không tìm thấy Chrome
 # Tự động tải và cài đặt phiên bản ChromeDriver tương thích với phiên bản Chrome
 service = Service(ChromeDriverManager().install())
 
