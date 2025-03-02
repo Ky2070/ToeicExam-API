@@ -68,17 +68,78 @@ service = Service(ChromeDriverManager().install())
 # Khởi tạo WebDriver với Service và Options
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
+# Hàm để đọc dữ liệu từ file .txt
+def read_data_from_file(file_path):
+    data = {}
+    try:
+        with open(file_path, 'r') as file:
+            current_part = None
+            for line in file:
+                line = line.strip()  # Loại bỏ dấu cách thừa và dòng trống
+                if line:  # Nếu dòng không rỗng
+                    if '=' in line:  # Kiểm tra nếu có dấu '=' để phân tách key và value
+                        key, value = line.split('=', 1)  # Tách dữ liệu thành key và value
+                        key = key.strip()  # Loại bỏ dấu cách thừa
+                        value = value.strip()
+
+                        # Lưu test_id
+                        if key == "test_id":
+                            data[key] = value
+                        # Lưu các phần part id và content id
+                        elif key.startswith('part_'):
+                            part_key = key.split('_')[1]  # Lấy phần số (1, 2, 3, ...)
+                            if part_key not in data:
+                                data[part_key] = {}  # Nếu chưa có key part, tạo dictionary cho nó
+                            part_subkey = key.split('_')[2]  # Lấy phần id hoặc content id
+                            data[part_key][part_subkey] = value
+                    else:
+                        print(f"Warning: Skipping invalid line: {line}")
+    except FileNotFoundError as e:
+        print(f"File {file_path} not found: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    return data
+
+
+# Đọc dữ liệu từ file test_data.txt
+print(f"Current working directory: {os.getcwd()}")
+
+data = read_data_from_file('test-data.txt')
+
+# Kiểm tra dữ liệu đã đọc được
+print("Data read from file:", data)
+
+# Lấy test_id từ dữ liệu đọc được
+test_id = data.get('test_id')
+print(f"Test_id: {test_id}")
+
+# Cấu hình lại các part_id và content_id từ dữ liệu đã đọc từ file
+part_ids = []
+content_ids = []
+
+for i in range(1, 8):
+    # Lấy dữ liệu từ dictionary đã đọc được
+    part_id_key = str(i)  # Sử dụng phần số như 1, 2, 3, ... thay vì 'part_{i}_id'
+    content_id_key = str(i)  # Sử dụng phần số tương ứng
+
+    # Lấy dữ liệu từ part i
+    part_ids.append(data.get(part_id_key, {}).get('id'))
+    content_ids.append(data.get(part_id_key, {}).get('content'))
+
+# Kiểm tra các giá trị đã lấy ra từ file
+print("Part IDs:", part_ids)
+print("Content IDs:", content_ids)
+
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
 
     try:
-        # Tìm phần tử có id là 'new-economy-toeic-test-2'
-        test_item = driver.find_element(By.ID, 'new-economy-toeic-test-10')
+        test_item = driver.find_element(By.ID, test_id)
 
         # Lấy thẻ <a> trong test_item để lấy link
-        a_tag = test_item.find_element(By.XPATH,
-                                       "/html/body/div[3]/div[2]/div[3]/div/div[1]/div[1]/div/div[2]/div/div/a[2]")  # Lấy thẻ cha của thẻ <h2> chứa id
+        # Lấy thẻ <a> cha của thẻ <h2> chứa test_id
+        a_tag = test_item.find_element(By.XPATH, './ancestor::a') # Tìm thẻ <a> cha
         link = a_tag.get_attribute('href')
 
         print(f"Found link: {link}")
@@ -246,11 +307,9 @@ def extract_test_data(driver):
 
     # Loop through different parts (Part 1 - Part 7)
     for part_id, content_id in zip(
-            ['pills-3153-tab', 'pills-3154-tab', 'pills-3155-tab', 'pills-3156-tab', 'pills-3157-tab', 'pills-3158-tab',
-             'pills-3159-tab'],
-            ['partcontent-3153', 'partcontent-3154', 'partcontent-3155', 'partcontent-3156', 'partcontent-3157',
-             'partcontent-3158', 'partcontent-3159']
+            part_ids, content_ids
     ):
+        print(f"Part ID: {part_id}, Content ID: {content_id}")
         try:
             part_tab = driver.find_element(By.ID, part_id)
             part_tab.click()
@@ -302,7 +361,7 @@ def extract_test_data(driver):
 
 
 def save_data_to_json(data):
-    file_path = "data-test/new-economy-test-10.json"
+    file_path = "data-test/new-economy-test-2.json"
 
     # Initialize the data structure if the file is empty
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
