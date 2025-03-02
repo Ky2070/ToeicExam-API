@@ -2,39 +2,51 @@ import json
 import os
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, \
     StaleElementReferenceException, NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Load environment variables for credentials
-load_dotenv('C:/Users/nguye/PycharmProjects/EnglishTest/scrapper/.env')
+load_dotenv('C:/Users/Administrator/Documents/ToeicExam-API/scrapper/.env')
 
-# Setup paths for Chromedriver
-base_path = r'C:\Users\nguye\PycharmProjects\EnglishTest\scrapper\chromedriver-win64'
-chromedriver_path = os.path.join(base_path, 'chromedriver.exe')
+# # Setup paths for Chromedriver
+# base_path = r'C:\Users\nguye\PycharmProjects\EnglishTest\scrapper\chromedriver-win64'
+# chromedriver_path = os.path.join(base_path, 'chromedriver.exe')
+#
+# # Initialize WebDriver
+# service = Service(executable_path=chromedriver_path)
+# driver = webdriver.Chrome(service=service)
+# Cung cấp đường dẫn đến Chrome binary
 
-# Initialize WebDriver
-service = Service(executable_path=chromedriver_path)
-driver = webdriver.Chrome(service=service)
+chrome_options = Options()
+chrome_options.binary_location = r'G:\VK Tools\Chrome\chrome.exe'  # Đảm bảo đường dẫn đúng
 
+# Tự động tải và cài đặt phiên bản ChromeDriver tương thích với phiên bản Chrome
+service = Service(ChromeDriverManager().install())
+
+# Khởi tạo WebDriver với Service và Options
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
 
     try:
-        test_items = driver.find_elements(By.CLASS_NAME, 'testitem-wrapper')
-        test_links = []
+        # Tìm phần tử có id là 'new-economy-toeic-test-2'
+        test_item = driver.find_element(By.ID, 'new-economy-toeic-test-10')
 
-        for index, test_item in enumerate(test_items, start=1):
-            a_tag = test_item.find_element(By.TAG_NAME, 'a')
-            link = a_tag.get_attribute('href')
-            test_links.append(link)
-            print(f"{index}. {link}")
-        return test_links
+        # Lấy thẻ <a> trong test_item để lấy link
+        a_tag = test_item.find_element(By.XPATH,
+                                       "/html/body/div[3]/div[2]/div[3]/div/div[1]/div[1]/div/div[2]/div/div/a[2]")  # Lấy thẻ cha của thẻ <h2> chứa id
+        link = a_tag.get_attribute('href')
+
+        print(f"Found link: {link}")
+        return link
     except Exception as e:
         print(f"Error extracting test links: {e}")
         return []
@@ -42,7 +54,7 @@ def get_test_links():
 
 def handle_checkbox_selection():
     checkboxes_selected = 0
-    max_scroll_attempts = 10
+    max_scroll_attempts = 7
     for scroll_attempt in range(max_scroll_attempts):
         checkboxes = driver.find_elements(By.CSS_SELECTOR, 'input.form-check-input[type="checkbox"]')
         for checkbox in checkboxes:
@@ -63,7 +75,7 @@ def handle_checkbox_selection():
             print("Selected 7 checkboxes, moving to submit.")
             break
         else:
-            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.05);")
+            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.01);")
             WebDriverWait(driver, 15).until(lambda d: d.execute_script("return document.readyState") == "complete")
 
     return checkboxes_selected >= 7
@@ -71,7 +83,7 @@ def handle_checkbox_selection():
 
 def submit_form():
     submit_button_found = False
-    for _ in range(5):
+    for _ in range(7):
         try:
             submit_button = WebDriverWait(driver, 15).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.btn.btn-primary[type="submit"]'))
@@ -115,7 +127,7 @@ def login_with_facebook():
         login_button.click()
         print("Logged in with Facebook.")
 
-        continue_button = WebDriverWait(driver, 15).until(
+        continue_button = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Tiếp tục dưới tên Quốc Kỳ')]"))
         )
         continue_button.click()
@@ -130,6 +142,32 @@ def login_with_facebook():
 
 
 def extract_test_data(driver):
+    # question_data = {
+    #     "questionSetPart": [
+    #         {
+    #             "id": None,
+    #             "audio": None,
+    #             "page": None,
+    #             "image": None,
+    #             "fromQues": None,
+    #             "toQues": None,
+    #             "questionQuestionSet": [
+    #                 {
+    #                     "id": None,
+    #                     "questionNumber": None,
+    #                     "questionText": None,
+    #                     "answers": {
+    #                         "A": None,
+    #                         "B": None,
+    #                         "C": None,
+    #                         "D": None
+    #                     },
+    #                     "partId": None
+    #                 }
+    #             ]
+    #         }
+    #     ]
+    # }
     question_data = {"title": None, "questions": [], "audio": [], "images": []}
     try:
         title_element = driver.find_element(By.CSS_SELECTOR, '.h4')
@@ -172,10 +210,10 @@ def extract_test_data(driver):
 
     # Loop through different parts (Part 1 - Part 7)
     for part_id, content_id in zip(
-            ['pills-729-tab', 'pills-730-tab', 'pills-731-tab', 'pills-732-tab', 'pills-733-tab', 'pills-734-tab',
-             'pills-735-tab'],
-            ['partcontent-729', 'partcontent-730', 'partcontent-731', 'partcontent-732', 'partcontent-733',
-             'partcontent-734', 'partcontent-735']
+            ['pills-3153-tab', 'pills-3154-tab', 'pills-3155-tab', 'pills-3156-tab', 'pills-3157-tab', 'pills-3158-tab',
+             'pills-3159-tab'],
+            ['partcontent-3153', 'partcontent-3154', 'partcontent-3155', 'partcontent-3156', 'partcontent-3157',
+             'partcontent-3158', 'partcontent-3159']
     ):
         try:
             part_tab = driver.find_element(By.ID, part_id)
@@ -228,7 +266,7 @@ def extract_test_data(driver):
 
 
 def save_data_to_json(data):
-    file_path = "data.json"
+    file_path = "data-test/new-economy-test-10.json"
 
     # Initialize the data structure if the file is empty
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
@@ -257,27 +295,26 @@ def save_data_to_json(data):
 
 
 def main():
-    test_links = get_test_links()
+    link = get_test_links()
 
-    for link in test_links:
-        driver.get(link)
-        WebDriverWait(driver, 15).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'input.form-check-input[type="checkbox"]'))
-        )
+    driver.get(link)
+    WebDriverWait(driver, 15).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, 'input.form-check-input[type="checkbox"]'))
+    )
 
-        if handle_checkbox_selection():
-            if submit_form():
-                login_with_facebook()
+    if handle_checkbox_selection():
+        if submit_form():
+            login_with_facebook()
 
-                # Trích xuất dữ liệu câu hỏi, audio và hình ảnh
-                question_data = extract_test_data(driver)
+            # Trích xuất dữ liệu câu hỏi, audio và hình ảnh
+            question_data = extract_test_data(driver)
 
-                # Lưu dữ liệu vào JSON
-                save_data_to_json(question_data)
-            else:
-                print("Form submission failed, skipping.")
+            # Lưu dữ liệu vào JSON
+            save_data_to_json(question_data)
         else:
-            print("Checkbox selection failed, skipping.")
+            print("Form submission failed, skipping.")
+    else:
+        print("Checkbox selection failed, skipping.")
 
     driver.quit()
 
