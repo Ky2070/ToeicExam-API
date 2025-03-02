@@ -31,14 +31,13 @@ load_dotenv(env_path)
 def find_chrome_from_registry():
     # Các đường dẫn trong registry để tìm chrome.exe
     registry_paths = [
-        r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 64-bit hệ điều hành
-        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 32-bit hệ điều hành
+         r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 64-bit hệ điều hành
     ]
 
     for registry_path in registry_paths:
         try:
             # Mở registry key
-            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
