@@ -116,7 +116,7 @@ def login_with_facebook():
         login_button.click()
         print("Logged in with Facebook.")
 
-        continue_button = WebDriverWait(driver, 15).until(
+        continue_button = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'Tiếp tục dưới tên Quốc Kỳ')]"))
         )
         continue_button.click()
@@ -131,6 +131,32 @@ def login_with_facebook():
 
 
 def extract_test_data(driver):
+    # question_data = {
+    #     "questionSetPart": [
+    #         {
+    #             "id": None,
+    #             "audio": None,
+    #             "page": None,
+    #             "image": None,
+    #             "fromQues": None,
+    #             "toQues": None,
+    #             "questionQuestionSet": [
+    #                 {
+    #                     "id": None,
+    #                     "questionNumber": None,
+    #                     "questionText": None,
+    #                     "answers": {
+    #                         "A": None,
+    #                         "B": None,
+    #                         "C": None,
+    #                         "D": None
+    #                     },
+    #                     "partId": None
+    #                 }
+    #             ]
+    #         }
+    #     ]
+    # }
     question_data = {"title": None, "questions": [], "audio": [], "images": []}
     try:
         title_element = driver.find_element(By.CSS_SELECTOR, '.h4')
