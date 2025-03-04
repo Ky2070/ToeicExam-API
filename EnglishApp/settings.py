@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'course',
     'EStudyApp',
     'Authentication',
+    'question_bank',
     'rest_framework',
     'corsheaders',
     'debug_toolbar',
