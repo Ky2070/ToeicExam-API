@@ -17,7 +17,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 # Xác định đường dẫn thư mục chứa script và file .env
 env_path = Path(__file__).parent / '.env'
 # Load biến môi trường từ file .env
+print(env_path)
 load_dotenv(env_path)
+
 
 # # Setup paths for Chromedriver
 # base_path = r'C:\Users\nguye\PycharmProjects\EnglishTest\scrapper\chromedriver-win64'
@@ -28,16 +30,18 @@ load_dotenv(env_path)
 # driver = webdriver.Chrome(service=service)
 # Cung cấp đường dẫn đến Chrome binary
 
+
 def find_chrome_from_registry():
     # Các đường dẫn trong registry để tìm chrome.exe
     registry_paths = [
-         r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 64-bit hệ điều hành
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",  # Đối với 64-bit hệ điều hành
+        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe"
     ]
 
     for registry_path in registry_paths:
         try:
-            # Mở registry key
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -67,6 +71,7 @@ service = Service(ChromeDriverManager().install())
 
 # Khởi tạo WebDriver với Service và Options
 driver = webdriver.Chrome(service=service, options=chrome_options)
+
 
 # Hàm để đọc dữ liệu từ file .txt
 def read_data_from_file(file_path):
@@ -130,6 +135,7 @@ for i in range(1, 8):
 print("Part IDs:", part_ids)
 print("Content IDs:", content_ids)
 
+
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
@@ -139,7 +145,7 @@ def get_test_links():
 
         # Lấy thẻ <a> trong test_item để lấy link
         # Lấy thẻ <a> cha của thẻ <h2> chứa test_id
-        a_tag = test_item.find_element(By.XPATH, './ancestor::a') # Tìm thẻ <a> cha
+        a_tag = test_item.find_element(By.XPATH, './ancestor::a')  # Tìm thẻ <a> cha
         link = a_tag.get_attribute('href')
 
         print(f"Found link: {link}")
