@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from datetime import datetime, timedelta
+from ckeditor.fields import RichTextField
 
 from Authentication.models import User  # type: ignore
 from EStudyApp.base_model import BaseModel
@@ -228,7 +229,7 @@ class QuestionSet(models.Model):
         blank=True,
         null=True
     )
-    page = models.TextField(
+    page = RichTextField(
         blank=True,  # Cho phép trường này để trống
         null=True  # Cho phép lưu giá trị NULL
     )
