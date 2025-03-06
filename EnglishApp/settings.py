@@ -99,7 +99,6 @@ INSTALLED_APPS = [
     'Authentication',
     'question_bank',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
     'debug_toolbar',
     'drf_spectacular',
