@@ -1,19 +1,18 @@
 import json
 import os
-import pickle
-import winreg
 import time
+import winreg
 from pathlib import Path
 
 from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.print_page_options import PrintOptions
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, \
-    StaleElementReferenceException, NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Xác định đường dẫn thư mục chứa script và file .env
@@ -36,7 +35,7 @@ def find_chrome_from_registry():
     for registry_path in registry_paths:
         try:
             # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -65,6 +64,7 @@ service = Service(ChromeDriverManager().install())
 
 # Khởi tạo WebDriver với Service và Options
 driver = webdriver.Chrome(service=service, options=chrome_options)
+driver.set_window_size(1920, 1080)
 
 
 # Hàm để đọc dữ liệu từ file .txt
@@ -270,35 +270,36 @@ def scrape_answers():
         driver.execute_script("arguments[0].click();", part_tab)
         time.sleep(2)  # Đợi nội dung load
         # Click vào nút "Hiện Transcript"
-        try:
-            transcript_button = driver.find_element(By.XPATH, "//a[contains(text(), 'Hiện Transcript')]")
-            driver.execute_script("arguments[0].click();", transcript_button)
-            time.sleep(2)
-        except:
-            print(f"❌ Không tìm thấy nút 'Hiện Transcript' cho {part_name}")
+        # try:
+        #     transcript_button = driver.find_element(By.XPATH, "//a[contains(text(), 'Hiện Transcript')]")
+        #     driver.execute_script("arguments[0].click();", transcript_button)
+        #     time.sleep(2)
+        # except:
+        #     print(f"❌ Không tìm thấy nút 'Hiện Transcript' cho {part_name}")
 
         # Lấy nội dung transcript
-        try:
-            transcript_element = driver.find_element(By.XPATH,
-                                                     "//div[contains(@class, 'context-transcript')]//div[contains(@class, 'collapse show')]")
-            transcript_text = transcript_element.text.strip()
-        except:
-            transcript_text = "Không có transcript"
+        # try:
+        #     transcript_element = driver.find_element(By.XPATH,
+        #                                              "//div[contains(@class, 'context-transcript')]//div[contains(@class, 'collapse show')]")
+        #     transcript_text = transcript_element.text.strip()
+        # except:
+        #     transcript_text = "Không có transcript"
 
         # Lấy danh sách câu hỏi CHỈ của Part hiện tại
         questions = []
         try:
-            part_container = driver.find_element(By.XPATH, f"//div[@id='{part_id}']")  # Chỉ lấy nội dung trong Part này
-            question_elements = part_container.find_elements(By.XPATH, ".//div[contains(@class, 'questions-wrapper')]")
+            part_container = driver.find_element(By.ID, part_id)  # Chỉ lấy nội dung trong Part này
+            question_wrapper = part_container.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
+            question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
             print(f"📌 Số câu hỏi tìm thấy trong {part_name}: {len(question_elements)}")
 
             if question_elements:
                 for question in question_elements:
                     try:
-                        question_number = question.find_element(By.XPATH,
-                                                                ".//div[contains(@class, 'question-number')]//strong").text.strip()
-                        correct_answer = question.find_element(By.XPATH,
-                                                               ".//div[contains(@class, 'text-success')]").text.replace(
+                        question_number = question.find_element(By.CSS_SELECTOR,
+                                                                ".question-number").text.strip()
+                        correct_answer = question.find_element(By.CSS_SELECTOR,
+                                                               ".text-success").text.replace(
                             "Đáp án đúng:", "").strip()
 
                         # ✅ Chỉ thêm câu hỏi hợp lệ
@@ -320,16 +321,17 @@ def scrape_answers():
         if questions:
             part_data = {
                 "Part": part_name,
-                "Transcript": transcript_text,
+                # "Transcript": transcript_text,
                 "Danh sách câu hỏi": questions
             }
             data.append(part_data)
 
-    # Ghi dữ liệu ra file JSON
-    with open("answers.json", "w", encoding="utf-8") as f:
+    # Lưu dữ liệu vào file new-economy-test-2.json
+    file_path = "data-test/new-economy-test-2.json"
+    with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("✅ Dữ liệu đã được lưu vào answers.json!")
+    print(f"✅ Dữ liệu đã được lưu vào {file_path}!")
 
 
 def main():
