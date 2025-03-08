@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import winreg
 from pathlib import Path
 
@@ -41,7 +42,7 @@ def find_chrome_from_registry():
     for registry_path in registry_paths:
         try:
             # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -178,7 +179,7 @@ def handle_checkbox_selection():
             print("Selected 7 checkboxes, moving to submit.")
             break
         else:
-            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.01);")
+            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.05);")
             WebDriverWait(driver, 15).until(lambda d: d.execute_script("return document.readyState") == "complete")
 
     return checkboxes_selected >= 7
@@ -198,7 +199,7 @@ def submit_form():
             break
         except (TimeoutException, ElementClickInterceptedException, StaleElementReferenceException) as e:
             print(f"Error submitting form: {e}")
-            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.05);")
+            driver.execute_script("window.scrollBy(0, window.innerHeight / 0.025);")
 
     return submit_button_found
 
@@ -271,10 +272,12 @@ def extract_test_data(driver):
     #         }
     #     ]
     # }
-    question_data = {"title": None, "questions": [], "audio": [], "images": []}
+    question_data = {"title": [], "questions": [], "audio": [], "images": []}
     try:
-        title_element = driver.find_element(By.CSS_SELECTOR, '.h4')
+        title_element = driver.find_element(By.TAG_NAME, 'h1')
         test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
+        # Loại bỏ "Thoát" nếu có
+        test_title = re.sub(r'\s*Thoát$', '', test_title).strip()
         if test_title:  # Kiểm tra tiêu đề không rỗng
             question_data["title"] = test_title
             print(f"Tiêu đề bài kiểm tra: {test_title}")
@@ -367,14 +370,18 @@ def extract_test_data(driver):
 
 
 def save_data_to_json(data):
-    file_path = "data-test/new-economy-test-2.json"
+    file_path = f"data-test/{test_id}.json"
 
     # Initialize the data structure if the file is empty
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         with open(file_path, 'r', encoding='utf-8') as file:
             existing_data = json.load(file)
     else:
-        existing_data = {"questions": [], "audio": [], "images": []}
+        existing_data = {"title": "", "questions": [], "audio": [], "images": []}
+
+    # ✅ Thêm điều kiện cập nhật title
+    if "title" in data and data["title"]:
+        existing_data["title"] = data["title"]  # Cập nhật title nếu có
 
     # Add new data
     for question in data["questions"]:
@@ -409,7 +416,7 @@ def main():
 
             # Trích xuất dữ liệu câu hỏi, audio và hình ảnh
             question_data = extract_test_data(driver)
-
+            print("Dữ liệu chuẩn bị lưu:", question_data)  # Debug kiểm tra dữ liệu
             # Lưu dữ liệu vào JSON
             save_data_to_json(question_data)
         else:

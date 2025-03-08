@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 import winreg
 from pathlib import Path
@@ -34,8 +35,8 @@ def find_chrome_from_registry():
 
     for registry_path in registry_paths:
         try:
-            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_LOCAL_MACHINE
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -260,6 +261,20 @@ def click_solution_link():
 
 def scrape_answers():
     data = []
+
+    title_element = driver.find_element(By.TAG_NAME, 'h1')
+    test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
+    # Loại bỏ "Thoát" nếu có
+    test_title = re.sub(r'\s*Thoát$', '', test_title).strip()
+    if test_title:  # Kiểm tra tiêu đề không rỗng
+        title = {
+            "Tiêu đề": test_title
+        }
+        data.append(title)
+        print(f"Tiêu đề bài kiểm tra: {test_title}")
+    else:
+        print("Tiêu đề bài kiểm tra rỗng!")
+
     part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
 
     for part_tab in part_tabs:
@@ -321,13 +336,14 @@ def scrape_answers():
         if questions:
             part_data = {
                 "Part": part_name,
+                "Question_set": len(question_elements),
                 # "Transcript": transcript_text,
                 "Danh sách câu hỏi": questions
             }
             data.append(part_data)
 
-    # Lưu dữ liệu vào file new-economy-test-2.json
-    file_path = "data-test/new-economy-test-2.json"
+    # Lưu dữ liệu vào file
+    file_path = f"answers/{test_id}.json"
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
