@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 import winreg
 from pathlib import Path
 
@@ -42,7 +43,7 @@ def find_chrome_from_registry():
     for registry_path in registry_paths:
         try:
             # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -111,9 +112,6 @@ def read_data_from_file(file_path):
 print(f"Current working directory: {os.getcwd()}")
 
 data = read_data_from_file('test-data.txt')
-
-# Kiểm tra dữ liệu đã đọc được
-print("Data read from file:", data)
 
 # Lấy test_id từ dữ liệu đọc được
 test_id = data.get('test_id')
@@ -272,7 +270,7 @@ def extract_test_data(driver):
     #         }
     #     ]
     # }
-    question_data = {"title": [], "questions": [], "audio": [], "images": []}
+    question_data = {"title": [], "questions_by_part": {}, "audio": [], "images": []}
     try:
         title_element = driver.find_element(By.TAG_NAME, 'h1')
         test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
@@ -313,21 +311,24 @@ def extract_test_data(driver):
             print(f"Lỗi khi trích xuất ảnh: {e}")
 
         return audio_urls, img_urls
-
+    part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
     # Loop through different parts (Part 1 - Part 7)
-    for part_id, content_id in zip(
-            part_ids, content_ids
-    ):
-        print(f"Part ID: {part_id}, Content ID: {content_id}")
+    for part_tab in part_tabs:
         try:
-            part_tab = driver.find_element(By.ID, part_id)
-            part_tab.click()
-            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, content_id)))
-
-            part_content = driver.find_element(By.ID, content_id)
+            part_name = part_tab.text.strip()
+            part_id = part_tab.get_attribute("href").split("#")[-1]  # Lấy ID của nội dung Part
+            part_container = driver.find_element(By.ID, part_id)  # Chỉ lấy nội dung trong Part này
+            print(print(f"Part ID: {part_id}"))
+            print(f"📌 Đang xử lý: {part_name}")
+            driver.execute_script("arguments[0].click();", part_tab)
+            time.sleep(2)  # Đợi nội dung load
+            # WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, content_id)))
+            #
+            # part_content = driver.find_element(By.ID, content_id)
 
             # Trích xuất audio và hình ảnh từ phần nội dung
-            audio_urls, img_urls = extract_audio_and_images_from_part(part_content)
+            audio_urls, img_urls = extract_audio_and_images_from_part(part_container)
+
 
             # Lưu các URL audio và ảnh vào question_data hoặc nơi bạn muốn
             for audio_url in audio_urls:
@@ -340,12 +341,14 @@ def extract_test_data(driver):
             question_data["images"].extend(img_urls)
 
             # Trích xuất các câu hỏi
-            question_wrapper = part_content.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
-            question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
 
+            question_wrapper = part_container.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
+            question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
+            print(f"📌 Số câu hỏi tìm thấy trong {part_name}: {len(question_elements)}")
+            questions_for_part = []
             for wrapper in question_elements:
-                question = {}
-                question['question_number'] = wrapper.find_element(By.CSS_SELECTOR, '.question-number').text.strip()
+                question = {'question_number': wrapper.find_element(By.CSS_SELECTOR, '.question-number').text.strip()}
+
                 # question['question_text'] = wrapper.find_element(By.CSS_SELECTOR, '.question-text').text.strip()
                 # Handle case where there is no question-text (missing question)
                 try:
@@ -354,17 +357,96 @@ def extract_test_data(driver):
                     question['question_text'] = None  # Set to None if no question text is found
                     print(f"Warning: No question text found for question number {question['question_number']}")
 
-                answers = []
+                # answers = []
+                # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
+                # for answer in answer_elements:
+                #     answers.append(answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip())
+
+                # Khởi tạo đáp án với giá trị mặc định là rỗng
+
+                # Lấy đáp án, nếu có
+                # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
+                # answers = {
+                #     "A": "",
+                #     "B": "",
+                #     "C": "",
+                #     "D": ""
+                # }
+                # options_found = 0
+                # # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
+                # for answer in answer_elements:
+                #     try:
+                #         label = answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip()
+                #         option = answer.find_element(By.CSS_SELECTOR, 'input').get_attribute("value")
+                #
+                #         # Cập nhật đáp án vào dictionary chỉ khi option tồn tại và hợp lệ
+                #         if option in answers:
+                #             answers[option] = label.split(". ", 1)[1]  # Lấy phần nội dung đáp án mà không có "A.", "B."...
+                #             options_found += 1
+                #     except Exception as e:
+                #         print(f"Error extracting answer: {e}")
+                #
+                # # Nếu chỉ có 3 đáp án, ta loại bỏ "D"
+                # if options_found < 4:
+                #     answers = {k: v for k, v in answers.items() if v != ""}
+                # Lấy danh sách các đáp án từ trang
                 answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
+                # Khởi tạo đáp án mặc định với 4 lựa chọn rỗng
+                answers = {
+                    "A": "",
+                    "B": "",
+                    "C": "",
+                    "D": ""
+                }
+
+                options_found = 0
+
+                # Duyệt qua các phần tử đáp án tìm được
                 for answer in answer_elements:
-                    answers.append(answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip())
+                    try:
+                        # Lấy nhãn đáp án (A, B, C, D...)
+                        label = answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip()
+                        # Lấy giá trị của input (A, B, C, D)
+                        # option = answer.find_element(By.CSS_SELECTOR, 'input').get_attribute("value")
+                        # Lấy giá trị của input (A, B, C, D), chỉ lấy khi có value
+                        option_element = answer.find_element(By.CSS_SELECTOR, 'input')
+                        option = option_element.get_attribute("value") if option_element.get_attribute("value") else None
+                        # Cập nhật đáp án vào dictionary nếu option tồn tại
+                        # if option in answers:
+                        #     # Lấy phần nội dung đáp án mà không có "A.", "B."...
+                        #     answers[option] = label.split(". ", 1)[1] if ". " in label else label
+                        #     options_found += 1
+                        # Cập nhật đáp án vào dictionary nếu option tồn tại
+                        # if option in answers:
+                        if option in answers and option is not None:
+                            # Lấy phần nội dung đáp án mà không có "A.", "B.", "C." hoặc "D."
+                            if ". " in label:
+                                answers[option] = label.split(". ", 1)[1]  # Lấy phần nội dung đáp án
+                            else:
+                                answers[option] = ""  # Nếu không có dấu ". ", lấy luôn default ""
+                            options_found += 1
+                    except Exception as e:
+                        print(f"Error extracting answer: {e}")
+                # Nếu chỉ có 3 đáp án, ta loại bỏ "D"
+                if options_found < 4:
+                    answers.pop("D", None)
+                    # answers = {k: v for k, v in answers.items() if v != ""}
+                # Kiểm tra số lượng đáp án đã tìm được
+                # if options_found < 4:
+                #     # Nếu số lượng đáp án ít hơn 4, không xóa các đáp án rỗng
+                #     print(f"Only {options_found} answers found, keeping empty answers for missing options.")
+                #     # Không cần thay đổi gì thêm, giữ nguyên cấu trúc answers có đủ 4 key
 
+                # Đặt câu trả lời vào phần câu hỏi
                 question['answers'] = answers
-                question_data["questions"].append(question)
+                questions_for_part.append(question)
 
-            print(f"Extracted questions from {part_id}.")
+            # Thêm câu hỏi vào phần tương ứng trong question_data
+            question_data["questions_by_part"][part_name] = questions_for_part
+
+            print(f"Extracted questions from {part_name}.")
         except Exception as e:
-            print(f"Error extracting data from part {part_id}: {e}")
+            print(f"Error extracting data from part {part_name}: {e}")
 
     return question_data
 
@@ -377,16 +459,20 @@ def save_data_to_json(data):
         with open(file_path, 'r', encoding='utf-8') as file:
             existing_data = json.load(file)
     else:
-        existing_data = {"title": "", "questions": [], "audio": [], "images": []}
+        existing_data = {"title": "", "questions_by_part": {}, "audio": [], "images": []}
 
     # ✅ Thêm điều kiện cập nhật title
     if "title" in data and data["title"]:
         existing_data["title"] = data["title"]  # Cập nhật title nếu có
 
-    # Add new data
-    for question in data["questions"]:
-        if question not in existing_data['questions']:
-            existing_data['questions'].append(question)
+        # Thêm các câu hỏi theo từng phần (questions_by_part)
+    for part_name, questions in data["questions_by_part"].items():
+        if part_name not in existing_data["questions_by_part"]:
+            existing_data["questions_by_part"][part_name] = []
+
+        for question in questions:
+            if question not in existing_data["questions_by_part"][part_name]:
+                existing_data["questions_by_part"][part_name].append(question)
 
     for audio_url in data["audio"]:
         if audio_url not in existing_data['audio']:
@@ -399,7 +485,7 @@ def save_data_to_json(data):
     # Write the updated data back to the file
     with open(file_path, 'w', encoding='utf-8') as file:
         json.dump(existing_data, file, indent=4, ensure_ascii=False)
-    print("Data saved to JSON.")
+    print(f"Data saved successfully to {file_path}")
 
 
 def main():
