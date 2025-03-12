@@ -43,7 +43,7 @@ def find_chrome_from_registry():
     for registry_path in registry_paths:
         try:
             # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -311,6 +311,7 @@ def extract_test_data(driver):
             print(f"Lỗi khi trích xuất ảnh: {e}")
 
         return audio_urls, img_urls
+
     part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
     # Loop through different parts (Part 1 - Part 7)
     for part_tab in part_tabs:
@@ -328,8 +329,6 @@ def extract_test_data(driver):
 
             # Trích xuất audio và hình ảnh từ phần nội dung
             audio_urls, img_urls = extract_audio_and_images_from_part(part_container)
-
-
             # Lưu các URL audio và ảnh vào question_data hoặc nơi bạn muốn
             for audio_url in audio_urls:
                 print(f"Audio URL found: {audio_url}")
@@ -357,39 +356,6 @@ def extract_test_data(driver):
                     question['question_text'] = None  # Set to None if no question text is found
                     print(f"Warning: No question text found for question number {question['question_number']}")
 
-                # answers = []
-                # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
-                # for answer in answer_elements:
-                #     answers.append(answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip())
-
-                # Khởi tạo đáp án với giá trị mặc định là rỗng
-
-                # Lấy đáp án, nếu có
-                # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
-                # answers = {
-                #     "A": "",
-                #     "B": "",
-                #     "C": "",
-                #     "D": ""
-                # }
-                # options_found = 0
-                # # answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
-                # for answer in answer_elements:
-                #     try:
-                #         label = answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip()
-                #         option = answer.find_element(By.CSS_SELECTOR, 'input').get_attribute("value")
-                #
-                #         # Cập nhật đáp án vào dictionary chỉ khi option tồn tại và hợp lệ
-                #         if option in answers:
-                #             answers[option] = label.split(". ", 1)[1]  # Lấy phần nội dung đáp án mà không có "A.", "B."...
-                #             options_found += 1
-                #     except Exception as e:
-                #         print(f"Error extracting answer: {e}")
-                #
-                # # Nếu chỉ có 3 đáp án, ta loại bỏ "D"
-                # if options_found < 4:
-                #     answers = {k: v for k, v in answers.items() if v != ""}
-                # Lấy danh sách các đáp án từ trang
                 answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
                 # Khởi tạo đáp án mặc định với 4 lựa chọn rỗng
                 answers = {
@@ -398,26 +364,15 @@ def extract_test_data(driver):
                     "C": "",
                     "D": ""
                 }
-
                 options_found = 0
-
                 # Duyệt qua các phần tử đáp án tìm được
                 for answer in answer_elements:
                     try:
                         # Lấy nhãn đáp án (A, B, C, D...)
                         label = answer.find_element(By.CSS_SELECTOR, '.form-check-label').text.strip()
                         # Lấy giá trị của input (A, B, C, D)
-                        # option = answer.find_element(By.CSS_SELECTOR, 'input').get_attribute("value")
-                        # Lấy giá trị của input (A, B, C, D), chỉ lấy khi có value
                         option_element = answer.find_element(By.CSS_SELECTOR, 'input')
                         option = option_element.get_attribute("value") if option_element.get_attribute("value") else None
-                        # Cập nhật đáp án vào dictionary nếu option tồn tại
-                        # if option in answers:
-                        #     # Lấy phần nội dung đáp án mà không có "A.", "B."...
-                        #     answers[option] = label.split(". ", 1)[1] if ". " in label else label
-                        #     options_found += 1
-                        # Cập nhật đáp án vào dictionary nếu option tồn tại
-                        # if option in answers:
                         if option in answers and option is not None:
                             # Lấy phần nội dung đáp án mà không có "A.", "B.", "C." hoặc "D."
                             if ". " in label:
@@ -430,13 +385,6 @@ def extract_test_data(driver):
                 # Nếu chỉ có 3 đáp án, ta loại bỏ "D"
                 if options_found < 4:
                     answers.pop("D", None)
-                    # answers = {k: v for k, v in answers.items() if v != ""}
-                # Kiểm tra số lượng đáp án đã tìm được
-                # if options_found < 4:
-                #     # Nếu số lượng đáp án ít hơn 4, không xóa các đáp án rỗng
-                #     print(f"Only {options_found} answers found, keeping empty answers for missing options.")
-                #     # Không cần thay đổi gì thêm, giữ nguyên cấu trúc answers có đủ 4 key
-
                 # Đặt câu trả lời vào phần câu hỏi
                 question['answers'] = answers
                 questions_for_part.append(question)
