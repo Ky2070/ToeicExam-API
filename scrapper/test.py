@@ -231,10 +231,47 @@ def extract_test_data(driver):
         print(f"Lỗi khi trích xuất tiêu đề bài kiểm tra: {e}")
 
     # Trích xuất cả audio và hình ảnh
-    def extract_audio_and_images(part_content):
-        audio_urls = [a.get_attribute('src') for a in part_content.find_elements(By.TAG_NAME, 'source')]
-        img_urls = [img.get_attribute('src') for img in part_content.find_elements(By.TAG_NAME, 'img')]
-        return audio_urls, img_urls
+    def extract_audio_and_images(driver):
+        # Wait for the context-wrapper element to appear (assuming it might be dynamically loaded)
+        try:
+            context_wrapper = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "context-wrapper"))
+            )
+
+            # Initialize lists to store the URLs
+            audio_urls = []
+            img_urls = []
+
+            # Extract audio URLs from context-audio section
+            context_audio_elements = context_wrapper.find_elements(By.CLASS_NAME, 'context-audio')
+            for context_audio in context_audio_elements:
+                # Extract <audio> and <source> URLs
+                audio_elements = context_audio.find_elements(By.TAG_NAME, 'audio')
+                for audio in audio_elements:
+                    audio_src = audio.get_attribute('src')
+                    if audio_src:
+                        audio_urls.append(audio_src)
+
+                source_elements = context_audio.find_elements(By.TAG_NAME, 'source')
+                for source in source_elements:
+                    source_src = source.get_attribute('src')
+                    if source_src:
+                        audio_urls.append(source_src)
+
+            # Extract image URLs from context-image section
+            context_image_elements = context_wrapper.find_elements(By.CLASS_NAME, 'context-image')
+            for context_image in context_image_elements:
+                img_elements = context_image.find_elements(By.TAG_NAME, 'img')
+                for img in img_elements:
+                    img_src = img.get_attribute('src')
+                    if img_src:
+                        img_urls.append(img_src)
+
+            return audio_urls, img_urls
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return [], []
 
     part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
     # Loop through different parts (Part 1 - Part 7)
