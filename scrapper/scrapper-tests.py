@@ -117,23 +117,6 @@ data = read_data_from_file('test-data.txt')
 test_id = data.get('test_id')
 print(f"Test_id: {test_id}")
 
-# Cấu hình lại các part_id và content_id từ dữ liệu đã đọc từ file
-part_ids = []
-content_ids = []
-
-for i in range(1, 8):
-    # Lấy dữ liệu từ dictionary đã đọc được
-    part_id_key = str(i)  # Sử dụng phần số như 1, 2, 3, ... thay vì 'part_{i}_id'
-    content_id_key = str(i)  # Sử dụng phần số tương ứng
-
-    # Lấy dữ liệu từ part i
-    part_ids.append(data.get(part_id_key, {}).get('id'))
-    content_ids.append(data.get(part_id_key, {}).get('content'))
-
-# Kiểm tra các giá trị đã lấy ra từ file
-print("Part IDs:", part_ids)
-print("Content IDs:", content_ids)
-
 
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
@@ -244,33 +227,7 @@ def login_with_facebook():
 
 
 def extract_test_data(driver):
-    # question_data = {
-    #     "questionSetPart": [
-    #         {
-    #             "id": None,
-    #             "audio": None,
-    #             "page": None,
-    #             "image": None,
-    #             "fromQues": None,
-    #             "toQues": None,
-    #             "questionQuestionSet": [
-    #                 {
-    #                     "id": None,
-    #                     "questionNumber": None,
-    #                     "questionText": None,
-    #                     "answers": {
-    #                         "A": None,
-    #                         "B": None,
-    #                         "C": None,
-    #                         "D": None
-    #                     },
-    #                     "partId": None
-    #                 }
-    #             ]
-    #         }
-    #     ]
-    # }
-    question_data = {"title": [], "questions_by_part": {}, "audio": [], "images": []}
+    question_data = {"title": [], "questions_by_part": {}}
     try:
         title_element = driver.find_element(By.TAG_NAME, 'h1')
         test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
@@ -285,31 +242,9 @@ def extract_test_data(driver):
         print(f"Lỗi khi trích xuất tiêu đề bài kiểm tra: {e}")
 
     # Trích xuất cả audio và hình ảnh
-    def extract_audio_and_images_from_part(part_content):
-        audio_urls = []
-        img_urls = []
-
-        # Trích xuất audio
-        try:
-            audio_elements = part_content.find_elements(By.TAG_NAME, 'audio')
-            for audio_element in audio_elements:
-                source_element = audio_element.find_element(By.TAG_NAME, 'source')
-                audio_url = source_element.get_attribute('src')
-                if audio_url not in audio_urls:  # Kiểm tra xem URL đã tồn tại chưa
-                    audio_urls.append(audio_url)
-        except Exception as e:
-            print(f"Lỗi khi trích xuất audio: {e}")
-
-        # Trích xuất ảnh
-        try:
-            img_elements = part_content.find_elements(By.TAG_NAME, 'img')
-            for img_element in img_elements:
-                img_url = img_element.get_attribute('src')
-                if img_url not in img_urls:  # Kiểm tra xem URL đã tồn tại chưa
-                    img_urls.append(img_url)
-        except Exception as e:
-            print(f"Lỗi khi trích xuất ảnh: {e}")
-
+    def extract_audio_and_images(part_content):
+        audio_urls = [a.get_attribute('src') for a in part_content.find_elements(By.TAG_NAME, 'audio')]
+        img_urls = [img.get_attribute('src') for img in part_content.find_elements(By.TAG_NAME, 'img')]
         return audio_urls, img_urls
 
     part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
@@ -326,35 +261,25 @@ def extract_test_data(driver):
             # WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, content_id)))
             #
             # part_content = driver.find_element(By.ID, content_id)
-
             # Trích xuất audio và hình ảnh từ phần nội dung
-            audio_urls, img_urls = extract_audio_and_images_from_part(part_container)
-            # Lưu các URL audio và ảnh vào question_data hoặc nơi bạn muốn
-            for audio_url in audio_urls:
-                print(f"Audio URL found: {audio_url}")
-            for img_url in img_urls:
-                print(f"Image URL found: {img_url}")
-
-            # Thêm các URL audio và hình ảnh vào question_data
-            question_data["audio"].extend(audio_urls)
-            question_data["images"].extend(img_urls)
+            audio_urls, img_urls = extract_audio_and_images(part_container)
 
             # Trích xuất các câu hỏi
-
             question_wrapper = part_container.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
             question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
             print(f"📌 Số câu hỏi tìm thấy trong {part_name}: {len(question_elements)}")
             questions_for_part = []
             for wrapper in question_elements:
-                question = {'question_number': wrapper.find_element(By.CSS_SELECTOR, '.question-number').text.strip()}
-
+                # question = {'question_number': wrapper.find_element(By.CSS_SELECTOR, '.question-number').text.strip()}
+                question_number = wrapper.find_element(By.CSS_SELECTOR, '.question-number').text.strip()
                 # question['question_text'] = wrapper.find_element(By.CSS_SELECTOR, '.question-text').text.strip()
                 # Handle case where there is no question-text (missing question)
                 try:
-                    question['question_text'] = wrapper.find_element(By.CSS_SELECTOR, '.question-text').text.strip()
+                    question_text = wrapper.find_element(By.CSS_SELECTOR, '.question-text').text.strip() if wrapper.find_elements(By.CSS_SELECTOR, '.question-text') else None
+                    # question['question_text'] = wrapper.find_element(By.CSS_SELECTOR, '.question-text').text.strip()
                 except NoSuchElementException:
-                    question['question_text'] = None  # Set to None if no question text is found
-                    print(f"Warning: No question text found for question number {question['question_number']}")
+                    question_text = None  # Set to None if no question text is found
+                    print(f"Warning: No question text found for question number {question_number}")
 
                 answer_elements = wrapper.find_elements(By.CSS_SELECTOR, '.question-answers .form-check')
                 # Khởi tạo đáp án mặc định với 4 lựa chọn rỗng
@@ -386,10 +311,20 @@ def extract_test_data(driver):
                 if options_found < 4:
                     answers.pop("D", None)
                 # Đặt câu trả lời vào phần câu hỏi
-                question['answers'] = answers
-                questions_for_part.append(question)
+                # question['answers'] = answers
+                # questions_for_part.append(question)
 
             # Thêm câu hỏi vào phần tương ứng trong question_data
+                # Gán audio và hình ảnh cho từng câu hỏi
+                question = {
+                    "question_number": question_number,
+                    "question_text": question_text,
+                    "answers": answers,
+                    "audio": audio_urls.copy(),
+                    "images": img_urls.copy()
+                }
+                questions_for_part.append(question)
+
             question_data["questions_by_part"][part_name] = questions_for_part
 
             print(f"Extracted questions from {part_name}.")
@@ -402,18 +337,14 @@ def extract_test_data(driver):
 def save_data_to_json(data):
     file_path = f"data-test/{test_id}.json"
 
-    # Initialize the data structure if the file is empty
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         with open(file_path, 'r', encoding='utf-8') as file:
             existing_data = json.load(file)
     else:
-        existing_data = {"title": "", "questions_by_part": {}, "audio": [], "images": []}
+        existing_data = {"title": "", "questions_by_part": {}}
 
-    # ✅ Thêm điều kiện cập nhật title
-    if "title" in data and data["title"]:
-        existing_data["title"] = data["title"]  # Cập nhật title nếu có
+    existing_data["title"] = data.get("title", existing_data["title"])
 
-        # Thêm các câu hỏi theo từng phần (questions_by_part)
     for part_name, questions in data["questions_by_part"].items():
         if part_name not in existing_data["questions_by_part"]:
             existing_data["questions_by_part"][part_name] = []
@@ -422,18 +353,44 @@ def save_data_to_json(data):
             if question not in existing_data["questions_by_part"][part_name]:
                 existing_data["questions_by_part"][part_name].append(question)
 
-    for audio_url in data["audio"]:
-        if audio_url not in existing_data['audio']:
-            existing_data['audio'].append(audio_url)
-
-    for img_url in data["images"]:
-        if img_url not in existing_data['images']:
-            existing_data['images'].append(img_url)
-
-    # Write the updated data back to the file
     with open(file_path, 'w', encoding='utf-8') as file:
         json.dump(existing_data, file, indent=4, ensure_ascii=False)
     print(f"Data saved successfully to {file_path}")
+# def save_data_to_json(data):
+#     file_path = f"data-test/{test_id}.json"
+#
+#     # Initialize the data structure if the file is empty
+#     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+#         with open(file_path, 'r', encoding='utf-8') as file:
+#             existing_data = json.load(file)
+#     else:
+#         existing_data = {"title": "", "questions_by_part": {}, "audio": [], "images": []}
+#
+#     # ✅ Thêm điều kiện cập nhật title
+#     if "title" in data and data["title"]:
+#         existing_data["title"] = data["title"]  # Cập nhật title nếu có
+#
+#         # Thêm các câu hỏi theo từng phần (questions_by_part)
+#     for part_name, questions in data["questions_by_part"].items():
+#         if part_name not in existing_data["questions_by_part"]:
+#             existing_data["questions_by_part"][part_name] = []
+#
+#         for question in questions:
+#             if question not in existing_data["questions_by_part"][part_name]:
+#                 existing_data["questions_by_part"][part_name].append(question)
+#
+#     for audio_url in data["audio"]:
+#         if audio_url not in existing_data['audio']:
+#             existing_data['audio'].append(audio_url)
+#
+#     for img_url in data["images"]:
+#         if img_url not in existing_data['images']:
+#             existing_data['images'].append(img_url)
+#
+#     # Write the updated data back to the file
+#     with open(file_path, 'w', encoding='utf-8') as file:
+#         json.dump(existing_data, file, indent=4, ensure_ascii=False)
+#     print(f"Data saved successfully to {file_path}")
 
 
 def main():
