@@ -205,7 +205,11 @@ class PublishStatusFilter(SimpleListFilter):
 
 
 class TestAdmin(admin.ModelAdmin):
-    list_display = ('name', 'colored_publish_status', 'colored_types', 'tag')
+    list_display = ('name', 'colored_publish_status', 'colored_types', 'get_tags')
+
+    def get_tags(self, obj):
+        return ", ".join([tag.name for tag in obj.tags.all()])
+    get_tags.short_description = 'Tags'
 
     def colored_types(self, obj):
         # Gán màu sắc và biểu tượng dựa trên giá trị `types`
@@ -257,7 +261,7 @@ class TestAdmin(admin.ModelAdmin):
         js = ('js/custom_admin.js',)  # Liên kết tới tệp JavaScript tùy chỉnh của bạn
 
     search_fields = ('name', 'description')
-    list_filter = (PublishStatusFilter, 'tag', 'types')  # Thêm bộ lọc tùy chỉnh vào đây
+    list_filter = (PublishStatusFilter, 'tags', 'types')  # Updated to use tags instead of tag
     list_per_page = 6
     readonly_fields = ('id', 'test_date',)
 
@@ -265,7 +269,7 @@ class TestAdmin(admin.ModelAdmin):
     ordering = ('-publish', 'id')
 
     # Sử dụng fields thay vì fieldsets
-    fields = ('name', 'description', 'types', 'test_date', 'duration', 'question_count', 'part_count', 'tag', 'publish')
+    fields = ('name', 'description', 'types', 'test_date', 'duration', 'question_count', 'part_count', 'tags', 'publish')
 
     actions = ['mark_tests_published', 'mark_tests_unpublished', 'mark_tests_as_practice',
                'mark_tests_as_online', 'mark_tests_as_all', 'export_to_csv']
@@ -355,7 +359,7 @@ class TestAdmin(admin.ModelAdmin):
         writer = csv.writer(response)
         # Ghi tiêu đề cột
         writer.writerow(
-            ['ID', 'Name', 'Type', 'Test Date', 'Duration', 'Question Count', 'Part Count', 'Publish', 'Tag'])
+            ['ID', 'Name', 'Type', 'Test Date', 'Duration', 'Question Count', 'Part Count', 'Publish', 'Tags'])
         # Ghi từng hàng dữ liệu
         for obj in queryset:
             writer.writerow([
@@ -367,7 +371,7 @@ class TestAdmin(admin.ModelAdmin):
                 obj.question_count,
                 obj.part_count,
                 obj.publish,
-                obj.tag.name if obj.tag else 'N/A'
+                ", ".join([tag.name for tag in obj.tags.all()])
             ])
 
         self.message_user(request, f"Xuất dữ liệu thành công: {queryset.count()} bài kiểm tra.")

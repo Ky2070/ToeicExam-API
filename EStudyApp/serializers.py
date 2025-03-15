@@ -123,17 +123,17 @@ class TestDetailSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name']
 
 
 class TestSerializer(serializers.ModelSerializer):
-    tag = TagSerializer()
+    tags = TagSerializer(many=True, read_only=True)
     latest_history = serializers.SerializerMethodField()
     
     class Meta:
         model = Test
         fields = ['id', 'name', 'description', 'types', 'test_date',
-                 'duration', 'question_count', 'part_count', 'tag',
+                 'duration', 'question_count', 'part_count', 'tags',
                  'publish', 'latest_history', 'created_at', 'updated_at', 'part_total', 'question_total']
 
     def get_latest_history(self, obj):
@@ -221,29 +221,53 @@ class HistorySerializer(serializers.ModelSerializer):
 
 
 class CreateTestSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    tag_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+
     class Meta:
         model = Test
         fields = [
             'id', 'name', 'description', 'types', 'test_date', 'duration',
-            'question_count', 'part_count', 'tag', 'publish', 'created_at', 'updated_at'
+            'question_count', 'part_count', 'tags', 'tag_ids', 'publish', 'created_at', 'updated_at', 'publish_date', 'close_date'  
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    def update(self, instance, validated_data):
+        # Remove tag_ids from validated_data if it exists
+        tag_ids = validated_data.pop('tag_ids', None)
+        
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Update tags if tag_ids is provided
+        if tag_ids is not None:
+            instance.tags.set(tag_ids)
+        
+        instance.save()
+        return instance
+
 
 class TestListSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Test
         fields = [
-            'name', 'description', 'types', 'publish'
+            'name', 'description', 'types', 'publish', 'tags', 'publish_date', 'close_date'
         ]
 
 
 class TestByTagSerializer(serializers.ModelSerializer):
-    tag = TagSerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'duration', 'question_count', 'part_count', 'tag']
+        fields = ['id', 'name', 'description', 'duration', 'question_count', 'part_count', 'tags']
 
 
 class StudentStatisticsSerializer(serializers.Serializer):

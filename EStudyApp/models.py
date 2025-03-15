@@ -13,6 +13,7 @@ class Tag(BaseModel):
     DoesNotExist = None
     objects = None
     name = models.CharField(
+        unique=True,
         max_length=125,
         blank=True,
         null=True
@@ -75,12 +76,21 @@ class Test(BaseModel):
     part_count = models.IntegerField(
         default=7
     )
-    tag = models.ForeignKey(Tag, related_name='test_tag',
-                            on_delete=models.CASCADE,
-                            null=True,
-                            blank=True
-                            )
+    
+    tags = models.ManyToManyField(Tag, related_name='tests', blank=True)
     publish = models.BooleanField(default=False)
+    
+    publish_date = models.DateTimeField(
+        # default=datetime.now,
+        blank=True,
+        null=True
+    )
+    
+    close_date = models.DateTimeField(
+        # default=datetime.now,
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         return self.name
@@ -92,7 +102,6 @@ class Test(BaseModel):
     @property
     def question_total(self):
         question_total = Question.objects.filter(test=self).count()
-            
         return question_total
 
 

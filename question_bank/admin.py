@@ -81,7 +81,7 @@ class QuestionBankInline(admin.TabularInline):
 @admin.register(QuestionSetBank)
 class QuestionSetBankAdmin(admin.ModelAdmin):
     form = QuestionSetBankAdminForm
-    list_display = ('part_description', 'from_ques', 'to_ques', 'created_at', 'updated_at')
+    list_display = ('part_description', 'from_ques', 'to_ques', 'note')
     list_filter = ("part_description", "created_at", "updated_at")
     search_fields = ("page", "audio", "image")
     readonly_fields = ("created_at", "updated_at")
@@ -90,7 +90,7 @@ class QuestionSetBankAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('part_description', 'from_ques', 'to_ques')
+            'fields': ('part_description', 'from_ques', 'to_ques', 'note')
         }),
         ('Content', {
             'fields': ('page', 'audio', 'image'),

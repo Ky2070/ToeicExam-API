@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from course.services.blog import BlogService
 from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDeleteAPIView
 from Authentication.permissions import IsTeacher
+from question_bank.models import QuestionBank, QuestionSetBank
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -169,3 +170,55 @@ class BlogUpdateView(BaseUpdateAPIView):
 class BlogDeleteView(BaseDeleteAPIView):
     permission_classes = [IsAuthenticated, IsTeacher]
     service_class = BlogService
+    
+@api_view(['PUT'])
+# @permission_classes([IsAuthenticated])
+def panel_blog_question_bank(request, blog_id):
+    """
+    Add a question bank to a blog
+    """
+    note = request.data['note']
+    
+    blog = Blog.objects.get(id=blog_id)
+    
+    if blog is None:
+        return Response({'message': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    question_set = blog.questions_set
+    if question_set and question_set.part:
+        part_description = question_set.part.part_description
+    else:
+        # Handle the case where part is None
+        part_description = None  # Or set a default value
+        # Or return an error response
+        # return Response({"error": "Part not found for this question set"}, status=status.HTTP_404_NOT_FOUND)
+    
+    question_bank = QuestionSetBank.objects.create(
+        part_description=part_description if part_description else None,
+        audio=question_set.audio if question_set.audio else None,
+        page=question_set.page if question_set.page else None,
+        image=question_set.image if question_set.image else None,
+        from_ques=question_set.from_ques if question_set.from_ques else None,
+        to_ques=question_set.to_ques if question_set.to_ques else None,
+        note=note if note else None
+    )
+    
+    questions = Question.objects.filter(question_set=question_set)
+    for question in questions:
+        QuestionBank.objects.create(
+            question_set=question_bank,
+            question_type=question.question_type,
+            question_text=question.question_text,
+            correct_answer=question.correct_answer,
+            answers=question.answers,
+            part_description=part_description if part_description else None,
+            difficulty_level=question.difficulty_level,
+            question_number=question.question_number
+        )
+    
+    if question_set is None:
+        return Response({'message': 'Question set not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+
+    return Response(status=status.HTTP_200_OK)

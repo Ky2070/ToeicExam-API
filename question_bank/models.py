@@ -29,6 +29,7 @@ class QuestionSetBank(BaseModel):
     )
     from_ques = models.IntegerField(blank=True, null=True)
     to_ques = models.IntegerField(blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self):
         if self.page:
