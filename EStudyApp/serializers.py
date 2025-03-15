@@ -232,7 +232,7 @@ class CreateTestSerializer(serializers.ModelSerializer):
         model = Test
         fields = [
             'id', 'name', 'description', 'types', 'test_date', 'duration',
-            'question_count', 'part_count', 'tags', 'tag_ids', 'publish', 'created_at', 'updated_at'
+            'question_count', 'part_count', 'tags', 'tag_ids', 'publish', 'created_at', 'updated_at', 'publish_date', 'close_date'  
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -258,7 +258,7 @@ class TestListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = [
-            'name', 'description', 'types', 'publish', 'tags'
+            'name', 'description', 'types', 'publish', 'tags', 'publish_date', 'close_date'
         ]
 
 

@@ -308,7 +308,9 @@ class TestListView(APIView):
         skills = request.GET.get('skills')
         tag_ids = request.GET.get('tag_ids')  # Get tag IDs from query parameters
         limit = request.GET.get('limit')  # Get limit from query parameters
+        name = request.GET.get('name')  # Get name parameter for filtering
 
+        # Base query with prefetch_related
         tests = Test.objects.prefetch_related(
             Prefetch(
                 'part_test',
@@ -320,7 +322,12 @@ class TestListView(APIView):
                 to_attr='user_histories'
             ),
             'tags'  # Add tags to prefetch_related
-        ).filter(publish=True, types=type).order_by('id', 'name')  # Sắp xếp theo `id`
+        ).filter(publish=True, types=type)
+
+        # Add name filter if provided (case-insensitive)
+        if name:
+            name = name.strip()  # Remove whitespace
+            tests = tests.filter(name__icontains=name)  # Use icontains for case-insensitive search
 
         # Filter by tag IDs if specified
         if tag_ids:
@@ -355,18 +362,21 @@ class TestListView(APIView):
                 part_test__part_description__skill__in=['READING', 'LISTENING']
             ).distinct()
 
+        # Final ordering
+        tests = tests.order_by('id', 'name')
+
         # Apply limit if specified
         if limit:
             try:
                 limit = int(limit)
                 if limit > 0:
                     tests = tests[:limit]
-                    serializer = TestSerializer(tests, many=True)
-                    return Response({
-                        'results': serializer.data,
-                        'total_items': len(tests),
-                        'limit': limit
-                    })
+                    # serializer = TestSerializer(tests, many=True)
+                    # return Response({
+                    #     'results': serializer.data,
+                    #     'total_items': len(tests),
+                    #     'limit': limit
+                    # })
                 else:
                     return Response(
                         {"error": "Limit must be a positive integer."},
@@ -379,8 +389,8 @@ class TestListView(APIView):
                 )
         
         # If no limit specified, use pagination
-        paginator = FixedTestPagination()  # Sử dụng phân trang cố định
-        paginated_tests = paginator.paginate_queryset(tests, request)  # Phân trang dữ liệu
+        paginator = FixedTestPagination()
+        paginated_tests = paginator.paginate_queryset(tests, request)
         serializer = TestSerializer(paginated_tests, many=True)
         
         # Calculate total pages
@@ -451,11 +461,26 @@ class TestPartDetailView(APIView):
 
 class PartListView(APIView):
     def get(self, request, test_id):
-        parts = Part.objects.filter(test=test_id).select_related(
-            'part_description').order_by('id')
-
-        serializer = PartListSerializer(parts, many=True)
-        return Response(serializer.data)
+        try:
+            # Use select_related to fetch test in a single query
+            test = Test.objects.select_related().get(id=test_id)
+            
+            # Use select_related for foreign key relationships and order by part number
+            parts = (Part.objects.filter(test=test)
+                    .select_related('part_description')  # Join with part_description
+                    .prefetch_related(
+                        'question_set_part',  # Prefetch related question sets
+                        'question_part'       # Prefetch related questions
+                    )
+                    .order_by('part_description__part_number'))
+            
+            serializer = PartListSerializer(parts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Test.DoesNotExist:
+            return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class StateCreateView(APIView):
@@ -923,20 +948,58 @@ class TestCreateAPIView(APIView):
 
 
 class TestUpdateAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Chỉ người dùng đã đăng nhập
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, id, *args, **kwargs):
         """
-            Cập nhật thông tin bài thi theo ID.
-            """
+        Cập nhật thông tin bài thi theo ID.
+        """
         try:
             test = Test.objects.get(id=id)
+            
+            # Get dates from request data
+            publish_date = request.data.get('publish_date')
+            close_date = request.data.get('close_date')
+            
+            # Handle publish_date
+            if publish_date:
+                if publish_date == "null":
+                    request.data['publish_date'] = None
+                else:
+                    try:
+                        request.data['publish_date'] = datetime.strptime(publish_date, '%Y-%m-%dT%H:%M:%S%z')
+                    except ValueError:
+                        return Response(
+                            {'error': 'Invalid publish_date format. Use format (e.g., 2025-03-16T00:00:00+07:00)'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+            
+            # Handle close_date
+            if close_date:
+                if close_date == "null":
+                    request.data['close_date'] = None
+                else:
+                    try:
+                        request.data['close_date'] = datetime.strptime(close_date, '%Y-%m-%dT%H:%M:%S%z')
+                        # Only validate dates if both are provided and not null
+                        if publish_date and publish_date != "null" and request.data['close_date'] <= request.data['publish_date']:
+                            return Response(
+                                {'error': 'close_date must be after publish_date'},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    except ValueError:
+                        return Response(
+                            {'error': 'Invalid close_date format. Use format (e.g., 2025-03-16T00:00:00+07:00)'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+
             serializer = CreateTestSerializer(
                 test, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         except Test.DoesNotExist:
             return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
 
