@@ -526,17 +526,17 @@ def extract_part_3_4(test_question_wrapper):
 def extract_part_6_7(test_question_wrapper):
     questions_for_part = []
     # Xử lý các nhóm câu hỏi
-    question_groups = test_question_wrapper.find_elements(By.CSS_SELECTOR, '.question-group-wrapper')
+    question_groups = test_question_wrapper.find_elements(By.CSS_SELECTOR, '.question-group-wrapper > .question-twocols')
     for group in question_groups:
         # Lấy đoạn văn từ `.question-twocols-left .context-wrapper`
         try:
             context_text = group.find_element(By.CSS_SELECTOR,
-                                              '.question-twocols-left .context-wrapper').text.strip()
+                                              '.question-twocols-left > .context-wrapper').text.strip()
         except:
             context_text = ""
 
         # Lấy danh sách câu hỏi trong `.question-twocols-right .question-wrapper`
-        question_columns = group.find_elements(By.CSS_SELECTOR, '.question-twocols-right .question-wrapper')
+        question_columns = group.find_elements(By.CSS_SELECTOR, '.question-twocols-right .questions-wrapper .question-wrapper')
         print(f"Tìm thấy {len(question_columns)} bộ câu hỏi")
         group_questions = []
 
@@ -614,10 +614,10 @@ def save_data_to_json(data):
         elif part_name in ["Part 6", "Part 7"]:
             # Lưu theo đoạn văn bản + câu hỏi liên quan
             for new_passage in questions:
-                passage_text = new_passage.get("passage", "")
+                passage_text = new_passage.get("text", "")  # Đổi "passage" thành "text"
                 existing_passages = [
                     p for p in existing_data["questions_by_part"][part_name]
-                    if p.get("passage", "") == passage_text
+                    if p.get("text", "") == passage_text  # Đổi "passage" thành "text"
                 ]
 
                 if existing_passages:
@@ -638,7 +638,6 @@ def save_data_to_json(data):
         json.dump(existing_data, file, indent=4, ensure_ascii=False)
 
     print(f"✅ Dữ liệu đã được lưu vào {file_path}")
-
 
 # def save_data_to_json(data):
 #     file_path = f"data-test/{test_id}.json"
