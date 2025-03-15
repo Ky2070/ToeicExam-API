@@ -5,14 +5,14 @@ from Authentication.permissions import IsTeacher
 from question_bank.models import QuestionBank, QuestionSetBank
 from utils.standard_part import PART_STRUCTURE
 
-from django.contrib.postgres.search import SearchQuery, SearchVector
+
 from django.db.models import Prefetch, Q
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from collections import defaultdict
-from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
+# from collections import defaultdict
+# from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
@@ -26,7 +26,7 @@ from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, 
     StudentStatisticsSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-
+from EStudyApp.services.service_student import get_suggestions
 class QuestionSkillAPIView(APIView):
     """
     API View to retrieve the skill (LISTENING or READING) of a question by its ID.
@@ -1454,3 +1454,20 @@ class SystemStatisticsAPIView(APIView):
             "avg_score": History.objects.aggregate(Avg('score'))['score__avg'],
         }
         return Response(stats)
+
+
+class StudentReportView(APIView):
+    def get(self, request, user_id):
+        history = History.objects.filter(user_id=user_id, complete=True)
+        training = HistoryTraining.objects.filter(user_id=user_id, complete=True)
+
+        history_data = HistorySerializer(history, many=True).data
+        training_data = HistoryTrainingSerializer(training, many=True).data
+
+        analysis = get_suggestions(user_id)
+
+        return Response({
+            "history": history_data,
+            "training": training_data,
+            "analysis": analysis
+        }, status=status.HTTP_200_OK)

@@ -1,12 +1,14 @@
 from django.urls import path
-from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
+from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, \
+    PartListQuestionsSetAPIView, TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
-    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestQuestionSetAPIView, TestUpdateAPIView, \
+    TestCommentView, CommentView, SubmitTrainingView, SearchTestsAPIView, TestCreateAPIView, TestQuestionSetAPIView, \
+    TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
-    StudentStatisticsAPIView, SystemStatisticsAPIView
+    StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView
 
 urlpatterns = [
     # Tag for Test-list
@@ -70,8 +72,7 @@ urlpatterns = [
     path('delete/comments/<int:pk>/', TestCommentView.as_view(), name='comment-delete'),
 
     # path('courses/', CourseListView.as_view(), name='course-list'),
-
-
+    path('student/<int:user_id>/', StudentReportView.as_view(), name='student_report'),
     path('statistics/', StudentStatisticsAPIView.as_view(), name='student-statistics'),
 
     path('system/statistics/', SystemStatisticsAPIView.as_view(), name='system-statistics'),
