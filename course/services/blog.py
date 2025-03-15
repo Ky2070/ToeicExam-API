@@ -372,3 +372,9 @@ class BlogService:
     def delete(self, id: int, author: Any) -> bool:
         """Alias for delete_blog to match base interface"""
         return self.delete_blog(id, author)
+    
+    def add_question_bank(self, data: Dict[str, Any], blog_id: int) -> Dict[str, Any]:
+        """
+        Add a question bank to a blog
+        """
+        pass

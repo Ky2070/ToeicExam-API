@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from django.db.models import Avg, Max, Min, Count
+from django.db.models import Avg, Max, Min, Count, F
 import random
 from Authentication.permissions import IsTeacher
 from question_bank.models import QuestionBank, QuestionSetBank
@@ -304,32 +304,107 @@ class TestListView(APIView):
 
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
+        
+        skills = request.GET.get('skills')
+        tag_ids = request.GET.get('tag_ids')  # Get tag IDs from query parameters
+        limit = request.GET.get('limit')  # Get limit from query parameters
 
         tests = Test.objects.prefetch_related(
             Prefetch(
                 'part_test',
-                queryset=Part.objects.all()
+                queryset=Part.objects.select_related('part_description').all()
             ),
             Prefetch(
                 'history_test',
                 queryset=History.objects.order_by('-end_time'),
                 to_attr='user_histories'
-            )
-        ).filter(publish=True, types=type).select_related(
-            'tag').order_by('id')  # Sắp xếp theo `id`
-        paginator = FixedTestPagination()  # Sử dụng phân trang cố định
-        paginated_tests = paginator.paginate_queryset(
-            tests, request)  # Phân trang dữ liệu
-        serializer = TestSerializer(paginated_tests, many=True)
-        # Trả dữ liệu kèm thông tin phân trang
-        return paginator.get_paginated_response(serializer.data)
+            ),
+            'tags'  # Add tags to prefetch_related
+        ).filter(publish=True, types=type).order_by('id', 'name')  # Sắp xếp theo `id`
 
-    # def get(self, request, format=None):
-    #     # Sắp xếp các bài kiểm tra theo trường 'name' (hoặc trường bạn muốn)
-    #     # hoặc 'date_created' nếu bạn muốn sắp xếp theo ngày tạo
-    #     tests = Test.objects.all().select_related('tag').order_by('id')
-    #     serializer = TestSerializer(tests, many=True)
-    #     return Response(serializer.data)
+        # Filter by tag IDs if specified
+        if tag_ids:
+            try:
+                # Convert comma-separated string to list of integers
+                tag_id_list = [int(tag_id) for tag_id in tag_ids.split(',')]
+                # Filter tests that have any of the specified tags
+                tests = tests.filter(tags__id__in=tag_id_list).distinct()
+            except ValueError:
+                return Response(
+                    {"error": "Invalid tag IDs format. Please provide comma-separated integers."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Filter by skills if specified
+        if skills:
+            if skills.upper() == 'READING':
+                # Get tests where all parts are READING
+                tests = tests.annotate(
+                    total_parts=Count('part_test'),
+                    reading_parts=Count('part_test', filter=Q(part_test__part_description__skill='READING'))
+                ).filter(total_parts=F('reading_parts')).distinct()
+            elif skills.upper() == 'LISTENING':
+                # Get tests where all parts are LISTENING
+                tests = tests.annotate(
+                    total_parts=Count('part_test'),
+                    listening_parts=Count('part_test', filter=Q(part_test__part_description__skill='LISTENING'))
+                ).filter(total_parts=F('listening_parts')).distinct()
+        else:
+            # Get tests that have both READING and LISTENING parts
+            tests = tests.filter(
+                part_test__part_description__skill__in=['READING', 'LISTENING']
+            ).distinct()
+
+        # Apply limit if specified
+        if limit:
+            try:
+                limit = int(limit)
+                if limit > 0:
+                    tests = tests[:limit]
+                    serializer = TestSerializer(tests, many=True)
+                    return Response({
+                        'results': serializer.data,
+                        'total_items': len(tests),
+                        'limit': limit
+                    })
+                else:
+                    return Response(
+                        {"error": "Limit must be a positive integer."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            except ValueError:
+                return Response(
+                    {"error": "Invalid limit format. Please provide a valid integer."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # If no limit specified, use pagination
+        paginator = FixedTestPagination()  # Sử dụng phân trang cố định
+        paginated_tests = paginator.paginate_queryset(tests, request)  # Phân trang dữ liệu
+        serializer = TestSerializer(paginated_tests, many=True)
+        
+        # Calculate total pages
+        total_items = tests.count()
+        page_size = paginator.page_size
+        total_pages = (total_items + page_size - 1) // page_size
+        
+        # Get current page from request
+        current_page = paginator.page.number if hasattr(paginator, 'page') else 1
+        
+        # Create response data
+        response_data = {
+            'results': serializer.data,
+            'pagination': {
+                'total_items': total_items,
+                'total_pages': total_pages,
+                'current_page': current_page,
+                'page_size': page_size,
+                'has_next': paginator.page.has_next() if hasattr(paginator, 'page') else False,
+                'has_previous': paginator.page.has_previous() if hasattr(paginator, 'page') else False,
+            }
+        }
+        
+        return Response(response_data)
 
 
 class TestPartDetailView(APIView):
@@ -345,7 +420,7 @@ class TestPartDetailView(APIView):
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
                                 Prefetch(
-                                    'question_question_set',  # S���p xếp câu hỏi trong bộ câu hỏi
+                                    'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
                                     queryset=Question.objects.filter(
                                         part_id__in=parts).order_by(
                                         'question_number')
@@ -832,6 +907,12 @@ class ListTestView(APIView):
 class TestCreateAPIView(APIView):
     # Chỉ người dùng đã đăng nhập mới được phép truy cập
     permission_classes = [IsAuthenticated]
+    
+    def get(self, request, id, *args, **kwargs):
+        print(id)
+        test = Test.objects.get(id=id)
+        serializer = TestListSerializer(test)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = CreateTestSerializer(data=request.data)
@@ -839,17 +920,6 @@ class TestCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request, id, *args, **kwargs):
-        """
-        Lấy thông tin chi tiết bài thi theo ID.
-        """
-        try:
-            test = Test.objects.get(id=id)
-            serializer = TestListSerializer(test)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Test.DoesNotExist:
-            return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class TestUpdateAPIView(APIView):
@@ -1220,6 +1290,93 @@ class CreatePartAutoAPIView(APIView):
             # Save the part instance first to get a primary key
             part.save()
 
+            # create part 1
+            if part_number == '1' or part_number == '2' or part_number == '5' or part_number == '6':
+                print("part 1")
+                id_array_existing = []
+                start_question_set = 0
+                length_array_existing = 0
+                if part_number == '1':
+                    length_array_existing = 6
+                    start_question_set = 0
+                elif part_number == '2':
+                    length_array_existing = 25
+                    start_question_set = 6
+                elif part_number == '5':
+                    length_array_existing = 30
+                    start_question_set = 100
+                elif part_number == '6':
+                    # 16 questions 4 sets
+                    length_array_existing = 4 
+                    start_question_set = 130
+                    
+                while len(id_array_existing) < length_array_existing:
+                    random_question_set = QuestionSetBank.objects.filter(
+                        part_description_id=int(part_number)
+                    ).exclude(
+                        id__in=id_array_existing
+                    ).order_by('?').first()
+                    if random_question_set:
+                        id_array_existing.append(random_question_set.id)
+                    else:
+                        break
+                
+                for index, question_set_id in enumerate(id_array_existing):
+                    if part_number == '1' or part_number == '2' or part_number == '5':
+                        question_set = QuestionSetBank.objects.get(id=question_set_id)
+                        # Create new question set
+                        new_question_set = QuestionSet.objects.create(
+                            part=part,
+                            from_ques=start_question_set + index + 1,
+                            to_ques=start_question_set + index + 1,
+                            audio=question_set.audio,
+                            page=question_set.page,
+                            image=question_set.image,
+                            test=test,
+                        )
+                        # Duplicate questions
+                        existing_questions = QuestionBank.objects.filter(
+                            question_set=question_set)
+                        for q_index, question in enumerate(existing_questions):
+                            Question.objects.create(
+                                question_set=new_question_set,
+                                part=part,
+                                test=test,
+                                question_text=question.question_text,
+                                answers=question.answers,
+                                correct_answer=question.correct_answer,
+                                question_number=start_question_set + index + q_index + 1,
+                                difficulty_level=question.difficulty_level,
+                            )
+                    elif part_number == '6':
+                        question_set = QuestionSetBank.objects.get(id=question_set_id)
+                        # Create new question set
+                        new_question_set = QuestionSet.objects.create(
+                            part=part,
+                            from_ques=start_question_set + (index * 4) + 1,
+                            to_ques=start_question_set + (index * 4) + 4,
+                            audio=question_set.audio,
+                            page=question_set.page,
+                            image=question_set.image,
+                            test=test,
+                        )
+                        # Duplicate questions
+                        existing_questions = QuestionBank.objects.filter(
+                            question_set=question_set)
+                        for q_index, question in enumerate(existing_questions):
+                            Question.objects.create(
+                                question_set=new_question_set,
+                                part=part,
+                                test=test,
+                                question_text=question.question_text,
+                                answers=question.answers,
+                                correct_answer=question.correct_answer,
+                                question_number=start_question_set + (index * 4) + q_index + 1,
+                                difficulty_level=question.difficulty_level,
+                            )
+
+                return part
+                    
             part_structures = PART_STRUCTURE[f'PART_{part_number}']
             for from_ques, to_ques in part_structures['sets']:
                 existing_question_sets = QuestionSetBank.objects.filter(
@@ -1454,3 +1611,28 @@ class SystemStatisticsAPIView(APIView):
             "avg_score": History.objects.aggregate(Avg('score'))['score__avg'],
         }
         return Response(stats)
+    
+    
+class TagListView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Get the name parameter and replace '+' with spaces
+            name = request.GET.get('name')
+            if name is not None:
+                # Replace '+' with spaces and strip any extra whitespace
+                name = name.replace('+', ' ').strip()
+                tags = Tag.objects.filter(name__icontains=name)
+            else:
+                tags = Tag.objects.all()
+            serializer = TagSerializer(tags, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = TagSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

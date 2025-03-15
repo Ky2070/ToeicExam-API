@@ -75,11 +75,7 @@ class Test(BaseModel):
     part_count = models.IntegerField(
         default=7
     )
-    tag = models.ForeignKey(Tag, related_name='test_tag',
-                            on_delete=models.CASCADE,
-                            null=True,
-                            blank=True
-                            )
+    tags = models.ManyToManyField(Tag, related_name='tests', blank=True)
     publish = models.BooleanField(default=False)
 
     def __str__(self):
@@ -92,7 +88,6 @@ class Test(BaseModel):
     @property
     def question_total(self):
         question_total = Question.objects.filter(test=self).count()
-            
         return question_total
 
 

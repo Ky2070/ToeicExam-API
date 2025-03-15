@@ -10,7 +10,8 @@ from course.views.api.blog import (
     panel_blog_detail,
     BlogCreateView,
     BlogUpdateView,
-    BlogDeleteView
+    BlogDeleteView,
+    panel_blog_question_bank
 )
 from course.views.api.review import (
     get_lesson_reviews, 
@@ -67,4 +68,6 @@ urlpatterns = [
     path('blogs/<int:blog_id>/toggle-like/', toggle_like_blog, name='toggle-blog-like'),
     path('blogs/<int:blog_id>/likes/', get_blog_likes, name='blog-likes'),
     path('blogs/<int:blog_id>/check-like/', check_user_like, name='check-blog-like'),
+    
+    path('panel/blogs/add-question-bank/<int:blog_id>/', panel_blog_question_bank, name='panel_blog_question_bank'),
 ]

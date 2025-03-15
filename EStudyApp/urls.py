@@ -1,5 +1,5 @@
 from django.urls import path
-from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TestDetailView, \
+from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TagListView, TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
@@ -68,6 +68,10 @@ urlpatterns = [
     path('create/comments/', TestCommentView.as_view(), name='create-comments'),
     path('edit/comments/<int:pk>/', TestCommentView.as_view(), name='comment-update'),
     path('delete/comments/<int:pk>/', TestCommentView.as_view(), name='comment-delete'),
+    
+    # tag
+    path('tags/', TagListView.as_view(), name='tag-list'),
+    
 
     # path('courses/', CourseListView.as_view(), name='course-list'),
 
