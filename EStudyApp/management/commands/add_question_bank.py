@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from EStudyApp.models import Part, PartDescription, Question, QuestionSet, Test
 from question_bank.models import QuestionBank, QuestionSetBank
 
+
 class Command(BaseCommand):
     help = 'Fix data question'
 
