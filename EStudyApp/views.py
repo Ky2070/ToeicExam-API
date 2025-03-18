@@ -27,6 +27,8 @@ from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, 
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from EStudyApp.services.service_student import get_suggestions
+
+
 class QuestionSkillAPIView(APIView):
     """
     API View to retrieve the skill (LISTENING or READING) of a question by its ID.
@@ -97,7 +99,8 @@ class SubmitTestView(APIView):
                 if question and user_answer is not None:
                     # Lấy skill từ part_skill_map
                     skill = part_skill_map.get(question.part_id)
-                    is_correct = user_answer == question.correct_answer
+                    is_correct = user_answer.lower() == question.correct_answer.lower()
+                    print(user_answer, question.correct_answer)
                     if skill == "LISTENING":
                         listening_total += 1
                         if is_correct:
@@ -304,9 +307,10 @@ class TestListView(APIView):
 
         type = request.GET.get('type') if request.GET.get(
             'type') is not None else 'Practice'
-        
+
         skills = request.GET.get('skills')
-        tag_ids = request.GET.get('tag_ids')  # Get tag IDs from query parameters
+        # Get tag IDs from query parameters
+        tag_ids = request.GET.get('tag_ids')
         limit = request.GET.get('limit')  # Get limit from query parameters
         name = request.GET.get('name')  # Get name parameter for filtering
 
@@ -327,7 +331,8 @@ class TestListView(APIView):
         # Add name filter if provided (case-insensitive)
         if name:
             name = name.strip()  # Remove whitespace
-            tests = tests.filter(name__icontains=name)  # Use icontains for case-insensitive search
+            # Use icontains for case-insensitive search
+            tests = tests.filter(name__icontains=name)
 
         # Filter by tag IDs if specified
         if tag_ids:
@@ -348,13 +353,15 @@ class TestListView(APIView):
                 # Get tests where all parts are READING
                 tests = tests.annotate(
                     total_parts=Count('part_test'),
-                    reading_parts=Count('part_test', filter=Q(part_test__part_description__skill='READING'))
+                    reading_parts=Count('part_test', filter=Q(
+                        part_test__part_description__skill='READING'))
                 ).filter(total_parts=F('reading_parts')).distinct()
             elif skills.upper() == 'LISTENING':
                 # Get tests where all parts are LISTENING
                 tests = tests.annotate(
                     total_parts=Count('part_test'),
-                    listening_parts=Count('part_test', filter=Q(part_test__part_description__skill='LISTENING'))
+                    listening_parts=Count('part_test', filter=Q(
+                        part_test__part_description__skill='LISTENING'))
                 ).filter(total_parts=F('listening_parts')).distinct()
         else:
             # Get tests that have both READING and LISTENING parts
@@ -387,20 +394,21 @@ class TestListView(APIView):
                     {"error": "Invalid limit format. Please provide a valid integer."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
+
         # If no limit specified, use pagination
         paginator = FixedTestPagination()
         paginated_tests = paginator.paginate_queryset(tests, request)
         serializer = TestSerializer(paginated_tests, many=True)
-        
+
         # Calculate total pages
         total_items = tests.count()
         page_size = paginator.page_size
         total_pages = (total_items + page_size - 1) // page_size
-        
+
         # Get current page from request
-        current_page = paginator.page.number if hasattr(paginator, 'page') else 1
-        
+        current_page = paginator.page.number if hasattr(
+            paginator, 'page') else 1
+
         # Create response data
         response_data = {
             'results': serializer.data,
@@ -413,7 +421,7 @@ class TestListView(APIView):
                 'has_previous': paginator.page.has_previous() if hasattr(paginator, 'page') else False,
             }
         }
-        
+
         return Response(response_data)
 
 
@@ -432,10 +440,13 @@ class TestPartDetailView(APIView):
                                 Prefetch(
                                     'question_question_set',  # Sắp xếp câu hỏi trong bộ câu hỏi
                                     queryset=Question.objects.filter(
-                                        part_id__in=parts).order_by(
-                                        'question_number')
+                                        part_id__in=parts).order_by('question_number')
                                 )
                             )
+                        ),
+                        Prefetch(
+                            'question_part',  # Các câu hỏi trong Part
+                            queryset=Question.objects.filter(part_id__in=parts).order_by('question_number')
                         )
                     ).order_by('part_description__part_number')  # Sắp xếp các phần theo `id`
                 ),
@@ -464,19 +475,20 @@ class PartListView(APIView):
         try:
             # Use select_related to fetch test in a single query
             test = Test.objects.select_related().get(id=test_id)
-            
+
             # Use select_related for foreign key relationships and order by part number
             parts = (Part.objects.filter(test=test)
-                    .select_related('part_description')  # Join with part_description
-                    .prefetch_related(
-                        'question_set_part',  # Prefetch related question sets
-                        'question_part'       # Prefetch related questions
-                    )
-                    .order_by('part_description__part_number'))
-            
+                     # Join with part_description
+                     .select_related('part_description')
+                     .prefetch_related(
+                'question_set_part',  # Prefetch related question sets
+                'question_part'       # Prefetch related questions
+            )
+                .order_by('part_description__part_number'))
+
             serializer = PartListSerializer(parts, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-            
+
         except Test.DoesNotExist:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -817,7 +829,7 @@ class SubmitTrainingView(APIView):
 
                     if user_answer is None:
                         unanswer_questions += 1
-                    elif user_answer == question.correct_answer:
+                    elif user_answer.lower() == question.correct_answer.lower():
                         correct_answers += 1
                     else:
                         wrong_answers += 1
@@ -932,7 +944,7 @@ class ListTestView(APIView):
 class TestCreateAPIView(APIView):
     # Chỉ người dùng đã đăng nhập mới được phép truy cập
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, id, *args, **kwargs):
         print(id)
         test = Test.objects.get(id=id)
@@ -956,31 +968,33 @@ class TestUpdateAPIView(APIView):
         """
         try:
             test = Test.objects.get(id=id)
-            
+
             # Get dates from request data
             publish_date = request.data.get('publish_date')
             close_date = request.data.get('close_date')
-            
+
             # Handle publish_date
             if publish_date:
                 if publish_date == "null":
                     request.data['publish_date'] = None
                 else:
                     try:
-                        request.data['publish_date'] = datetime.strptime(publish_date, '%Y-%m-%dT%H:%M:%S%z')
+                        request.data['publish_date'] = datetime.strptime(
+                            publish_date, '%Y-%m-%dT%H:%M:%S%z')
                     except ValueError:
                         return Response(
                             {'error': 'Invalid publish_date format. Use format (e.g., 2025-03-16T00:00:00+07:00)'},
                             status=status.HTTP_400_BAD_REQUEST
                         )
-            
+
             # Handle close_date
             if close_date:
                 if close_date == "null":
                     request.data['close_date'] = None
                 else:
                     try:
-                        request.data['close_date'] = datetime.strptime(close_date, '%Y-%m-%dT%H:%M:%S%z')
+                        request.data['close_date'] = datetime.strptime(
+                            close_date, '%Y-%m-%dT%H:%M:%S%z')
                         # Only validate dates if both are provided and not null
                         if publish_date and publish_date != "null" and request.data['close_date'] <= request.data['publish_date']:
                             return Response(
@@ -999,7 +1013,7 @@ class TestUpdateAPIView(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
+
         except Test.DoesNotExist:
             return Response({'error': 'Test not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -1079,48 +1093,58 @@ class PartListQuestionsSetAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, part_id, *args, **kwargs):
-        data = request.data
-        question_set_id = data.get('id')
-        audio = data.get('audio')
-        page = data.get('page')
-        image = data.get('image')
-        from_ques = data.get('from_ques')
-        to_ques = data.get('to_ques')
-        question_question_set = data.get('question_question_set', [])
-        test_id = data.get('test_id')
-        test = Test.objects.get(id=test_id)
-
         try:
-            # get part
-            part = Part.objects.get(id=part_id)
+            data = request.data
+            question_set_id = data.get('id')
+            audio = data.get('audio')
+            page = data.get('page')
+            image = data.get('image')
+            from_ques = data.get('from_ques')
+            to_ques = data.get('to_ques')
+            question_question_set = data.get('question_question_set', [])
+            test_id = data.get('test_id')
+            
+            # Get part first
+            try:
+                part = Part.objects.get(id=part_id)
+            except Part.DoesNotExist:
+                return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Get test if test_id is provided
+            test = None
+            if test_id:
+                try:
+                    test = Test.objects.get(id=test_id)
+                except Test.DoesNotExist:
+                    return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
             # get question set
             question_set = None
 
             if question_set_id:
-                question_set = QuestionSet.objects.get(id=question_set_id)
-                question_set.audio = audio
-                question_set.page = page
-                question_set.image = image
-                question_set.from_ques = int(from_ques)
-                question_set.to_ques = int(to_ques)
-                question_set.test = test
-                question_set.save()
+                try:
+                    question_set = QuestionSet.objects.get(id=question_set_id)
+                    question_set.audio = audio
+                    question_set.page = page
+                    question_set.image = image
+                    question_set.from_ques = int(from_ques) if from_ques else None
+                    question_set.to_ques = int(to_ques) if to_ques else None
+                    if test:
+                        question_set.test = test
+                    question_set.save()
+                except QuestionSet.DoesNotExist:
+                    return Response({"error": "Question set not found"}, status=status.HTTP_404_NOT_FOUND)
             else:
                 question_set = QuestionSet.objects.create(
                     part=part,
                     audio=audio,
                     page=page,
                     image=image,
-                    from_ques=int(from_ques),
-                    to_ques=int(to_ques),
-                    test=test,
+                    from_ques=int(from_ques) if from_ques else None,
+                    to_ques=int(to_ques) if to_ques else None,
+                    test=test
                 )
                 question_set_id = question_set.id
-
-            # Create a set of incoming question IDs
-            # incoming_question_ids = {
-            #     q.get('id') for q in question_question_set if q.get('id')}
 
             # Create a dictionary of incoming questions for updates
             question_updates = {
@@ -1155,7 +1179,8 @@ class PartListQuestionsSetAPIView(APIView):
                         'question_number', question.question_number)
                     question.difficulty_level = update_data.get(
                         'difficulty_level', question.difficulty_level)
-                    question.test = test
+                    if test:
+                        question.test = test
                     question.part = part
                     question.save()
                     del question_updates[question.id]
@@ -1173,7 +1198,7 @@ class PartListQuestionsSetAPIView(APIView):
                         'correct_answer', '').upper(),
                     question_number=new_question_data.get('question_number'),
                     difficulty_level=new_question_data.get('difficulty_level'),
-                    test=test,
+                    test=test
                 )
 
             # Refresh and serialize the updated question set
@@ -1181,10 +1206,8 @@ class PartListQuestionsSetAPIView(APIView):
             serializer = QuestionSetSerializer(question_set_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        except Part.DoesNotExist:
-            return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
-        # except Exception as e:
-        #     return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EditQuestionsAPIView(APIView):
@@ -1219,8 +1242,8 @@ class EditQuestionsAPIView(APIView):
                 question_set.audio = audio
                 question_set.page = page
                 question_set.image = image
-                question_set.from_ques = int(from_ques)
-                question_set.to_ques = int(to_ques)
+                question_set.from_ques = int(from_ques) if from_ques else None
+                question_set.to_ques = int(to_ques) if to_ques else None
                 question_set.save()
             else:
                 if data.get('id') is None:
@@ -1229,8 +1252,8 @@ class EditQuestionsAPIView(APIView):
                         audio=audio,
                         page=page,
                         image=image,
-                        from_ques=int(from_ques),
-                        to_ques=int(to_ques),
+                        from_ques=int(from_ques) if from_ques else None,
+                        to_ques=int(to_ques) if to_ques else None,
                     )
                 else:
                     return Response({"error": "Question set not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -1354,8 +1377,7 @@ class CreatePartAutoAPIView(APIView):
             part.save()
 
             # create part 1
-            if part_number == '1' or part_number == '2' or part_number == '5' or part_number == '6':
-                print("part 1")
+            if part_number in ['1', '2', '5', '6', '3', '4']:
                 id_array_existing = []
                 start_question_set = 0
                 length_array_existing = 0
@@ -1365,14 +1387,19 @@ class CreatePartAutoAPIView(APIView):
                 elif part_number == '2':
                     length_array_existing = 25
                     start_question_set = 6
+                elif part_number == '3':
+                    length_array_existing = 13
+                elif part_number == '4':
+                    length_array_existing = 10
+                    start_question_set = 70
                 elif part_number == '5':
                     length_array_existing = 30
                     start_question_set = 100
                 elif part_number == '6':
                     # 16 questions 4 sets
-                    length_array_existing = 4 
+                    length_array_existing = 4
                     start_question_set = 130
-                    
+
                 while len(id_array_existing) < length_array_existing:
                     random_question_set = QuestionSetBank.objects.filter(
                         part_description_id=int(part_number)
@@ -1383,10 +1410,11 @@ class CreatePartAutoAPIView(APIView):
                         id_array_existing.append(random_question_set.id)
                     else:
                         break
-                
+
                 for index, question_set_id in enumerate(id_array_existing):
                     if part_number == '1' or part_number == '2' or part_number == '5':
-                        question_set = QuestionSetBank.objects.get(id=question_set_id)
+                        question_set = QuestionSetBank.objects.get(
+                            id=question_set_id)
                         # Create new question set
                         new_question_set = QuestionSet.objects.create(
                             part=part,
@@ -1412,7 +1440,8 @@ class CreatePartAutoAPIView(APIView):
                                 difficulty_level=question.difficulty_level,
                             )
                     elif part_number == '6':
-                        question_set = QuestionSetBank.objects.get(id=question_set_id)
+                        question_set = QuestionSetBank.objects.get(
+                            id=question_set_id)
                         # Create new question set
                         new_question_set = QuestionSet.objects.create(
                             part=part,
@@ -1434,12 +1463,45 @@ class CreatePartAutoAPIView(APIView):
                                 question_text=question.question_text,
                                 answers=question.answers,
                                 correct_answer=question.correct_answer,
-                                question_number=start_question_set + (index * 4) + q_index + 1,
+                                question_number=start_question_set +
+                                (index * 4) + q_index + 1,
                                 difficulty_level=question.difficulty_level,
                             )
-
+                    elif part_number == '3' or part_number == '4':
+                        # 13 questions 3 sets
+                        question_set = QuestionSetBank.objects.get(
+                            id=question_set_id)
+                        # Create new question set
+                        new_question_set = QuestionSet.objects.create(
+                            part=part,
+                            from_ques=start_question_set + (index * 3) + 1,
+                            to_ques=start_question_set + (index * 3) + 3,
+                            audio=question_set.audio,
+                            page=question_set.page,
+                            image=question_set.image,
+                            test=test,
+                        )
+                        # Duplicate questions
+                        existing_questions = QuestionBank.objects.filter(
+                            question_set=question_set)
+                        for q_index, question in enumerate(existing_questions):
+                            Question.objects.create(
+                                question_set=new_question_set,
+                                part=part,
+                                test=test,
+                                question_text=question.question_text,
+                                answers=question.answers,
+                                correct_answer=question.correct_answer,
+                                question_number=start_question_set +
+                                (index * 3) + q_index + 1,
+                                difficulty_level=question.difficulty_level,
+                            )
+                    elif part_number == '7':
+                        # 10 questions 2 sets
+                        
+                        pass
                 return part
-                    
+
             part_structures = PART_STRUCTURE[f'PART_{part_number}']
             for from_ques, to_ques in part_structures['sets']:
                 existing_question_sets = QuestionSetBank.objects.filter(
@@ -1674,8 +1736,8 @@ class SystemStatisticsAPIView(APIView):
             "avg_score": History.objects.aggregate(Avg('score'))['score__avg'],
         }
         return Response(stats)
-    
-    
+
+
 class TagListView(APIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -1691,7 +1753,7 @@ class TagListView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def post(self, request, *args, **kwargs):
         serializer = TagSerializer(data=request.data)
         if serializer.is_valid():
@@ -1703,7 +1765,8 @@ class TagListView(APIView):
 class StudentReportView(APIView):
     def get(self, request, user_id):
         history = History.objects.filter(user_id=user_id, complete=True)
-        training = HistoryTraining.objects.filter(user_id=user_id, complete=True)
+        training = HistoryTraining.objects.filter(
+            user_id=user_id, complete=True)
 
         history_data = HistorySerializer(history, many=True).data
         training_data = HistoryTrainingSerializer(training, many=True).data
@@ -1715,4 +1778,24 @@ class StudentReportView(APIView):
             "training": training_data,
             "analysis": analysis
         }, status=status.HTTP_200_OK)
+        
 
+class QuestionSetDeleteView(APIView):
+    def delete(self, request, pk):
+        try:
+            question_set = QuestionSet.objects.get(id=pk)
+            question_set.delete()
+            return Response(
+                {'message': 'Question set deleted successfully'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except QuestionSet.DoesNotExist:
+            return Response(
+                {'error': 'Question set not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

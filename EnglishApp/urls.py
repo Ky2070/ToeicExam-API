@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/v1/auth/", include("Authentication.urls")),
     path("api/v1/app/", include("EStudyApp.urls")),
     path("api/v1/course/", include("course.urls")),
+    path("api/v1/question-bank/", include("question_bank.urls")),
     # path('', include('admin_black.urls')),
     path('admin/', admin.site.urls),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
