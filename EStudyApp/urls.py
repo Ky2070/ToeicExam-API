@@ -8,7 +8,7 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
-    StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView
+    StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView
 
 urlpatterns = [
     # Tag for Test-list
@@ -80,4 +80,7 @@ urlpatterns = [
     path('statistics/', StudentStatisticsAPIView.as_view(), name='student-statistics'),
 
     path('system/statistics/', SystemStatisticsAPIView.as_view(), name='system-statistics'),
+
+    # Question Set API
+    path('question-sets/<int:pk>/delete/', QuestionSetDeleteView.as_view(), name='question-set-delete'),  # Delete question set
 ]
