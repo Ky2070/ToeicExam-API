@@ -475,10 +475,9 @@ def save_data_to_json(data):
                 context_images = new_passage.get("image", [])  # Lấy danh sách hình ảnh
                 context_images = list(set(context_images))  # Đảm bảo không có ảnh trùng lặp
 
-                # Nếu có hình ảnh, không lưu text (ưu tiên ảnh)
                 passage_data = {
-                    "image": context_images if context_images else [],  # Chỉ lưu nếu có ảnh
-                    "text": "" if context_images else passage_text,  # Nếu có ảnh thì không lưu text
+                    "image": context_images if context_images else [],  # Nếu có ảnh thì lưu, không có thì là []
+                    "text": passage_text if passage_text else "",  # Nếu có text thì lưu, không có thì là ""
                     "question_set": new_passage.get("question_set", 0),
                     "questions": new_passage.get("questions", [])
                 }
@@ -491,7 +490,7 @@ def save_data_to_json(data):
 
                 existing_passages = [
                     p for p in existing_data["questions_by_part"][part_name]
-                    if p.get("text", "") == passage_text and p.get("image", []) == context_images  # Đổi "passage" thành "text"
+                    if p.get("text", "") == passage_text   # Đổi "passage" thành "text"
                 ]
                 if existing_passages:
                     # Nếu đã tồn tại, hợp nhất danh sách câu hỏi

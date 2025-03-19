@@ -55,7 +55,24 @@ class Command(BaseCommand):
                     defaults={"part_description": ""}
                 )
                 part = Part.objects.create(test=test, part_description=part_desc)
+                # Nhóm các câu hỏi có cùng image/audio/page vào một QuestionSet
+                grouped_questions = {}
+                for question_data in questions:
+                    key = (
+                        question_data.get("image", ""), question_data.get("audio", ""), question_data.get("page", ""))
+                    if key not in grouped_questions:
+                        grouped_questions[key] = []
+                    grouped_questions[key].append(question_data)
 
+                for (image, audio, page), question_list in grouped_questions.items():
+                    # Tạo QuestionSet cho nhóm câu hỏi này
+                    question_set = QuestionSet.objects.create(
+                        test=test,
+                        part=part,
+                        image=image,
+                        audio=audio,
+                        page=page
+                    )
                 for question_data in questions:
                     question_set, _ = QuestionSet.objects.get_or_create(
                         test=test, part=part
