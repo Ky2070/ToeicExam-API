@@ -42,7 +42,7 @@ class Blog(BaseModel):
     status = models.CharField(
         max_length=30,
         choices=STATUS_CHOICES,
-        default='INACTIVE'
+        default='ACTIVE'
     )
 
     @property

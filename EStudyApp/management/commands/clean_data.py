@@ -9,22 +9,8 @@ class Command(BaseCommand):
     help = 'Generate parts for a test by copying from existing data'
 
     def handle(self, *args, **kwargs):
-        for i in range(101, 131):
-            test = Test.objects.get(id=1)
-            part = Part.objects.get(id=5)
-            question = Question.objects.get(
-                question_number=i, test=test, part=part)
-            question_set = QuestionSet.objects.create(
-                test=test,
-                part=part,
-                from_ques=question.question_number,
-                to_ques=question.question_number,
-                audio=None,
-                page=None,
-                image=None,
-            )
-            question.question_set = question_set
-            question.save()
-
-            self.stdout.write(self.style.SUCCESS(
-                f'ADD question set with ID {question_set}'))
+        ids = [95,96,97,98,99]
+        tests = Test.objects.filter(id__in=ids)
+        for test in tests:
+            test.delete()
+            self.stdout.write(self.style.SUCCESS('Successfully deleted tests!'))
