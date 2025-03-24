@@ -5,7 +5,8 @@ from .views import (
     QuestionSetBankDeleteView,
     QuestionSetBankDetailView,
     QuestionSetBankUpdateView,
-    QuestionSetBankListView
+    QuestionSetBankListView,
+    QuestionImportView
 )
 
 urlpatterns = [
@@ -16,4 +17,7 @@ urlpatterns = [
     path('<int:pk>/update/', QuestionSetBankUpdateView.as_view(), name='question-set-bank-update'),
     # delete question set
     path('question-sets/<int:pk>/delete/', QuestionSetBankDeleteView.as_view(), name='question-set-bank-delete'),
+    
+    # get question import file
+    path('<int:test_id>/import-question/', QuestionImportView.as_view(), name='question-import'),
 ]

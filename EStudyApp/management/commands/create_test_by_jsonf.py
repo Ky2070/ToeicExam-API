@@ -13,6 +13,8 @@ class Command(BaseCommand):
                             help='Test JSON filename (without path)')
         parser.add_argument('answer_filename', type=str,
                             help='Answer JSON filename (without path)')
+        parser.add_argument('test_id', type=int,
+                            help='Test ID')
 
     def handle(self, *args, **kwargs):
         from_ques = 1
@@ -22,6 +24,7 @@ class Command(BaseCommand):
             base_dir, "../../../scrapper/data-test", kwargs['json_filename'])
         answer_json_path = os.path.join(
             base_dir, "../../../scrapper/answers", kwargs['answer_filename'])
+        test_id = kwargs['test_id']
 
         # Kiểm tra xem file có tồn tại không
         if not os.path.exists(test_json_path):
@@ -50,11 +53,16 @@ class Command(BaseCommand):
                 correct_answers[q["question_number"]] = q["correct_answer"]
 
         # Create the test entry
-        test = Test.objects.create(
-            name=data["title"],
-            types="Online",
-            publish=True
-        )
+        # test = Test.objects.create(
+        #     name=data["title"],
+        #     types="Online",
+        #     publish=True
+        # )
+        test = Test.objects.get(id=test_id)
+        if test is None:
+            self.stdout.write(self.style.ERROR(
+                f"Test not found: {test_id}"))
+            raise Exception(f"Test not found: {test_id}")
 
         # Iterate through parts and questions
         for part_name, questions in data["questions_by_part"].items():
@@ -138,7 +146,6 @@ class Command(BaseCommand):
                         from_ques = int(questions_data['questions'][0]['question_number'])
                         for question_data in questions_data['questions']:
                             correct_answer = correct_answers[question_data["question_number"]]
-                            print(correct_answer)
                             question = Question.objects.create(
                                 test=test,
                                 question_set=question_set,
