@@ -23,7 +23,11 @@ def create_blog(request):
 
     if data['questions_set']:
         questions_set_obj = QuestionSet.objects.create(
-            page=data['questions_set']
+            page=data['questions_set'],
+            audio=data['audio'],
+            image=data['image'],
+            from_ques=data['from'],
+            to_ques=data['to']
         )
         questions_set_obj.save()
 

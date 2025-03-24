@@ -15,7 +15,7 @@ class BlogService:
     def __init__(self):
         self.blog_repository = BlogRepository()
 
-    def get_blog_list(self, filters: Dict[str, Any] = None, page: int = 1, per_page: int = 10) -> Dict[str, Any]:
+    def get_blog_list(self, filters: Dict[str, Any] = None, page: int = 1, per_page: int = 100) -> Dict[str, Any]:
         """
         Get list of blogs with filters and pagination
         
