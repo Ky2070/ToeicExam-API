@@ -285,9 +285,9 @@ class FixedTestPagination(PageNumberPagination):
     """
     Phân trang với giới hạn cố định 6 bài kiểm tra mỗi trang.
     """
-    page_size = 6  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
+    page_size = 8  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
     page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
-    max_page_size = 6  # Giới hạn cứng
+    max_page_size = 100  # Giới hạn cứng
 
 
 class TestListView(APIView):
