@@ -301,7 +301,7 @@ class TestListView(APIView):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         # get type from request and default is Practice
         if request.GET.get('type') is None:
-            tests = Test.objects.all()
+            tests = Test.objects.all().order_by('-created_at')
             serializer = TestSerializer(tests, many=True)
             return Response(serializer.data)
 

@@ -3,6 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
+import os
+import json
+from django.core.management import call_command
+
+from EStudyApp.models import Test
 from .models import QuestionBank, QuestionSetBank, PartDescription
 from .serializers import QuestionBankSerializer, QuestionSetBankCreateSerializer, QuestionSetBankDetailSerializer, QuestionSetBankUpdateSerializer, QuestionSetBankListSerializer
 
@@ -325,3 +330,52 @@ class QuestionSetBankDeleteView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+            
+class QuestionImportView(APIView):
+    def post(self, request, test_id):
+        try:
+            question_file = request.FILES.get('question_file')
+            answer_file = request.FILES.get('answer_file')
+            
+            if not question_file or not answer_file:
+                return Response(
+                    {'error': 'Question file or answer file is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Save files to media directory
+            question_path = os.path.join('scrapper', 'data-test', question_file.name)
+            answer_path = os.path.join('scrapper', 'answers', answer_file.name)
+            
+            # delete files if exist
+            if os.path.exists(question_path):
+                os.remove(question_path)
+            if os.path.exists(answer_path):
+                os.remove(answer_path)
+            
+            # Save files to media directory
+            with open(question_path, 'wb') as f:
+                f.write(question_file.read())
+            with open(answer_path, 'wb') as f:
+                f.write(answer_file.read())
+                
+            # call command to create test
+            call_command('create_test_by_jsonf', 
+                        question_file.name,
+                        answer_file.name,
+                        test_id)
+            
+                
+            return Response(
+                {'message': 'Files saved successfully'},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+            
+
