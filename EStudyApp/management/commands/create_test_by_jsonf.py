@@ -45,12 +45,12 @@ class Command(BaseCommand):
             test = Test.objects.create(
                 name=data["title"],
                 types="Online",
-                publish=True
+                publish=False
             )
 
             # Iterate through parts and questions
             for part_name, questions in data["questions_by_part"].items():
-                part_desc, _ = PartDescription.objects.get_or_create(
+                part_desc, _ = PartDescription.objects.get(
                     part_name=part_name,
                     defaults={"part_description": ""}
                 )
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                         page=page
                     )
                 for question_data in questions:
-                    question_set, _ = QuestionSet.objects.get_or_create(
+                    question_set, _ = QuestionSet.objects.get(
                         test=test, part=part
                     )
                     # Get correct answer for the current question number
