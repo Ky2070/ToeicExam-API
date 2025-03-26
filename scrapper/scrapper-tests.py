@@ -379,7 +379,7 @@ def extract_part_6_7(test_question_wrapper):
             context_wrapper = group.find_element(By.CSS_SELECTOR, '.question-twocols-left .context-wrapper')
 
             # Kiểm tra nếu có hình ảnh trong context-wrapper và lấy ảnh đầu tiên
-            image = context_wrapper.find_elements(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
+            image = context_wrapper.find_element(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
             print(image)
             if image:
                 context_images = [image.get_attribute('src')]  # Lấy src của ảnh đầu tiên
@@ -472,35 +472,36 @@ def save_data_to_json(data):
         elif part_name in ["Part 6", "Part 7"]:
             # Lưu theo đoạn văn bản + câu hỏi liên quan
             for new_passage in questions:
-                passage_text = new_passage.get("page", "")  # Đoạn văn bản
+                passage_text = new_passage.get("page", "")  # Đổi "passage" thành "text"
                 context_images = new_passage.get("image", [])  # Lấy danh sách hình ảnh
-                context_images = list(set(context_images))  # Loại bỏ ảnh trùng lặp
-                # Lấy ảnh cho bộ câu hỏi (nếu có)
-                selected_image = context_images[0] if context_images else None
-                passage_data = {
-                    "image": selected_image if selected_image else [],  # Gán ảnh cho bộ câu hỏi
-                    "page": passage_text if passage_text else "",  # Gán đoạn văn
-                    "question_set": len(new_passage.get("questions", [])),  # Gán số lượng câu hỏi trong bộ
-                    "questions": new_passage.get("questions", [])  # Gán danh sách câu hỏi
+                context_images = list(set(context_images))  # Đảm bảo không có ảnh trùng lặp
 
+                # Nếu có hình ảnh, không lưu text (ưu tiên ảnh)
+                passage_data = {
+                    "image": context_images if context_images else [],  # Chỉ lưu nếu có ảnh
+                    "page": "" if context_images else passage_text,  # Nếu có ảnh thì không lưu text
+                    "question_set": new_passage.get("question_set", 0),
+                    "questions": new_passage.get("questions", [])
                 }
-                # Kiểm tra xem bộ câu hỏi này đã tồn tại chưa
+
+                # Lưu tất cả các ảnh của nhóm câu hỏi (set câu hỏi), không chỉ lấy ảnh đầu tiên
+                # passage_images = context_images if context_images else []
+
+                # Gán ảnh cho nhóm câu hỏi (passage) mà không gán cho từng câu hỏi
+                # new_passage["image"] = passage_images  # Lưu tất cả các ảnh của nhóm câu hỏi
+
                 existing_passages = [
                     p for p in existing_data["questions_by_part"][part_name]
-                    if p.get("page", "") == passage_text  # So sánh đoạn văn bản
+                    if p.get("page", "") == passage_text and p.get("image", []) == context_images
+                    # Đổi "passage" thành "page"
                 ]
-                # Tìm bộ câu hỏi phù hợp, nếu tồn tại
-                matching_passage = None
-                for existing_passage in existing_passages:
-                    if existing_passage["question_set"] == len(new_passage.get("questions", [])):
-                        matching_passage = existing_passage
-                        break
-                if matching_passage:
-                    # Nếu đã tồn tại bộ câu hỏi với đoạn văn và số lượng câu hỏi đúng, hợp nhất câu hỏi
-                    matching_passage["questions"].extend(new_passage.get("questions", []))
-                    matching_passage["question_set"] = len(matching_passage["questions"])  # Cập nhật số lượng câu hỏi
+                if existing_passages:
+                    # Nếu đã tồn tại, hợp nhất danh sách câu hỏi
+                    existing_passages[0]["questions"].extend(new_passage.get("questions", []))
+                    existing_passages[0]["question_set"] = len(
+                        existing_passages[0]["questions"])  # Cập nhật số lượng câu hỏi
                 else:
-                    # Nếu chưa có bộ câu hỏi phù hợp, tạo mới
+                    # Nếu chưa có, thêm mới vào danh sách
                     existing_data["questions_by_part"][part_name].append(passage_data)
         # elif part_name in ["Part 6", "Part 7"]:
         #     # Duyệt từng đoạn văn + câu hỏi tương ứng
