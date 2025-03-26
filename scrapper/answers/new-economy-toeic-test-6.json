@@ -1,0 +1,847 @@
+[
+    {
+        "Tiêu đề": "Đáp án/transcript: New Economy TOEIC Test 6"
+    },
+    {
+        "Part": "Part 1",
+        "Question_set": 6,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "1",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "2",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "3",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "4",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "5",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "6",
+                "correct_answer": "D"
+            }
+        ]
+    },
+    {
+        "Part": "Part 2",
+        "Question_set": 25,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "7",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "8",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "9",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "10",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "11",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "12",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "13",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "14",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "15",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "16",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "17",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "18",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "19",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "20",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "21",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "22",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "23",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "24",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "25",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "26",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "27",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "28",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "29",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "30",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "31",
+                "correct_answer": "A"
+            }
+        ]
+    },
+    {
+        "Part": "Part 3",
+        "Question_set": 39,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "32",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "33",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "34",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "35",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "36",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "37",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "38",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "39",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "40",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "41",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "42",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "43",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "44",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "45",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "46",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "47",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "48",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "49",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "50",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "51",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "52",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "53",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "54",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "55",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "56",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "57",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "58",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "59",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "60",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "61",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "62",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "63",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "64",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "65",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "66",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "67",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "68",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "69",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "70",
+                "correct_answer": "D"
+            }
+        ]
+    },
+    {
+        "Part": "Part 4",
+        "Question_set": 30,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "71",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "72",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "73",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "74",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "75",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "76",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "77",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "78",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "79",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "80",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "81",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "82",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "83",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "84",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "85",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "86",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "87",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "88",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "89",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "90",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "91",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "92",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "93",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "94",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "95",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "96",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "97",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "98",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "99",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "100",
+                "correct_answer": "D"
+            }
+        ]
+    },
+    {
+        "Part": "Part 5",
+        "Question_set": 30,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "101",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "102",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "103",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "104",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "105",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "106",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "107",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "108",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "109",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "110",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "111",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "112",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "113",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "114",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "115",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "116",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "117",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "118",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "119",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "120",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "121",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "122",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "123",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "124",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "125",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "126",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "127",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "128",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "129",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "130",
+                "correct_answer": "C"
+            }
+        ]
+    },
+    {
+        "Part": "Part 6",
+        "Question_set": 16,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "131",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "132",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "133",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "134",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "135",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "136",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "137",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "138",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "139",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "140",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "141",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "142",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "143",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "144",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "145",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "146",
+                "correct_answer": "C"
+            }
+        ]
+    },
+    {
+        "Part": "Part 7",
+        "Question_set": 54,
+        "Danh sách câu hỏi": [
+            {
+                "question_number": "147",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "148",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "149",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "150",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "151",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "152",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "153",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "154",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "155",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "156",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "157",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "158",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "159",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "160",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "161",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "162",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "163",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "164",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "165",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "166",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "167",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "168",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "169",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "170",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "171",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "172",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "173",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "174",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "175",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "176",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "177",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "178",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "179",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "180",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "181",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "182",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "183",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "184",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "185",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "186",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "187",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "188",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "189",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "190",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "191",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "192",
+                "correct_answer": "A"
+            },
+            {
+                "question_number": "193",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "194",
+                "correct_answer": "D"
+            },
+            {
+                "question_number": "195",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "196",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "197",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "198",
+                "correct_answer": "C"
+            },
+            {
+                "question_number": "199",
+                "correct_answer": "B"
+            },
+            {
+                "question_number": "200",
+                "correct_answer": "C"
+            }
+        ]
+    }
+]
