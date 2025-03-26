@@ -1843,5 +1843,5 @@ class GetPartDescriptionWithBlogID(APIView):
 
 
 class BlogListAPIView(ListAPIView):
-    queryset = Blog.objects.filter(is_published=True)  # Chỉ lấy blog đã public
+    queryset = Blog.objects.all()  # Lấy hết
     serializer_class = BlogSerializer

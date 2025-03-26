@@ -32,8 +32,8 @@ def find_chrome_from_registry():
 
     for registry_path in registry_paths:
         try:
-            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -379,7 +379,7 @@ def extract_part_6_7(test_question_wrapper):
             context_wrapper = group.find_element(By.CSS_SELECTOR, '.question-twocols-left .context-wrapper')
 
             # Kiểm tra nếu có hình ảnh trong context-wrapper và lấy ảnh đầu tiên
-            image = context_wrapper.find_element(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
+            image = context_wrapper.find_elements(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
             print(image)
             if image:
                 context_images = [image.get_attribute('src')]  # Lấy src của ảnh đầu tiên
@@ -576,6 +576,144 @@ def save_data_to_json(data):
     print(f"✅ Dữ liệu đã được lưu vào {file_path}")
 
 
+def click_exit_button():
+    """Tìm và bấm nút 'Thoát' trên trang hiện tại"""
+    try:
+        # 🔹 Chờ tối đa 10 giây để nút "Thoát" xuất hiện và có thể bấm
+        exit_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.LINK_TEXT, "Thoát"))
+        )
+
+        # 🔹 Bấm vào nút "Thoát"
+        exit_button.click()
+        print("✅ Đã bấm nút 'Thoát' thành công!")
+        # 🔹 Chờ alert xuất hiện và xử lý nó
+        WebDriverWait(driver, 5).until(EC.alert_is_present())  # Đợi tối đa 5 giây
+        alert = driver.switch_to.alert  # Chuyển sang Alert
+
+        print(f"⚠️ Alert hiển thị: {alert.text}")
+
+        # 🔹 Chấp nhận alert (bấm "OK")
+        alert.accept()
+        print("✅ Đã xác nhận thoát.")
+
+    except Exception as e:
+        print(f"❌ Lỗi: {e}")
+
+
+def click_solution_link():
+    try:
+        # Đợi phần tử xuất hiện
+        solution_link = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'nav-link') and @href='#test-solutions']"))
+        )
+
+        # Thử nhấp vào link đáp án
+        solution_link.click()
+        print("Đã nhấp vào link Đáp án!")
+        time.sleep(2)
+        view_solutions_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//a[contains(@href, '/solutions/') and contains(text(), 'Xem đáp án đề thi')]"))
+        )
+        view_solutions_link.click()
+        print("Đã nhấp vào link Xem đáp án đề thi!")
+        time.sleep(2)
+    except Exception as e:
+        print("Lỗi khi nhấp vào link Đáp án:", e)
+
+
+def scrape_answers():
+    data = []
+
+    title_element = driver.find_element(By.TAG_NAME, 'h1')
+    test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
+    # Loại bỏ "Thoát" nếu có
+    test_title = re.sub(r'\s*Thoát$', '', test_title).strip()
+    if test_title:  # Kiểm tra tiêu đề không rỗng
+        title = {
+            "Tiêu đề": test_title
+        }
+        data.append(title)
+        print(f"Tiêu đề bài kiểm tra: {test_title}")
+    else:
+        print("Tiêu đề bài kiểm tra rỗng!")
+
+    part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
+
+    for part_tab in part_tabs:
+        part_name = part_tab.text.strip()
+        part_id = part_tab.get_attribute("href").split("#")[-1]  # Lấy ID của nội dung Part
+        print(part_id)
+        print(f"📌 Đang xử lý: {part_name}")
+        driver.execute_script("arguments[0].click();", part_tab)
+        time.sleep(2)  # Đợi nội dung load
+        # Click vào nút "Hiện Transcript"
+        # try:
+        #     transcript_button = driver.find_element(By.XPATH, "//a[contains(text(), 'Hiện Transcript')]")
+        #     driver.execute_script("arguments[0].click();", transcript_button)
+        #     time.sleep(2)
+        # except:
+        #     print(f"❌ Không tìm thấy nút 'Hiện Transcript' cho {part_name}")
+
+        # Lấy nội dung transcript
+        # try:
+        #     transcript_element = driver.find_element(By.XPATH,
+        #                                              "//div[contains(@class, 'context-transcript')]//div[contains(@class, 'collapse show')]")
+        #     transcript_text = transcript_element.text.strip()
+        # except:
+        #     transcript_text = "Không có transcript"
+
+        # Lấy danh sách câu hỏi CHỈ của Part hiện tại
+        questions = []
+        try:
+            part_container = driver.find_element(By.ID, part_id)  # Chỉ lấy nội dung trong Part này
+            question_wrapper = part_container.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
+            question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
+            print(f"📌 Số câu hỏi tìm thấy trong {part_name}: {len(question_elements)}")
+
+            if question_elements:
+                for question in question_elements:
+                    try:
+                        question_number = question.find_element(By.CSS_SELECTOR,
+                                                                ".question-number").text.strip()
+                        correct_answer = question.find_element(By.CSS_SELECTOR,
+                                                               ".text-success").text.replace(
+                            "Đáp án đúng:", "").strip()
+
+                        # ✅ Chỉ thêm câu hỏi hợp lệ
+                        if question_number and correct_answer:
+                            questions.append({"question_number": question_number, "correct_answer": correct_answer})
+                        else:
+                            print(
+                                f"⚠️ Bỏ qua câu hỏi bị thiếu dữ liệu trong {part_name} (Số: {question_number}, Đáp án: {correct_answer})")
+
+                    except Exception as e:
+                        print(f"⚠️ Lỗi khi xử lý câu hỏi trong {part_name}: {e}")
+                        continue
+            else:
+                print(f"⚠️ Không tìm thấy câu hỏi trong {part_name}")
+        except:
+            print(f"⚠️ Không thể lấy danh sách câu hỏi cho {part_name}")
+
+        # **Chỉ lưu nếu có câu hỏi hợp lệ**
+        if questions:
+            part_data = {
+                "Part": part_name,
+                "Question_set": len(question_elements),
+                # "Transcript": transcript_text,
+                "Danh sách câu hỏi": questions
+            }
+            data.append(part_data)
+
+    # Lưu dữ liệu vào file
+    file_path = f"answers/{test_id}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+    print(f"✅ Dữ liệu đã được lưu vào {file_path}!")
+
+
 def main():
     link = get_test_links()
 
@@ -597,7 +735,9 @@ def main():
             print("Form submission failed, skipping.")
     else:
         print("Checkbox selection failed, skipping.")
-
+    click_exit_button()
+    click_solution_link()
+    scrape_answers()
     driver.quit()
 
 
