@@ -10,7 +10,7 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
     StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView, \
-    GetPartDescriptionWithBlogID, BlogListAPIView
+    GetPartDescriptionWithBlogID
 
 urlpatterns = [
     # Tag for Test-list
@@ -48,10 +48,6 @@ urlpatterns = [
 
     # Part-Description (Blog-ID)
     path('blogs/<int:blog_id>/part-description/', GetPartDescriptionWithBlogID.as_view(), name='blog-part-description'),
-
-    # Blog API
-    path('blogs/', BlogListAPIView.as_view(), name='blog-list'),
-    # path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='edit-questions'),  # GET theo ID
 
     # Question API
 

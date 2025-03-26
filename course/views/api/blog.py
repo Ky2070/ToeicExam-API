@@ -2,12 +2,13 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+
+from EStudyApp.serializers import QuestionSerializer
+from course.ai_classifier import classify_toeic_question
 from course.models.blog import Blog
 from EStudyApp.models import Question, QuestionSet
 from course.serializer.blog import BlogSerializer
 from django.db.models import Prefetch
-from django.core.exceptions import ValidationError
-from rest_framework.views import APIView
 
 from course.services.blog import BlogService
 from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDeleteAPIView
@@ -69,7 +70,7 @@ def create_blog(request):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def blog_list(request):
-    blogs = Blog.objects.filter().order_by('-created_at')
+    blogs = Blog.objects.filter(status='ACTIVE').order_by('-created_at')
     serializer = BlogSerializer(blogs, many=True).data
     return Response(serializer, status=status.HTTP_200_OK)
 
@@ -85,8 +86,31 @@ def blog_detail(request, id):
             )
         )
     ).get(id=id)
-    serializer = BlogSerializer(blog).data
-    return Response(serializer, status=status.HTTP_200_OK)
+
+    # Tạo danh sách câu hỏi đã phân loại
+    question_data = []
+
+    # Kiểm tra xem blog có chứa questions_set hay không và xử lý mối quan hệ một-một
+    if blog.questions_set:  # Kiểm tra nếu questions_set không phải là None
+        question_set = blog.questions_set  # Lấy đối tượng QuestionSet duy nhất
+        for question in question_set.question_question_set.all():  # Truy cập danh sách các câu hỏi
+            # Phân loại câu hỏi vào phần TOEIC
+            part = classify_toeic_question(question.question_text)  # Phân loại câu hỏi
+            print(part)
+            # Sử dụng serializer để chuyển đổi đối tượng Question thành JSON
+            question_serialized = QuestionSerializer(question).data
+            # Thêm thông tin câu hỏi và phần vào danh sách
+            question_data.append({
+                'question': question_serialized,  # Thêm thông tin câu hỏi đã được serialize
+                'part': part  # Phần của câu hỏi trong TOEIC
+            })
+            # Nếu cần, bạn có thể lưu thông tin part vào CSDL
+            # question.save()  # Nếu bạn muốn lưu vào CSDL
+        # Thêm thông tin câu hỏi và phần vào serializer
+    blog_data = BlogSerializer(blog).data
+    blog_data['questions_with_parts'] = question_data  # Thêm thông tin câu hỏi với phần vào response
+
+    return Response(blog_data, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT'])

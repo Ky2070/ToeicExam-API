@@ -14,7 +14,7 @@ class BlogSerializer(serializers.ModelSerializer):
         model = Blog
         fields = ['id', 'title', 'content', 'author', 'questions_set',
                   'part_info', 'from_ques', 'to_ques', 'created_at', 'updated_at',
-                  'likes_count', 'has_liked']
+                  'likes_count', 'has_liked', 'is_published', 'status']
 
     def get_likes_count(self, obj):
         return obj.blog_likes.count()
