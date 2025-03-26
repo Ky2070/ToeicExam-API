@@ -1,10 +1,13 @@
 from datetime import datetime, timezone, timedelta
 from django.db.models import Avg, Max, Min, Count, F
 import random
+
+from rest_framework.generics import ListAPIView
+
 from Authentication.permissions import IsTeacher
+from course.models import Blog
 from question_bank.models import QuestionBank, QuestionSetBank
 from utils.standard_part import PART_STRUCTURE
-
 
 from django.db.models import Prefetch, Q
 from rest_framework import status
@@ -16,14 +19,15 @@ from rest_framework.views import APIView
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, TestComment, \
+from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, \
+    TestComment, \
     HistoryTraining, Tag
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, \
     TestDetailSerializer, TestSerializer, \
     PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
     CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer, \
-    StudentStatisticsSerializer
+    StudentStatisticsSerializer, PartDescriptionSerializer, BlogSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from EStudyApp.services.service_student import get_suggestions
@@ -433,7 +437,8 @@ class TestPartDetailView(APIView):
             test = Test.objects.prefetch_related(
                 Prefetch(
                     'part_test',
-                    queryset=Part.objects.filter(id__in=parts).order_by('part_description__part_number').prefetch_related(
+                    queryset=Part.objects.filter(id__in=parts).order_by(
+                        'part_description__part_number').prefetch_related(
                         Prefetch(
                             'question_set_part',  # Sắp xếp bộ câu hỏi trong phần
                             queryset=QuestionSet.objects.order_by('id').prefetch_related(
@@ -482,9 +487,9 @@ class PartListView(APIView):
                      .select_related('part_description')
                      .prefetch_related(
                 'question_set_part',  # Prefetch related question sets
-                'question_part'       # Prefetch related questions
+                'question_part'  # Prefetch related questions
             )
-                .order_by('part_description__part_number'))
+                     .order_by('part_description__part_number'))
 
             serializer = PartListSerializer(parts, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -837,7 +842,7 @@ class SubmitTrainingView(APIView):
                 # Tính toán điểm phần
                 total_questions = correct_answers + wrong_answers
                 percentage_score = (
-                    correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                                           correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
@@ -858,7 +863,7 @@ class SubmitTrainingView(APIView):
             # Tính toán tổng kết điểm
             total_questions = total_correct_answers + total_wrong_answers
             overall_percentage_score = (
-                total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                                               total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
             time_taken = end_time - start_time
@@ -996,7 +1001,8 @@ class TestUpdateAPIView(APIView):
                         request.data['close_date'] = datetime.strptime(
                             close_date, '%Y-%m-%dT%H:%M:%S%z')
                         # Only validate dates if both are provided and not null
-                        if publish_date and publish_date != "null" and request.data['close_date'] <= request.data['publish_date']:
+                        if publish_date and publish_date != "null" and request.data['close_date'] <= request.data[
+                            'publish_date']:
                             return Response(
                                 {'error': 'close_date must be after publish_date'},
                                 status=status.HTTP_400_BAD_REQUEST
@@ -1103,13 +1109,13 @@ class PartListQuestionsSetAPIView(APIView):
             to_ques = data.get('to_ques')
             question_question_set = data.get('question_question_set', [])
             test_id = data.get('test_id')
-            
+
             # Get part first
             try:
                 part = Part.objects.get(id=part_id)
             except Part.DoesNotExist:
                 return Response({"error": "Part not found"}, status=status.HTTP_404_NOT_FOUND)
-            
+
             # Get test if test_id is provided
             test = None
             if test_id:
@@ -1464,7 +1470,7 @@ class CreatePartAutoAPIView(APIView):
                                 answers=question.answers,
                                 correct_answer=question.correct_answer,
                                 question_number=start_question_set +
-                                (index * 4) + q_index + 1,
+                                                (index * 4) + q_index + 1,
                                 difficulty_level=question.difficulty_level,
                             )
                     elif part_number == '3' or part_number == '4':
@@ -1493,12 +1499,12 @@ class CreatePartAutoAPIView(APIView):
                                 answers=question.answers,
                                 correct_answer=question.correct_answer,
                                 question_number=start_question_set +
-                                (index * 3) + q_index + 1,
+                                                (index * 3) + q_index + 1,
                                 difficulty_level=question.difficulty_level,
                             )
                     elif part_number == '7':
                         # 10 questions 2 sets
-                        
+
                         pass
                 return part
 
@@ -1778,7 +1784,7 @@ class StudentReportView(APIView):
             "training": training_data,
             "analysis": analysis
         }, status=status.HTTP_200_OK)
-        
+
 
 class QuestionSetDeleteView(APIView):
     def delete(self, request, pk):
@@ -1799,3 +1805,43 @@ class QuestionSetDeleteView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class GetPartDescriptionWithBlogID(APIView):
+    def get(self, request, blog_id):
+        try:
+            # Bước 1: Lấy Blog theo ID
+            blog = Blog.objects.get(id=blog_id)
+
+            # Bước 2: Lấy QuestionSet liên quan
+            questions_set = blog.questions_set
+            print(questions_set)
+            if questions_set is None:
+                return Response({"error": "Blog này chưa liên kết với bất kỳ QuestionSet nào."}, status=status.HTTP_404_NOT_FOUND)
+
+            qs = QuestionSet.objects.get(id=blog.questions_set.id)
+            print(f"QuestionSet ID: {qs.id}, Part: {qs.part}")  # Kiểm tra Part có tồn tại không
+
+            # Bước 3: Kiểm tra xem QuestionSet có Part không
+            part = questions_set.part
+            if part is None:
+                return Response({"error": "Không tìm thấy Part tương ứng với QuestionSet."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Bước 4: Kiểm tra Part có PartDescription không
+            part_description = part.part_description
+            if part_description is None:
+                return Response({"error": "Không tìm thấy PartDescription cho Part này."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Serialize dữ liệu trả về
+            serializer = PartDescriptionSerializer(part_description)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Blog.DoesNotExist:
+            return Response({"error": "Blog không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BlogListAPIView(ListAPIView):
+    queryset = Blog.objects.all()  # Lấy hết
+    serializer_class = BlogSerializer

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from Authentication.serializers import UserSerializer
 from EStudyApp.models import History, HistoryTraining, PartDescription, Test, Part, QuestionSet, Question, Tag, \
     QuestionType, State, TestComment
+from course.models import Blog
 
 
 class TestRepliesSerializer(serializers.ModelSerializer):
@@ -117,7 +118,8 @@ class TestDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ['id', 'name', 'description', 'part_total', 'question_total', 'test_date', 'duration', 'part_test', 'question_test']
+        fields = ['id', 'name', 'description', 'part_total', 'question_total', 'test_date', 'duration', 'part_test',
+                  'question_test']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -129,12 +131,12 @@ class TagSerializer(serializers.ModelSerializer):
 class TestSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     latest_history = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Test
         fields = ['id', 'name', 'description', 'types', 'test_date',
-                 'duration', 'question_count', 'part_count', 'tags',
-                 'publish', 'latest_history', 'created_at', 'updated_at', 'part_total', 'question_total']
+                  'duration', 'question_count', 'part_count', 'tags',
+                  'publish', 'latest_history', 'created_at', 'updated_at', 'part_total', 'question_total']
 
     def get_latest_history(self, obj):
         try:
@@ -158,6 +160,7 @@ class TestSerializer(serializers.ModelSerializer):
 class PartListSerializer(serializers.ModelSerializer):
     part_description = PartDescriptionSerializer(read_only=True)
     question_set_part = QuestionSetSerializer(many=True, read_only=True)
+
     class Meta:
         model = Part
         # fields = ['part_description']
@@ -232,29 +235,30 @@ class CreateTestSerializer(serializers.ModelSerializer):
         model = Test
         fields = [
             'id', 'name', 'description', 'types', 'test_date', 'duration',
-            'question_count', 'part_count', 'tags', 'tag_ids', 'publish', 'created_at', 'updated_at', 'publish_date', 'close_date'  
+            'question_count', 'part_count', 'tags', 'tag_ids', 'publish', 'created_at', 'updated_at', 'publish_date',
+            'close_date'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def update(self, instance, validated_data):
         # Remove tag_ids from validated_data if it exists
         tag_ids = validated_data.pop('tag_ids', None)
-        
+
         # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         # Update tags if tag_ids is provided
         if tag_ids is not None:
             instance.tags.set(tag_ids)
-        
+
         instance.save()
         return instance
 
 
 class TestListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = Test
         fields = [
@@ -275,3 +279,9 @@ class StudentStatisticsSerializer(serializers.Serializer):
     max_score = serializers.FloatField()
     min_score = serializers.FloatField()
     total_tests = serializers.IntegerField()
+
+
+class BlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blog
+        fields = "__all__"
