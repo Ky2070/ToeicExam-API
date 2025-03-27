@@ -41,7 +41,7 @@ def classify_toeic_question(question_text):
     try:
         # Gọi GPT-4 để phân tích câu hỏi
         response = openai.completions.create(
-            model="gpt-3.5-turbo",  # Sử dụng mô hình GPT-4
+            model="gpt-4o",  # Sử dụng mô hình GPT-4
             prompt=f"Given the TOEIC question: '{question_text}', determine which part of the TOEIC exam it belongs to. The options are: Part 1, Part 2, Part 3, Part 4, Part 5, Part 6, Part 7. Return only the part number.",
             max_tokens=10  # Giới hạn độ dài của câu trả lời
         )
