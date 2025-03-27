@@ -26,12 +26,17 @@ def analyze_toeic_question(question_data):
     """
     question_text = question_data["question_text"]
     answers = question_data["answers"]
+    audios = question_data["audio"]
+    images = question_data["image"]
     # Định dạng danh sách đáp án từ JSON
     formatted_answers = "\n".join([f"({chr(65 + i)}) {ans}" for i, ans in enumerate(answers)])
     toeic_question = f"""
     Question:
     {question_text}
     {formatted_answers}
+    {audios}
+    {images}
+    
     """
     prompt = f"""
     Dưới đây là một câu hỏi trong bài thi TOEIC:
@@ -49,8 +54,10 @@ def analyze_toeic_question(question_data):
 #     "answers": ["didn't go", "hasn't gone", "won't go", "doesn't go"]
 # }
 question_json = {
-    "question_text": "What problem does the woman mention?",
-    "answers": ["The address is no longer relevant.", "A company has gone bankrupt.", "A budget must be revised.", "A flight has been canceled."]
+    "audio":"https://s4-media1.study4.com/media/tez_media/sound/eco_toeic_1000_test_2_1.mp3",
+    "image": [],
+    "question_text": "What is offered for teenage students?",
+    "answers": ["A hands-on experience", " A weekly after-school class", "A complimentary souvenir", "A discounted ticket price"]
 }
 
 # Gọi hàm để phân tích

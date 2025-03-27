@@ -3,6 +3,7 @@ import os
 import re
 import time
 import winreg
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -33,7 +34,7 @@ def find_chrome_from_registry():
     for registry_path in registry_paths:
         try:
             # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -106,6 +107,8 @@ data = read_data_from_file('test-data.txt')
 # Lấy test_id từ dữ liệu đọc được
 test_id = data.get('test_id')
 print(f"Test_id: {test_id}")
+# Tạo biến current_date một lần duy nhất
+current_date = datetime.now().strftime("%d-%m-%Y")  # Định dạng dd-mm-yyyy
 
 
 def get_test_links():
@@ -311,6 +314,7 @@ def extract_other_parts(test_question_wrapper, part_name):
 
                 questions_for_part.append({
                     "question_set": 1,
+                    "comment": f"{test_id} - {current_date}",  # Thêm ngày vào commen
                     "question_number": question_number,
                     "question_text": question_text,
                     "answers": answers,
@@ -361,6 +365,7 @@ def extract_part_3_4(test_question_wrapper):
                 "image": img_urls.copy(),
                 "text": "",
                 "question_set": len(question_columns),
+                "comment": f"{test_id} - {current_date}",
                 "questions": group_questions
             })
         except Exception as e:
@@ -371,27 +376,10 @@ def extract_part_3_4(test_question_wrapper):
 
 def extract_part_6_7(test_question_wrapper):
     questions_for_part = []
+
     # Xử lý các nhóm câu hỏi
     question_groups = test_question_wrapper.find_elements(By.CSS_SELECTOR, '.question-group-wrapper .question-twocols')
     for group in question_groups:
-        # Lấy đoạn văn từ `.question-twocols-left .context-wrapper`
-        # try:
-        #     context_wrapper = group.find_element(By.CSS_SELECTOR, '.question-twocols-left .context-wrapper')
-        #
-        #     # Kiểm tra nếu có hình ảnh trong context-wrapper và lấy ảnh đầu tiên
-        #     image = context_wrapper.find_elements(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
-        #     print(image)
-        #     if image:
-        #         context_images = [image.get_attribute('src')]  # Lấy src của ảnh đầu tiên
-        #         context_text = ""  # Nếu có hình ảnh, không lấy văn bản
-        #     else:
-        #         context_text = context_wrapper.text.strip()  # Nếu không có hình ảnh, lấy văn bản
-        #         context_images = []  # Không có hình ảnh
-        #     print(context_text)
-        # except Exception as e:
-        #     print(f"❌ Lỗi xử lý context-wrapper hoặc hình ảnh: {e}")
-        #     context_text = ""
-        #     context_images = []
         try:
             context_wrapper = group.find_element(By.CSS_SELECTOR, '.question-twocols-left .context-wrapper')
 
@@ -445,6 +433,7 @@ def extract_part_6_7(test_question_wrapper):
             "image": context_images,
             "page": context_text,
             "question_set": len(question_columns),
+            "comment": f"{test_id} - {current_date}",
             "questions": group_questions
         })
 
@@ -509,12 +498,6 @@ def save_data_to_json(data):
                     "questions": new_passage.get("questions", [])
                 }
 
-                # Lưu tất cả các ảnh của nhóm câu hỏi (set câu hỏi), không chỉ lấy ảnh đầu tiên
-                # passage_images = context_images if context_images else []
-
-                # Gán ảnh cho nhóm câu hỏi (passage) mà không gán cho từng câu hỏi
-                # new_passage["image"] = passage_images  # Lưu tất cả các ảnh của nhóm câu hỏi
-
                 existing_passages = [
                     p for p in existing_data["questions_by_part"][part_name]
                     if p.get("page", "") == passage_text and p.get("image", []) == context_images
@@ -548,16 +531,13 @@ def click_exit_button():
         exit_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.LINK_TEXT, "Thoát"))
         )
-
         # 🔹 Bấm vào nút "Thoát"
         exit_button.click()
         print("✅ Đã bấm nút 'Thoát' thành công!")
         # 🔹 Chờ alert xuất hiện và xử lý nó
         WebDriverWait(driver, 5).until(EC.alert_is_present())  # Đợi tối đa 5 giây
         alert = driver.switch_to.alert  # Chuyển sang Alert
-
         print(f"⚠️ Alert hiển thị: {alert.text}")
-
         # 🔹 Chấp nhận alert (bấm "OK")
         alert.accept()
         print("✅ Đã xác nhận thoát.")
@@ -613,23 +593,6 @@ def scrape_answers():
         print(f"📌 Đang xử lý: {part_name}")
         driver.execute_script("arguments[0].click();", part_tab)
         time.sleep(2)  # Đợi nội dung load
-        # Click vào nút "Hiện Transcript"
-        # try:
-        #     transcript_button = driver.find_element(By.XPATH, "//a[contains(text(), 'Hiện Transcript')]")
-        #     driver.execute_script("arguments[0].click();", transcript_button)
-        #     time.sleep(2)
-        # except:
-        #     print(f"❌ Không tìm thấy nút 'Hiện Transcript' cho {part_name}")
-
-        # Lấy nội dung transcript
-        # try:
-        #     transcript_element = driver.find_element(By.XPATH,
-        #                                              "//div[contains(@class, 'context-transcript')]//div[contains(@class, 'collapse show')]")
-        #     transcript_text = transcript_element.text.strip()
-        # except:
-        #     transcript_text = "Không có transcript"
-
-        # Lấy danh sách câu hỏi CHỈ của Part hiện tại
         questions = []
         try:
             part_container = driver.find_element(By.ID, part_id)  # Chỉ lấy nội dung trong Part này
@@ -666,7 +629,6 @@ def scrape_answers():
             part_data = {
                 "Part": part_name,
                 "Question_set": len(question_elements),
-                # "Transcript": transcript_text,
                 "Danh sách câu hỏi": questions
             }
             data.append(part_data)
