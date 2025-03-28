@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from EStudyApp.serializers import QuestionSerializer
-from course.ai_classifier import classify_toeic_question
+from course.toeicAI import analyze_toeic_question
 from course.models.blog import Blog
 from EStudyApp.models import Question, QuestionSet
 from course.serializer.blog import BlogSerializer
@@ -95,14 +95,14 @@ def blog_detail(request, id):
         question_set = blog.questions_set  # Lấy đối tượng QuestionSet duy nhất
         for question in question_set.question_question_set.all():  # Truy cập danh sách các câu hỏi
             # Phân loại câu hỏi vào phần TOEIC
-            part = classify_toeic_question(question.question_text)  # Phân loại câu hỏi
-            print(part)
+            analyst = analyze_toeic_question(question.question_text, question.answers, question_set.audio, question_set.image)  # Phân loại câu hỏi
+            print(analyst)
             # Sử dụng serializer để chuyển đổi đối tượng Question thành JSON
             question_serialized = QuestionSerializer(question).data
             # Thêm thông tin câu hỏi và phần vào danh sách
             question_data.append({
                 'question': question_serialized,  # Thêm thông tin câu hỏi đã được serialize
-                'part': part  # Phần của câu hỏi trong TOEIC
+                'analyst': analyst  # Phần của câu hỏi trong TOEIC
             })
             # Nếu cần, bạn có thể lưu thông tin part vào CSDL
             # question.save()  # Nếu bạn muốn lưu vào CSDL
