@@ -1,6 +1,7 @@
 from django.urls import path
 
-from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, PartListQuestionsSetAPIView, TagListView, TestDetailView, \
+from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, \
+    PartListQuestionsSetAPIView, TagListView, TestDetailView, \
     TestListView, TestPartDetailView, \
     SubmitTestView, \
     QuestionSkillAPIView, DetailHistoryView, PartListView, QuestionListView, StateCreateView, StateView, \
@@ -8,7 +9,8 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestUpdateAPIView, \
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
-    StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView
+    StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView, \
+    GetPartDescriptionWithBlogID
 
 urlpatterns = [
     # Tag for Test-list
@@ -43,8 +45,9 @@ urlpatterns = [
     path('parts/update/<int:id>/', UpdatePartAPIView.as_view(), name='part-update'),  # PUT
     path('parts/delete/<int:id>/', DeletePartAPIView.as_view(), name='part-delete'),  # API xóa phần (DELETE)
     path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='part-api'),  # GET theo ID
-    
-    # path('parts/<int:part_id>/questions_set/', PartListQuestionsSetAPIView.as_view(), name='edit-questions'),  # GET theo ID
+
+    # Part-Description (Blog-ID)
+    path('blogs/<int:blog_id>/part-description/', GetPartDescriptionWithBlogID.as_view(), name='blog-part-description'),
 
     # Question API
 
@@ -53,7 +56,7 @@ urlpatterns = [
     path('questions/<int:id>/', DetailQuestionAPIView.as_view(), name='question-detail'),  # Chi tiết câu hỏi
     path('questions/update/<int:id>/', UpdateQuestionAPIView.as_view(), name='question-update'),  # Cập nhật câu hỏi
     path('questions/delete/<int:id>/', DeleteQuestionAPIView.as_view(), name='question-delete'),  # Xóa câu hỏi
-    
+
     # API lấy skill và tính toán kết quả cho các câu hỏi
     path('submit/', SubmitTestView.as_view(), name='test-submit'),
     path('submit/history/', DetailSubmitTestView.as_view(), name='get-submit-id'),
@@ -70,10 +73,9 @@ urlpatterns = [
     path('create/comments/', TestCommentView.as_view(), name='create-comments'),
     path('edit/comments/<int:pk>/', TestCommentView.as_view(), name='comment-update'),
     path('delete/comments/<int:pk>/', TestCommentView.as_view(), name='comment-delete'),
-    
+
     # tag
     path('tags/', TagListView.as_view(), name='tag-list'),
-    
 
     # path('courses/', CourseListView.as_view(), name='course-list'),
     path('student/<int:user_id>/', StudentReportView.as_view(), name='student_report'),
@@ -82,5 +84,6 @@ urlpatterns = [
     path('system/statistics/', SystemStatisticsAPIView.as_view(), name='system-statistics'),
 
     # Question Set API
-    path('question-sets/<int:pk>/delete/', QuestionSetDeleteView.as_view(), name='question-set-delete'),  # Delete question set
+    path('question-sets/<int:pk>/delete/', QuestionSetDeleteView.as_view(), name='question-set-delete'),
+    # Delete question set
 ]

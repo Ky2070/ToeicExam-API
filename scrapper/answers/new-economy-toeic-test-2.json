@@ -1,7 +1,10 @@
 [
-    "Đáp án/transcript: New Economy TOEIC Test 2",
+    {
+        "Tiêu đề": "Đáp án/transcript: New Economy TOEIC Test 2"
+    },
     {
         "Part": "Part 1",
+        "Question_set": 6,
         "Danh sách câu hỏi": [
             {
                 "question_number": "1",
@@ -31,6 +34,7 @@
     },
     {
         "Part": "Part 2",
+        "Question_set": 25,
         "Danh sách câu hỏi": [
             {
                 "question_number": "7",
@@ -136,6 +140,7 @@
     },
     {
         "Part": "Part 3",
+        "Question_set": 39,
         "Danh sách câu hỏi": [
             {
                 "question_number": "32",
@@ -297,6 +302,7 @@
     },
     {
         "Part": "Part 4",
+        "Question_set": 30,
         "Danh sách câu hỏi": [
             {
                 "question_number": "71",
@@ -422,6 +428,7 @@
     },
     {
         "Part": "Part 5",
+        "Question_set": 30,
         "Danh sách câu hỏi": [
             {
                 "question_number": "101",
@@ -547,6 +554,7 @@
     },
     {
         "Part": "Part 6",
+        "Question_set": 16,
         "Danh sách câu hỏi": [
             {
                 "question_number": "131",
@@ -616,6 +624,7 @@
     },
     {
         "Part": "Part 7",
+        "Question_set": 54,
         "Danh sách câu hỏi": [
             {
                 "question_number": "147",

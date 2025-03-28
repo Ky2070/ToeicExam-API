@@ -3,6 +3,7 @@ import os
 import re
 import time
 import winreg
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -32,8 +33,8 @@ def find_chrome_from_registry():
 
     for registry_path in registry_paths:
         try:
-            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path)
+            # Mở registry key, tùy trường hợp ứng dụng chrome thì chỗ này có thể là HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
+            registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, registry_path)
             chrome_path, _ = winreg.QueryValueEx(registry_key, None)
             winreg.CloseKey(registry_key)
 
@@ -106,6 +107,8 @@ data = read_data_from_file('test-data.txt')
 # Lấy test_id từ dữ liệu đọc được
 test_id = data.get('test_id')
 print(f"Test_id: {test_id}")
+# Tạo biến current_date một lần duy nhất
+current_date = datetime.now().strftime("%d-%m-%Y")  # Định dạng dd-mm-yyyy
 
 
 def get_test_links():
@@ -311,6 +314,7 @@ def extract_other_parts(test_question_wrapper, part_name):
 
                 questions_for_part.append({
                     "question_set": 1,
+                    "comment": f"{test_id} - {current_date}",  # Thêm ngày vào commen
                     "question_number": question_number,
                     "question_text": question_text,
                     "answers": answers,
@@ -361,6 +365,7 @@ def extract_part_3_4(test_question_wrapper):
                 "image": img_urls.copy(),
                 "text": "",
                 "question_set": len(question_columns),
+                "comment": f"{test_id} - {current_date}",
                 "questions": group_questions
             })
         except Exception as e:
@@ -371,23 +376,31 @@ def extract_part_3_4(test_question_wrapper):
 
 def extract_part_6_7(test_question_wrapper):
     questions_for_part = []
+
     # Xử lý các nhóm câu hỏi
     question_groups = test_question_wrapper.find_elements(By.CSS_SELECTOR, '.question-group-wrapper .question-twocols')
     for group in question_groups:
-        # Lấy đoạn văn từ `.question-twocols-left .context-wrapper`
         try:
             context_wrapper = group.find_element(By.CSS_SELECTOR, '.question-twocols-left .context-wrapper')
 
-            # Kiểm tra nếu có hình ảnh trong context-wrapper và lấy ảnh đầu tiên
-            image = context_wrapper.find_element(By.TAG_NAME, 'img')  # Lấy thẻ img đầu tiên
-            print(image)
-            if image:
-                context_images = [image.get_attribute('src')]  # Lấy src của ảnh đầu tiên
+            # Lấy tất cả các thẻ img trong context-wrapper
+            image_elements = context_wrapper.find_elements(By.TAG_NAME, 'img')  # Lấy danh sách các thẻ img
+            context_images = []  # Khởi tạo danh sách ảnh
+
+            # Kiểm tra nếu có ảnh và duyệt qua từng ảnh trong danh sách
+            if image_elements:
+                for image in image_elements:  # Duyệt qua từng ảnh
+                    print(image)
+                    context_images.append(image.get_attribute('src'))  # Thêm src của mỗi ảnh vào danh sách ảnh
                 context_text = ""  # Nếu có hình ảnh, không lấy văn bản
             else:
                 context_text = context_wrapper.text.strip()  # Nếu không có hình ảnh, lấy văn bản
                 context_images = []  # Không có hình ảnh
-            print(context_text)
+
+            # In ra kết quả văn bản và các ảnh
+            print("Context Text:", context_text)
+            print("Images:", context_images)
+
         except Exception as e:
             print(f"❌ Lỗi xử lý context-wrapper hoặc hình ảnh: {e}")
             context_text = ""
@@ -420,6 +433,7 @@ def extract_part_6_7(test_question_wrapper):
             "image": context_images,
             "page": context_text,
             "question_set": len(question_columns),
+            "comment": f"{test_id} - {current_date}",
             "questions": group_questions
         })
 
@@ -472,97 +486,31 @@ def save_data_to_json(data):
         elif part_name in ["Part 6", "Part 7"]:
             # Lưu theo đoạn văn bản + câu hỏi liên quan
             for new_passage in questions:
-                passage_text = new_passage.get("page", "")  # Đoạn văn bản
+                passage_text = new_passage.get("page", "")  # Đổi "passage" thành "text"
                 context_images = new_passage.get("image", [])  # Lấy danh sách hình ảnh
-                context_images = list(set(context_images))  # Loại bỏ ảnh trùng lặp
-                # Lấy ảnh cho bộ câu hỏi (nếu có)
-                selected_image = context_images[0] if context_images else None
-                passage_data = {
-                    "image": selected_image if selected_image else [],  # Gán ảnh cho bộ câu hỏi
-                    "page": passage_text if passage_text else "",  # Gán đoạn văn
-                    "question_set": len(new_passage.get("questions", [])),  # Gán số lượng câu hỏi trong bộ
-                    "questions": new_passage.get("questions", [])  # Gán danh sách câu hỏi
+                context_images = list(set(context_images))  # Đảm bảo không có ảnh trùng lặp
 
+                # Nếu có hình ảnh, không lưu text (ưu tiên ảnh)
+                passage_data = {
+                    "image": context_images if context_images else [],  # Chỉ lưu nếu có ảnh
+                    "page": "" if context_images else passage_text,  # Nếu có ảnh thì không lưu text
+                    "question_set": new_passage.get("question_set", 0),
+                    "questions": new_passage.get("questions", [])
                 }
-                # Kiểm tra xem bộ câu hỏi này đã tồn tại chưa
+
                 existing_passages = [
                     p for p in existing_data["questions_by_part"][part_name]
-                    if p.get("page", "") == passage_text  # So sánh đoạn văn bản
+                    if p.get("page", "") == passage_text and p.get("image", []) == context_images
+                    # Đổi "passage" thành "page"
                 ]
-                # Tìm bộ câu hỏi phù hợp, nếu tồn tại
-                matching_passage = None
-                for existing_passage in existing_passages:
-                    if existing_passage["question_set"] == len(new_passage.get("questions", [])):
-                        matching_passage = existing_passage
-                        break
-                if matching_passage:
-                    # Nếu đã tồn tại bộ câu hỏi với đoạn văn và số lượng câu hỏi đúng, hợp nhất câu hỏi
-                    matching_passage["questions"].extend(new_passage.get("questions", []))
-                    matching_passage["question_set"] = len(matching_passage["questions"])  # Cập nhật số lượng câu hỏi
+                if existing_passages:
+                    # Nếu đã tồn tại, hợp nhất danh sách câu hỏi
+                    existing_passages[0]["questions"].extend(new_passage.get("questions", []))
+                    existing_passages[0]["question_set"] = len(
+                        existing_passages[0]["questions"])  # Cập nhật số lượng câu hỏi
                 else:
-                    # Nếu chưa có bộ câu hỏi phù hợp, tạo mới
+                    # Nếu chưa có, thêm mới vào danh sách
                     existing_data["questions_by_part"][part_name].append(passage_data)
-        # elif part_name in ["Part 6", "Part 7"]:
-        #     # Duyệt từng đoạn văn + câu hỏi tương ứng
-        #     for new_passage in questions:
-        #         passage_text = new_passage.get("page", "").strip()
-        #         question_set = new_passage.get("question_set", 0)
-        #         questions_list = new_passage.get("questions", [])
-        #
-        #         # Lấy ảnh từ đúng đoạn văn
-        #         context_images = new_passage.get("image", [])  # Lấy danh sách ảnh của đoạn này
-        #
-        #         # Tạo object lưu thông tin đoạn văn
-        #         passage_data = {
-        #             "image": context_images,  # Giữ nguyên danh sách ảnh, không lấy sai ảnh
-        #             "page": passage_text,
-        #             "question_set": question_set,
-        #             "questions": questions_list
-        #         }
-        #
-        #         # Kiểm tra xem đoạn văn này đã tồn tại chưa
-        #         existing_passages = [
-        #             p for p in existing_data["questions_by_part"][part_name]
-        #             if p.get("page", "") == passage_text
-        #         ]
-        #
-        #         if existing_passages:
-        #             existing_passage = existing_passages[0]
-        #             existing_passage["questions"].extend(questions_list)
-        #
-        #             # Hợp nhất danh sách ảnh mà không bị trùng
-        #             existing_passage["image"] = list(dict.fromkeys(existing_passage["image"] + context_images))
-        #
-        #             # Cập nhật số lượng câu hỏi chính xác
-        #             existing_passage["question_set"] = len(existing_passage["questions"])
-        #         else:
-        #             existing_data["questions_by_part"][part_name].append(passage_data)
-
-        # elif part_name in ["Part 6", "Part 7"]:
-        #     # Lưu theo đoạn văn bản + câu hỏi liên quan
-        #     for new_passage in questions:
-        #         passage_text = new_passage.get("page", "")  # Đổi "passage" thành "text"
-        #         context_images = new_passage.get("image", [])  # Lấy danh sách hình ảnh
-        #         context_images = list(set(context_images))  # Đảm bảo không có ảnh trùng lặp
-        #
-        #         passage_data = {
-        #             "image": context_images if context_images else [],  # Nếu có ảnh thì lưu, không có thì là []
-        #             "page": passage_text if passage_text else "",  # Nếu có text thì lưu, không có thì là ""
-        #             "question_set": new_passage.get("question_set", 0),
-        #             "questions": new_passage.get("questions", [])
-        #         }
-        #
-        #         existing_passages = [
-        #             p for p in existing_data["questions_by_part"][part_name]
-        #             if p.get("page", "") == passage_text   # Đổi "passage" thành "text"
-        #         ]
-        #         if existing_passages:
-        #             # Nếu đã tồn tại, hợp nhất danh sách câu hỏi
-        #             existing_passages[0]["questions"].extend(new_passage.get("questions", []))
-        #             existing_passages[0]["question_set"] = len(existing_passages[0]["questions"])  # Cập nhật số lượng câu hỏi
-        #         else:
-        #             # Nếu chưa có, thêm mới vào danh sách
-        #             existing_data["questions_by_part"][part_name].append(passage_data)
         else:
             # Lưu từng câu hỏi riêng lẻ (cho các Part khác)
             for new_question in questions:
@@ -574,6 +522,123 @@ def save_data_to_json(data):
         json.dump(existing_data, file, indent=4, ensure_ascii=False)
 
     print(f"✅ Dữ liệu đã được lưu vào {file_path}")
+
+
+def click_exit_button():
+    """Tìm và bấm nút 'Thoát' trên trang hiện tại"""
+    try:
+        # 🔹 Chờ tối đa 10 giây để nút "Thoát" xuất hiện và có thể bấm
+        exit_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.LINK_TEXT, "Thoát"))
+        )
+        # 🔹 Bấm vào nút "Thoát"
+        exit_button.click()
+        print("✅ Đã bấm nút 'Thoát' thành công!")
+        # 🔹 Chờ alert xuất hiện và xử lý nó
+        WebDriverWait(driver, 5).until(EC.alert_is_present())  # Đợi tối đa 5 giây
+        alert = driver.switch_to.alert  # Chuyển sang Alert
+        print(f"⚠️ Alert hiển thị: {alert.text}")
+        # 🔹 Chấp nhận alert (bấm "OK")
+        alert.accept()
+        print("✅ Đã xác nhận thoát.")
+
+    except Exception as e:
+        print(f"❌ Lỗi: {e}")
+
+
+def click_solution_link():
+    try:
+        # Đợi phần tử xuất hiện
+        solution_link = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'nav-link') and @href='#test-solutions']"))
+        )
+
+        # Thử nhấp vào link đáp án
+        solution_link.click()
+        print("Đã nhấp vào link Đáp án!")
+        time.sleep(2)
+        view_solutions_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//a[contains(@href, '/solutions/') and contains(text(), 'Xem đáp án đề thi')]"))
+        )
+        view_solutions_link.click()
+        print("Đã nhấp vào link Xem đáp án đề thi!")
+        time.sleep(2)
+    except Exception as e:
+        print("Lỗi khi nhấp vào link Đáp án:", e)
+
+
+def scrape_answers():
+    data = []
+
+    title_element = driver.find_element(By.TAG_NAME, 'h1')
+    test_title = title_element.text.strip()  # Lấy nội dung tiêu đề
+    # Loại bỏ "Thoát" nếu có
+    test_title = re.sub(r'\s*Thoát$', '', test_title).strip()
+    if test_title:  # Kiểm tra tiêu đề không rỗng
+        title = {
+            "Tiêu đề": test_title
+        }
+        data.append(title)
+        print(f"Tiêu đề bài kiểm tra: {test_title}")
+    else:
+        print("Tiêu đề bài kiểm tra rỗng!")
+
+    part_tabs = driver.find_elements(By.XPATH, "//a[contains(@class, 'nav-link') and contains(@id, 'pills-')]")
+
+    for part_tab in part_tabs:
+        part_name = part_tab.text.strip()
+        part_id = part_tab.get_attribute("href").split("#")[-1]  # Lấy ID của nội dung Part
+        print(part_id)
+        print(f"📌 Đang xử lý: {part_name}")
+        driver.execute_script("arguments[0].click();", part_tab)
+        time.sleep(2)  # Đợi nội dung load
+        questions = []
+        try:
+            part_container = driver.find_element(By.ID, part_id)  # Chỉ lấy nội dung trong Part này
+            question_wrapper = part_container.find_element(By.CSS_SELECTOR, '.test-questions-wrapper')
+            question_elements = question_wrapper.find_elements(By.CSS_SELECTOR, '.question-wrapper')
+            print(f"📌 Số câu hỏi tìm thấy trong {part_name}: {len(question_elements)}")
+
+            if question_elements:
+                for question in question_elements:
+                    try:
+                        question_number = question.find_element(By.CSS_SELECTOR,
+                                                                ".question-number").text.strip()
+                        correct_answer = question.find_element(By.CSS_SELECTOR,
+                                                               ".text-success").text.replace(
+                            "Đáp án đúng:", "").strip()
+
+                        # ✅ Chỉ thêm câu hỏi hợp lệ
+                        if question_number and correct_answer:
+                            questions.append({"question_number": question_number, "correct_answer": correct_answer})
+                        else:
+                            print(
+                                f"⚠️ Bỏ qua câu hỏi bị thiếu dữ liệu trong {part_name} (Số: {question_number}, Đáp án: {correct_answer})")
+
+                    except Exception as e:
+                        print(f"⚠️ Lỗi khi xử lý câu hỏi trong {part_name}: {e}")
+                        continue
+            else:
+                print(f"⚠️ Không tìm thấy câu hỏi trong {part_name}")
+        except:
+            print(f"⚠️ Không thể lấy danh sách câu hỏi cho {part_name}")
+
+        # **Chỉ lưu nếu có câu hỏi hợp lệ**
+        if questions:
+            part_data = {
+                "Part": part_name,
+                "Question_set": len(question_elements),
+                "Danh sách câu hỏi": questions
+            }
+            data.append(part_data)
+
+    # Lưu dữ liệu vào file
+    file_path = f"answers/{test_id}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
+    print(f"✅ Dữ liệu đã được lưu vào {file_path}!")
 
 
 def main():
@@ -597,7 +662,9 @@ def main():
             print("Form submission failed, skipping.")
     else:
         print("Checkbox selection failed, skipping.")
-
+    click_exit_button()
+    click_solution_link()
+    scrape_answers()
     driver.quit()
 
 
