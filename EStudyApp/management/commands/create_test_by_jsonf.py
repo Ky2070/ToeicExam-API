@@ -3,6 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand
 from EStudyApp.models import Test, Part, PartDescription, QuestionSet, Question
+from question_bank.models import QuestionBank, QuestionSetBank
 
 
 class Command(BaseCommand):
@@ -96,6 +97,7 @@ class Command(BaseCommand):
                 # Tạo QuestionSet cho nhóm câu hỏi này
                 if part.part_description.id == 1 or part.part_description.id == 2 or part.part_description.id == 5:
 
+                    # add questionset
                     question_set = QuestionSet.objects.create(
                         test=test,
                         part=part,
@@ -105,13 +107,23 @@ class Command(BaseCommand):
                         audio=group_data['audio'],
                         page=group_data['page']
                     )
+                    
+                    # add question set bank
+                    question_set_bank = QuestionSetBank.objects.create(
+                        part_description=part.part_description,
+                        image=group_data['image'],
+                        audio=group_data['audio'],
+                        page=group_data['page'],
+                        note=f"Question set {question_set.id}",
+                        from_ques=question_data["question_number"],
+                        to_ques=question_data["question_number"],
+                    )
 
                     # Create questions for this QuestionSet
                     for question_data in group_data['questions']:
                         # Get correct answer for the current question number
                         question_number = int(question_data["question_number"])
                         correct_answer = correct_answers[question_data["question_number"]]
-                        print(correct_answer)
                         question = Question.objects.create(
                             test=test,
                             question_set=question_set,
@@ -122,11 +134,24 @@ class Command(BaseCommand):
                             answers=question_data.get("answers", {}),
                             correct_answer=correct_answer,
                         )
-
+                        
+                        # add question bank
+                        question_bank = QuestionBank.objects.create(
+                            question_set=question_set_bank,
+                            part_description=part.part_description,
+                            question_number=question_number,
+                            question_text=question_data.get(
+                                "question_text", ""),
+                            answers=question_data.get("answers", {}),
+                            correct_answer=correct_answer,
+                        )
+                        
                         from_ques += 1
 
                         self.stdout.write(self.style.SUCCESS(
                             f"Question created: {question.question_number}"))
+                        self.stdout.write(self.style.SUCCESS(
+                            f"Question bank created: {question_bank.question_number}"))
 
                 if part.part_description.id == 3 or part.part_description.id == 4 or part.part_description.id == 6 or part.part_description.id == 7 or part.part_description.id == 8 or part.part_description.id == 9 or part.part_description.id == 10 or part.part_description.id == 11 or part.part_description.id == 12:
                     question_set = QuestionSet.objects.create(
@@ -138,6 +163,18 @@ class Command(BaseCommand):
                         audio=group_data['audio'],
                         page=group_data['page']
                     )
+                    
+                    # add question set bank
+                    question_set_bank_2 = QuestionSetBank.objects.create(
+                        part_description=part.part_description,
+                        from_ques=from_ques,
+                        to_ques=from_ques + group_data['questions'][0]['question_set'],
+                        image=group_data['image'],
+                        audio=group_data['audio'],
+                        page=group_data['page'],
+                        note=f"Question set {question_set.id}"
+                    )
+                        
 
                     self.stdout.write(self.style.SUCCESS(
                         f"QuestionSet created: {question_set.id}"))
@@ -156,9 +193,23 @@ class Command(BaseCommand):
                                 answers=question_data.get("answers", {}),
                                 correct_answer=correct_answer,
                             )
-                            question_set.to_ques = question_data["question_number"]
+                            
+                            # add question bank
+                            question_bank = QuestionBank.objects.create(
+                                question_set=question_set_bank_2,
+                                part_description=part.part_description,
+                                question_number=question_data["question_number"],
+                                question_text=question_data.get(
+                                    "question_text", ""),
+                                answers=question_data.get("answers", {}),
+                                correct_answer=correct_answer,
+                            )
+                            
+                            question_set.to_ques = question_data["question_number"] 
+                            question_set_bank_2.to_ques = question_data["question_number"]
                             from_ques += 1
                             question_set.save()
+                            question_set_bank_2.save()
                             self.stdout.write(self.style.SUCCESS(
                                 f"Question created: {question.question_number}"))
 
