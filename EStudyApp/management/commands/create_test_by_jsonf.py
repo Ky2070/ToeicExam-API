@@ -122,7 +122,7 @@ class Command(BaseCommand):
                             answers=question_data.get("answers", {}),
                             correct_answer=correct_answer,
                         )
-                        
+
                         from_ques += 1
 
                         self.stdout.write(self.style.SUCCESS(
