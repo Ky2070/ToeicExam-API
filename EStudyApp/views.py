@@ -293,7 +293,6 @@ class FixedTestPagination(PageNumberPagination):
     page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
     max_page_size = 100  # Giới hạn cứng
 
-
 class TestListView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -309,13 +308,13 @@ class TestListView(APIView):
             serializer = TestSerializer(tests, many=True)
             return Response(serializer.data)
 
-        type = request.GET.get('type') if request.GET.get(
-            'type') is not None else 'Practice'
+        types = [request.GET.get('type'), 'All'] if request.GET.get(
+            'type') is not None else ['Practice', 'All']
 
         skills = request.GET.get('skills')
         # Get tag IDs from query parameters
         tag_ids = request.GET.get('tag_ids')
-        limit = request.GET.get('limit')  # Get limit from query parameters
+        # limit = request.GET.get('limit')  # Get limit from query parameters
         name = request.GET.get('name')  # Get name parameter for filtering
 
         # Base query with prefetch_related
@@ -330,7 +329,7 @@ class TestListView(APIView):
                 to_attr='user_histories'
             ),
             'tags'  # Add tags to prefetch_related
-        ).filter(publish=True, types=type)
+        ).filter(publish=True, types__in=types)
 
         # Add name filter if provided (case-insensitive)
         if name:
@@ -377,27 +376,27 @@ class TestListView(APIView):
         tests = tests.order_by('id', 'name')
 
         # Apply limit if specified
-        if limit:
-            try:
-                limit = int(limit)
-                if limit > 0:
-                    tests = tests[:limit]
-                    # serializer = TestSerializer(tests, many=True)
-                    # return Response({
-                    #     'results': serializer.data,
-                    #     'total_items': len(tests),
-                    #     'limit': limit
-                    # })
-                else:
-                    return Response(
-                        {"error": "Limit must be a positive integer."},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            except ValueError:
-                return Response(
-                    {"error": "Invalid limit format. Please provide a valid integer."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        # if limit:
+        #     try:
+        #         limit = int(limit)
+        #         if limit > 0:
+        #             tests = tests[:limit]
+        #             # serializer = TestSerializer(tests, many=True)
+        #             # return Response({
+        #             #     'results': serializer.data,
+        #             #     'total_items': len(tests),
+        #             #     'limit': limit
+        #             # })
+        #         else:
+        #             return Response(
+        #                 {"error": "Limit must be a positive integer."},
+        #                 status=status.HTTP_400_BAD_REQUEST
+        #             )
+        #     except ValueError:
+        #         return Response(
+        #             {"error": "Invalid limit format. Please provide a valid integer."},
+        #             status=status.HTTP_400_BAD_REQUEST
+        #         )
 
         # If no limit specified, use pagination
         paginator = FixedTestPagination()
