@@ -4,6 +4,7 @@ import random
 
 from rest_framework.generics import ListAPIView
 
+from Authentication.models import User
 from Authentication.permissions import IsTeacher
 from course.models import Blog
 from question_bank.models import QuestionBank, QuestionSetBank
@@ -522,6 +523,7 @@ class StateCreateView(APIView):
         info = request.data["info"]
         initial_minutes = 120
         initial_seconds = 0
+        time_start = datetime.now()
 
         state = State.objects.create(
             user=user,
@@ -530,6 +532,7 @@ class StateCreateView(APIView):
             initial_minutes=initial_minutes,
             initial_seconds=initial_seconds,
             name='Test State',
+            time_start=time_start,
             used=False
         )
 
@@ -1839,3 +1842,39 @@ class GetPartDescriptionWithBlogID(APIView):
             return Response({"error": "Blog không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class ChangeStateView(APIView):
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        test_id = request.data.get('test_id')
+        bonus_minute = request.data.get('bonus_minute')
+        minus_minute = request.data.get('minus_minute')
+
+        user = User.objects.get(email=email)
+        test = Test.objects.get(id=test_id)
+        
+        if not user or not test:
+            return Response({"error": "User or test not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        state = State.objects.filter(user=user, test=test).order_by('-created_at').first()
+        
+        if not state:
+            return Response({"error": "State not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if bonus_minute:
+            state.time_start = state.time_start + timedelta(minutes=bonus_minute)
+            state.save()
+        elif minus_minute:
+            print(state.time_start)
+            state.time_start = state.time_start - timedelta(minutes=minus_minute)
+            print(state.time_start)
+            state.save()
+        
+        return Response({"message": "State updated successfully"}, status=status.HTTP_200_OK)
+        
+        
+        
+
+        
+

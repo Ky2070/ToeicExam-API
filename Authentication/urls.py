@@ -10,4 +10,5 @@ urlpatterns = [
     path('token/', TokenObtainSlidingView.as_view(), name='token_obtain'),
     path('token/refresh/', TokenRefreshSlidingView.as_view(), name='token_refresh'),
     path('user/', UserProfileView.as_view(), name='user_profile'),
+    path('users/all/', UserAllView.as_view(), name='user_all'),
 ]

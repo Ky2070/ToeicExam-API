@@ -512,6 +512,7 @@ class State(BaseModel):
     initial_minutes = models.IntegerField(blank=True, null=True)
     initial_seconds = models.IntegerField(blank=True, null=True)
     time_taken = models.IntegerField(blank=True, null=True)
+    time_start = models.DateTimeField(blank=True, null=True)
 
     name = models.CharField(
         max_length=125,

@@ -10,7 +10,7 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
     StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView, \
-    GetPartDescriptionWithBlogID
+    GetPartDescriptionWithBlogID, ChangeStateView
 
 urlpatterns = [
     # Tag for Test-list
@@ -86,4 +86,6 @@ urlpatterns = [
     # Question Set API
     path('question-sets/<int:pk>/delete/', QuestionSetDeleteView.as_view(), name='question-set-delete'),
     # Delete question set
+
+    path('state/change/', ChangeStateView.as_view(), name='change-state'),
 ]
