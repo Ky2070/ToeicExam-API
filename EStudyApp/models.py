@@ -1,7 +1,14 @@
 from django.db import models
-from django.utils import timezone
-from datetime import datetime, timedelta
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import uuid
+import copy
+import random
 from ckeditor.fields import RichTextField
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from Authentication.models import User  # type: ignore
 from EStudyApp.base_model import BaseModel
@@ -103,6 +110,30 @@ class Test(BaseModel):
     def question_total(self):
         question_total = Question.objects.filter(test=self).count()
         return question_total
+        
+    def update_publish_status(self):
+        """
+        Update the publish status based on publish_date and close_date.
+        Returns True if the status was changed, False otherwise.
+        """
+        current_time = timezone.now()
+        
+        # Check if we need to publish this test
+        if (not self.publish and 
+            self.publish_date and self.publish_date <= current_time and
+            (not self.close_date or self.close_date > current_time)):
+            self.publish = True
+            self.save(update_fields=['publish'])
+            return True
+            
+        # Check if we need to unpublish this test
+        elif (self.publish and 
+              self.close_date and self.close_date <= current_time):
+            self.publish = False
+            self.save(update_fields=['publish'])
+            return True
+            
+        return False
 
 
 # class UserTestResult(models.Model):
