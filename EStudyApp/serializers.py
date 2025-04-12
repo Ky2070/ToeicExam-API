@@ -46,7 +46,7 @@ class TestCommentSerializer(serializers.ModelSerializer):
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ['id', 'info', 'initial_minutes', 'initial_seconds']
+        fields = ['id', 'info', 'initial_minutes', 'initial_seconds', 'created_at', 'updated_at', 'time_start']
         read_only_fields = ['id']  # Để tự động tạo ID
 
 
