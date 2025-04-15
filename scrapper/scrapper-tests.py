@@ -314,7 +314,7 @@ def extract_other_parts(test_question_wrapper, part_name):
 
                 questions_for_part.append({
                     "question_set": 1,
-                    "comment": f"{test_id} - {current_date}",  # Thêm ngày vào commen
+                    "note": f"{test_id} - {current_date}",  # Thêm ngày vào commen
                     "question_number": question_number,
                     "question_text": question_text,
                     "answers": answers,
@@ -365,7 +365,7 @@ def extract_part_3_4(test_question_wrapper):
                 "image": img_urls.copy(),
                 "text": "",
                 "question_set": len(question_columns),
-                "comment": f"{test_id} - {current_date}",
+                "note": f"{test_id} - {current_date}",
                 "questions": group_questions
             })
         except Exception as e:
@@ -433,7 +433,7 @@ def extract_part_6_7(test_question_wrapper):
             "image": context_images,
             "page": context_text,
             "question_set": len(question_columns),
-            "comment": f"{test_id} - {current_date}",
+            "note": f"{test_id} - {current_date}",
             "questions": group_questions
         })
 
