@@ -7,6 +7,7 @@ from rest_framework.generics import ListAPIView
 from Authentication.models import User
 from Authentication.permissions import IsTeacher
 from course.models import Blog
+from course.toeicAI import get_user_info_prompt_multi
 from question_bank.models import QuestionBank, QuestionSetBank
 from utils.standard_part import PART_STRUCTURE
 
@@ -20,15 +21,14 @@ from rest_framework.views import APIView
 
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
-from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, QuestionType, State, \
+from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, State, \
     TestComment, \
     HistoryTraining, Tag
 from EStudyApp.serializers import HistorySerializer, HistoryTrainingSerializer, QuestionSetSerializer, \
     TestDetailSerializer, TestSerializer, \
-    PartSerializer, \
     HistoryDetailSerializer, PartListSerializer, QuestionDetailSerializer, StateSerializer, TestCommentSerializer, \
-    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, TestByTagSerializer, \
-    StudentStatisticsSerializer, PartDescriptionSerializer, BlogSerializer
+    CreateTestSerializer, TestListSerializer, QuestionSerializer, TagSerializer, \
+    StudentStatisticsSerializer, PartDescriptionSerializer, ListHistorySerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from EStudyApp.services.service_student import get_suggestions
@@ -245,6 +245,41 @@ class DetailSubmitTestView(APIView):
         # Serialize danh sách lịch sử
         serializer = HistorySerializer(histories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ListResultToeicForUser(APIView):
+    # Chỉ cho phép người dùng đã xác thực
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_id = request.user.id  # Lấy ID của người dùng hiện tại
+        # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
+        histories = (
+            History.objects.filter(user_id=user_id, complete=True)
+            .select_related('test')  # Join bảng Test
+            .order_by('-id')[:3]
+        )
+
+        if not histories.exists():
+            return Response(
+                {"error": "No history found for this user"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serialize danh sách lịch sử
+        serializer = ListHistorySerializer(histories, many=True)
+
+        # Gọi hàm AI để phân tích và khuyên
+        try:
+            ai_feedback = get_user_info_prompt_multi(user_id)
+        except Exception as e:
+            ai_feedback = f"Lỗi khi tạo phản hồi từ AI: {str(e)}"
+
+        # Trả về dữ liệu lịch sử kèm phản hồi từ AI
+        return Response({
+            "results": serializer.data,
+            "ai_feedback": ai_feedback
+        }, status=status.HTTP_200_OK)
 
 
 class TestDetailView(APIView):
