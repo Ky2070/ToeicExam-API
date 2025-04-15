@@ -200,6 +200,18 @@ class HistoryDetailSerializer(serializers.ModelSerializer):
         ]
 
 
+class ListHistorySerializer(serializers.ModelSerializer):
+    test_name = serializers.CharField(source='test.name', read_only=True)
+
+    class Meta:
+        model = History
+        fields = [
+            'id', 'user', 'test_name', 'score',
+            'listening_score', 'reading_score', 'correct_answers', 'wrong_answers', 'unanswer_questions',
+            'complete', 'completion_time', 'percentage_score'
+        ]
+
+
 class HistoryTrainingSerializer(serializers.ModelSerializer):
     test = TestSubmitSerializer(read_only=True)
 
