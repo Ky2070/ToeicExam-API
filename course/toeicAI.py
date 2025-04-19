@@ -15,7 +15,10 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EnglishApp.settings')  # Thay bằng tên project thực của bạn
 django.setup()
 
-from EStudyApp.models import History
+from concurrent.futures import ThreadPoolExecutor
+import time
+
+executor = ThreadPoolExecutor(max_workers=10)  # tùy bạn điều chỉnh số lượng thread
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -38,72 +41,61 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 
-def get_latest_user_histories(user_id, limit=3):
-    latest_histories = (
-        History.objects
-        .filter(user_id=user_id, complete=True)
-        .select_related('test')
-        .order_by('-id')[:limit]  # Giả sử có trường completion_time
+def call_ai_sync(prompt):
+    response = model.generate_content(
+        prompt,
+        stream=True,
+        generation_config=genai.types.GenerationConfig(temperature=0.5),
+        safety_settings={
+            "HARASSMENT": "BLOCK_NONE",
+            "HATE": "BLOCK_NONE",
+            "SEXUAL": "BLOCK_NONE",
+            "DANGEROUS": "BLOCK_NONE"
+        }
     )
-    return latest_histories
+
+    return ''.join(chunk.text for chunk in response)
 
 
-def get_user_info_prompt_single(history, all_histories):
+def get_user_info_prompt_multi(user_id, histories):
     """
-    Tạo prompt chứa thông tin của một bài thi riêng biệt.
-    Phân tích từng phần của bài thi và trả về phản hồi từ AI.
+    Gộp dữ liệu 3 bài thi gần nhất của người dùng và tạo một phản hồi duy nhất từ AI.
     """
-    # Lọc ra các bài có cùng tên đề thi
-    same_test_histories = [h for h in all_histories if h.test.name == history.test.name]
-
-    # Sắp xếp theo thời gian hoàn thành (hoặc id nếu muốn)
-    same_test_histories.sort(key=lambda h: h.completion_time)
-
-    # Tìm chỉ số lần làm bài (tăng từ 1)
-    attempt_number = same_test_histories.index(history) + 1
-
-    user_info = f"""
-Tên đề thi: {history.test.name} (Lần làm thứ {attempt_number})
-Listening: {history.listening_score}
-Reading: {history.reading_score}
-Tổng điểm: {history.score}
-Đáp án đúng: {history.correct_answers}
-Tỷ lệ đúng: {history.percentage_score}%
-Thời gian hoàn thành: {history.completion_time} giây
-Sai: {history.wrong_answers} | Bỏ qua: {history.unanswer_questions}
-"""
-
-    prompt = f"""
-Dưới đây là thông tin bài thi TOEIC của người dùng:
-{user_info}
-Hãy phân tích kết quả điểm số Listening và Reading trong bài thi này và đưa ra lời khuyên ngắn gọn, rõ ràng:
-- Phần nào cần cải thiện, Listening hay Reading?
-"""
-
-    print(f"[DEBUG] Prompt gửi đi cho đề '{history.test.name}' - Lần {attempt_number}")
-    response = model.generate_content(prompt)  # Gọi AI để phân tích
-    return response.text
-
-
-def get_user_info_prompt_multi(user_id):
-    """
-    Tạo prompt cho tất cả các bài thi của người dùng.
-    Phân tích và nhận phản hồi cho từng bài thi riêng biệt.
-    """
-    histories = get_latest_user_histories(user_id, limit=3)  # Lấy tất cả lịch sử thi của người dùng
     if not histories:
-        return "Không tìm thấy lịch sử làm bài cho người dùng này."
+        return "Không tìm thấy dữ liệu bài thi."
 
-    # Phân tích từng bài thi và lấy phản hồi cho mỗi bài
-    feedbacks = []
-    for history in histories:
-        feedback = get_user_info_prompt_single(history, histories)
-        feedbacks.append({
-            "test_name": history.test.name,
-            "feedback": feedback
-        })
+    prompt_parts = []
+    for i, history in enumerate(histories[::-1], start=1):  # đảo ngược để từ cũ -> mới
+        same_test_histories = [h for h in histories if h.test.name == history.test.name]
+        same_test_histories.sort(key=lambda h: h.completion_time)
+        attempt_number = same_test_histories.index(history) + 1
 
-    return feedbacks
+        user_info = f"""
+Bài{i} [{history.test.name} - Lần {attempt_number}]: L={history.listening_score}, R={history.reading_score}, T={history.score}, Đúng={history.percentage_score}%, Sai={history.wrong_answers}, Bỏ qua={history.unanswer_questions}
+"""
+        prompt_parts.append(user_info.strip())
+
+    # Ghép toàn bộ thông tin
+    full_prompt = "\n\n".join(prompt_parts)
+
+    # Prompt chính gửi đến AI
+    final_prompt = f"""
+Bạn là trợ lý TOEIC chuyên phân tích kết quả thi nhanh chóng. Dưới đây là 3 bài thi:
+
+{full_prompt}
+
+Phân tích nhanh vừa đủ ý, phản hồi ngắn gọn: kỹ năng nào yếu và gợi ý cải thiện (TOEIC 900)
+"""
+
+    # print("[DEBUG] Prompt gửi AI:")
+    # print(final_prompt)
+
+    # Gọi AI để lấy phản hồi
+    start = time.time()
+    result = executor.submit(call_ai_sync, final_prompt).result()
+    end = time.time()
+    print(f">>> Total: {end - start:.3f}s")  # thời gian phản hồi (đã trôi qua)
+    return result
 
 
 def create_toeic_question_prompt(question_text, answers, audio=None, image=None):
@@ -156,8 +148,6 @@ def create_toeic_question_prompt(question_text, answers, audio=None, image=None)
 
     Trả lời rõ ràng, ngắn gọn nhưng súc tích và dễ hiểu.
     """
-    print("🧠 Prompt gửi đến AI:")
-    print(prompt)
     response = model.generate_content(prompt)
     return response.text
 
@@ -256,7 +246,7 @@ image = None
 #     except sr.RequestError as e:
 #         print(f"❌ Lỗi kết nối đến Google API: {e}")
 # Gọi hàm để phân tích
-analysis_result = create_toeic_question_prompt(question_text, answers, audio, image)
-
-# In kết quả phân tích
-print(analysis_result)
+# analysis_result = create_toeic_question_prompt(question_text, answers, audio, image)
+#
+# # In kết quả phân tích
+# print(analysis_result)
