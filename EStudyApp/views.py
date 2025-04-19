@@ -249,33 +249,35 @@ class DetailSubmitTestView(APIView):
 
 class ListResultToeicForUser(APIView):
     # Chỉ cho phép người dùng đã xác thực
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeacher]
 
-    def get(self, request):
-        user_id = request.user.id  # Lấy ID của người dùng hiện tại
-        # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
+    def get(self, request, user_id):
+        # Nếu bạn muốn thêm bảo mật, chỉ cho phép teacher xem người khác, còn người khác chỉ được xem chính mình:
+        if request.user.role != 'teacher' and request.user.id != user_id:
+            return Response(
+                {"error": "Bạn không có quyền xem lịch sử của người dùng khác."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         histories = (
             History.objects.filter(user_id=user_id, complete=True)
-            .select_related('test')  # Join bảng Test
+            .select_related('test')
             .order_by('-id')[:3]
         )
 
         if not histories.exists():
             return Response(
-                {"error": "No history found for this user"},
+                {"error": "Không tìm thấy lịch sử cho người dùng này."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Serialize danh sách lịch sử
         serializer = ListHistorySerializer(histories, many=True)
 
-        # Gọi hàm AI để phân tích và khuyên
         try:
-            ai_feedback = get_user_info_prompt_multi(user_id)
+            ai_feedback = get_user_info_prompt_multi(user_id, histories)
         except Exception as e:
             ai_feedback = f"Lỗi khi tạo phản hồi từ AI: {str(e)}"
 
-        # Trả về dữ liệu lịch sử kèm phản hồi từ AI
         return Response({
             "results": serializer.data,
             "ai_feedback": ai_feedback

@@ -19,16 +19,16 @@ print("✅ Kiểm tra FFprobe:", os.path.isfile(AudioSegment.ffprobe))
 # Tải file mp3 từ URL
 url = 'https://s4-media1.study4.com/media/economy1000/test10_audios/q32-34.mp3'
 response = requests.get(url)
-with open("audio.mp3", "wb") as f:
+with open("audio/audio.mp3", "wb") as f:
     f.write(response.content)
 
 # Chuyển mp3 sang wav
-audio = AudioSegment.from_mp3("audio.mp3")
-audio.export("audio.wav", format="wav")
+audio = AudioSegment.from_mp3("audio/audio.mp3")
+audio.export("wav/audio.wav", format="wav")
 
 # Nhận dạng giọng nói
 r = sr.Recognizer()
-with sr.AudioFile("audio.wav") as source:
+with sr.AudioFile("wav/audio.wav") as source:
     audio_data = r.record(source)
     try:
         text = r.recognize_google(audio_data)
