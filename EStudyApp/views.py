@@ -2,12 +2,13 @@ from datetime import datetime, timezone, timedelta
 from django.db.models import Avg, Max, Min, Count, F
 import random
 
-from rest_framework.generics import ListAPIView
-
 from Authentication.models import User
 from Authentication.permissions import IsTeacher
+
 from course.models import Blog
-from course.toeicAI import get_user_info_prompt_multi
+from course.toeicAI import get_user_info_prompt_multi, create_toeic_question_prompt
+from EStudyApp.generateAI.audio import transcribe_audio_from_urls
+from EStudyApp.generateAI.ocr import extract_text_from_image_urls
 from question_bank.models import QuestionBank, QuestionSetBank
 from utils.standard_part import PART_STRUCTURE
 
@@ -247,43 +248,6 @@ class DetailSubmitTestView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ListResultToeicForUser(APIView):
-    # Chỉ cho phép người dùng đã xác thực
-    permission_classes = [IsAuthenticated, IsTeacher]
-
-    def get(self, request, user_id):
-        # Nếu bạn muốn thêm bảo mật, chỉ cho phép teacher xem người khác, còn người khác chỉ được xem chính mình:
-        if request.user.role != 'teacher' and request.user.id != user_id:
-            return Response(
-                {"error": "Bạn không có quyền xem lịch sử của người dùng khác."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        histories = (
-            History.objects.filter(user_id=user_id, complete=True)
-            .select_related('test')
-            .order_by('-id')[:3]
-        )
-
-        if not histories.exists():
-            return Response(
-                {"error": "Không tìm thấy lịch sử cho người dùng này."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        serializer = ListHistorySerializer(histories, many=True)
-
-        try:
-            ai_feedback = get_user_info_prompt_multi(user_id, histories)
-        except Exception as e:
-            ai_feedback = f"Lỗi khi tạo phản hồi từ AI: {str(e)}"
-
-        return Response({
-            "results": serializer.data,
-            "ai_feedback": ai_feedback
-        }, status=status.HTTP_200_OK)
-
-
 class TestDetailView(APIView):
     def get(self, request, pk, format=None):
         try:
@@ -330,6 +294,7 @@ class FixedTestPagination(PageNumberPagination):
     page_size = 8  # Số lượng bài kiểm tra mỗi trang (không thể thay đổi)
     page_size_query_param = None  # Không cho phép người dùng thay đổi số lượng
     max_page_size = 100  # Giới hạn cứng
+
 
 class TestListView(APIView):
     authentication_classes = []
@@ -1856,7 +1821,8 @@ class GetPartDescriptionWithBlogID(APIView):
             questions_set = blog.questions_set
             print(questions_set)
             if questions_set is None:
-                return Response({"error": "Blog này chưa liên kết với bất kỳ QuestionSet nào."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Blog này chưa liên kết với bất kỳ QuestionSet nào."},
+                                status=status.HTTP_404_NOT_FOUND)
 
             qs = QuestionSet.objects.get(id=blog.questions_set.id)
             print(f"QuestionSet ID: {qs.id}, Part: {qs.part}")  # Kiểm tra Part có tồn tại không
@@ -1864,12 +1830,14 @@ class GetPartDescriptionWithBlogID(APIView):
             # Bước 3: Kiểm tra xem QuestionSet có Part không
             part = questions_set.part
             if part is None:
-                return Response({"error": "Không tìm thấy Part tương ứng với QuestionSet."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Không tìm thấy Part tương ứng với QuestionSet."},
+                                status=status.HTTP_404_NOT_FOUND)
 
             # Bước 4: Kiểm tra Part có PartDescription không
             part_description = part.part_description
             if part_description is None:
-                return Response({"error": "Không tìm thấy PartDescription cho Part này."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Không tìm thấy PartDescription cho Part này."},
+                                status=status.HTTP_404_NOT_FOUND)
 
             # Serialize dữ liệu trả về
             serializer = PartDescriptionSerializer(part_description)
@@ -1879,8 +1847,8 @@ class GetPartDescriptionWithBlogID(APIView):
             return Response({"error": "Blog không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
+
+
 class ChangeStateView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
@@ -1890,15 +1858,15 @@ class ChangeStateView(APIView):
 
         user = User.objects.get(email=email)
         test = Test.objects.get(id=test_id)
-        
+
         if not user or not test:
             return Response({"error": "User or test not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
         state = State.objects.filter(user=user, test=test).order_by('-created_at').first()
-        
+
         if not state:
             return Response({"error": "State not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
         if bonus_minute:
             state.time_start = state.time_start + timedelta(minutes=bonus_minute)
             state.save()
@@ -1907,11 +1875,69 @@ class ChangeStateView(APIView):
             state.time_start = state.time_start - timedelta(minutes=minus_minute)
             print(state.time_start)
             state.save()
-        
+
         return Response({"message": "State updated successfully"}, status=status.HTTP_200_OK)
-        
-        
-        
 
-        
 
+class ListResultToeicForUser(APIView):
+    # Chỉ cho phép người dùng đã xác thực
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def get(self, request, user_id):
+        # Nếu bạn muốn thêm bảo mật, chỉ cho phép teacher xem người khác, còn người khác chỉ được xem chính mình:
+        if request.user.role != 'teacher' and request.user.id != user_id:
+            return Response(
+                {"error": "Bạn không có quyền xem lịch sử của người dùng khác."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        histories = (
+            History.objects.filter(user_id=user_id, complete=True)
+            .select_related('test')
+            .order_by('-id')[:3]
+        )
+
+        if not histories.exists():
+            return Response(
+                {"error": "Không tìm thấy lịch sử cho người dùng này."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ListHistorySerializer(histories, many=True)
+
+        try:
+            ai_feedback = get_user_info_prompt_multi(user_id, histories)
+        except Exception as e:
+            ai_feedback = f"Lỗi khi tạo phản hồi từ AI: {str(e)}"
+
+        return Response({
+            "results": serializer.data,
+            "ai_feedback": ai_feedback
+        }, status=status.HTTP_200_OK)
+
+
+class ToeicQuestionAnalysisView(APIView):
+    # Chỉ cho phép người dùng đã xác thực (Teacher)
+    permission_classes = [IsAuthenticated, IsTeacher]
+
+    def post(self, request):
+        try:
+            question_text = request.data.get("question_text")
+            answers = request.data.get("answers")
+            audio = request.data.get("audio", [])
+            image = request.data.get("image", [])
+
+            if not question_text or not answers:
+                return Response(
+                    {"error": "question_text và answers là bắt buộc"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            audio_text = transcribe_audio_from_urls(audio)
+
+            image_text = extract_text_from_image_urls(image)
+
+            result = create_toeic_question_prompt(question_text, answers, audio_text, image_text)
+            return Response({"result": result}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

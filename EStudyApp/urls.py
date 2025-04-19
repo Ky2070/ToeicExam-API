@@ -10,7 +10,7 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     TestDeleteAPIView, GetPartAPIView, CreatePartAPIView, UpdatePartAPIView, ListTestView, DeletePartAPIView, \
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
     StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView, \
-    GetPartDescriptionWithBlogID, ChangeStateView, ListResultToeicForUser
+    GetPartDescriptionWithBlogID, ChangeStateView, ListResultToeicForUser, ToeicQuestionAnalysisView
 
 urlpatterns = [
     # Tag for Test-list
@@ -60,10 +60,8 @@ urlpatterns = [
     # API lấy skill và tính toán kết quả cho các câu hỏi
     path('submit/', SubmitTestView.as_view(), name='test-submit'),
     path('submit/history/', DetailSubmitTestView.as_view(), name='get-submit-id'),
-    path('submit/list-history/<int:user_id>', ListResultToeicForUser.as_view(), name="get-list-history"),
     path('submit/result/<int:history_id>/', DetailHistoryView.as_view(), name='history-detail'),
     path('questions/<int:question_id>/skill/', QuestionSkillAPIView.as_view(), name='question-skill'),
-
     path('submit/training/', SubmitTrainingView.as_view(), name='training-submit'),
     path('submit/training/<int:history_id>/', DetailTrainingView.as_view(), name='training-detail'),
     # Lưu state
@@ -89,4 +87,7 @@ urlpatterns = [
     # Delete question set
 
     path('state/change/', ChangeStateView.as_view(), name='change-state'),
+    # Toeic-AI
+    path('toeic/analyze/', ToeicQuestionAnalysisView.as_view(), name='question-analyst'),
+    path('submit/list-history/<int:user_id>', ListResultToeicForUser.as_view(), name="get-list-history"),
 ]
