@@ -1927,9 +1927,9 @@ class ToeicQuestionAnalysisView(APIView):
             audio = request.data.get("audio", [])
             image = request.data.get("image", [])
             page = request.data.get("page")
-            if not question_text or not answers:
+            if not answers:
                 return Response(
-                    {"error": "question_text và answers là bắt buộc"},
+                    {"error": "answers là bắt buộc"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             audio_text = transcribe_audio_from_urls(audio)
