@@ -1936,7 +1936,7 @@ class ToeicQuestionAnalysisView(APIView):
 
             image_text = extract_text_from_image_urls(image)
 
-            result = create_toeic_question_prompt(question_text, answers, audio_text, image_text, page)
+            result = create_toeic_question_prompt(question_text, answers, [audio_text], image_text, page)
             return Response({"result": result}, status=status.HTTP_200_OK)
 
         except Exception as e:

@@ -15,6 +15,10 @@ else:
     AudioSegment.converter = "/usr/bin/ffmpeg"
     AudioSegment.ffprobe = "/usr/bin/ffprobe"
 
+# In kiểm tra
+print("✅ FFMPEG PATH:", AudioSegment.converter)
+print("✅ FFPROBE PATH:", AudioSegment.ffprobe)
+
 
 def transcribe_audio_from_urls(audio_urls):
     """
@@ -30,20 +34,26 @@ def transcribe_audio_from_urls(audio_urls):
         try:
             # Tải về file mp3 tạm thời
             response = requests.get(url)
+            print(response)
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_mp3:
                 temp_mp3.write(response.content)
                 mp3_path = temp_mp3.name
+
+            print(f"🎧 Đã tải về mp3: {mp3_path}")
 
             # Chuyển sang wav
             wav_path = mp3_path.replace(".mp3", ".wav")
             audio = AudioSegment.from_mp3(mp3_path)
             audio.export(wav_path, format="wav")
 
+            print(f"🔄 Đã chuyển sang wav: {wav_path}")
+
             # Dùng speech_recognition nhận dạng
             with sr.AudioFile(wav_path) as source:
                 audio_data = recognizer.record(source)
                 try:
                     text = recognizer.recognize_google(audio_data, language='en-US')
+                    print(f"🗣️  Nhận dạng: {text}")
                     transcripts.append(text.strip())
                 except sr.UnknownValueError:
                     transcripts.append("⚠️ Không thể nhận dạng nội dung âm thanh.")
