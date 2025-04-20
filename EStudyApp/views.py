@@ -1926,7 +1926,7 @@ class ToeicQuestionAnalysisView(APIView):
             answers = request.data.get("answers")
             audio = request.data.get("audio", [])
             image = request.data.get("image", [])
-
+            page = request.data.get("page")
             if not question_text or not answers:
                 return Response(
                     {"error": "question_text và answers là bắt buộc"},
@@ -1936,7 +1936,7 @@ class ToeicQuestionAnalysisView(APIView):
 
             image_text = extract_text_from_image_urls(image)
 
-            result = create_toeic_question_prompt(question_text, answers, audio_text, image_text)
+            result = create_toeic_question_prompt(question_text, answers, audio_text, image_text, page)
             return Response({"result": result}, status=status.HTTP_200_OK)
 
         except Exception as e:
