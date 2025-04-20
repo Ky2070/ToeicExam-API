@@ -1,11 +1,12 @@
-# Sử dụng image Python chính thức
+# Use official Python image
 FROM python:3.10-slim
 
-# Đặt biến môi trường để ngăn yêu cầu đầu vào từ Python
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV IN_DOCKER=True
 
-# Cài đặt các dependency cần thiết
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
@@ -14,22 +15,28 @@ RUN apt-get update && apt-get install -y \
     libsm6 libxext6 libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# # Thiết lập thư mục làm việc trong container
-# WORKDIR /app
+# Verify FFmpeg installation
+RUN ffmpeg -version && \
+    which ffmpeg && \
+    which ffprobe
 
-# Sao chép tệp yêu cầu của Django vào container
+# Create directories for audio processing
+RUN mkdir -p /app/audio /app/wav
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Cài đặt các thư viện Python
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Sao chép mã nguồn ứng dụng Django vào container
+# Copy application code
 COPY . .
 
-# Mở port (thường dùng cho dev, có thể thay đổi)
+# Expose port
 EXPOSE 8000
 
+# Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Chạy lệnh để khởi chạy ứng dụng Django
+# Run the application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "EnglishApp.wsgi:application"]

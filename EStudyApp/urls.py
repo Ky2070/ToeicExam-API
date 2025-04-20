@@ -89,5 +89,5 @@ urlpatterns = [
     path('state/change/', ChangeStateView.as_view(), name='change-state'),
     # Toeic-AI
     path('toeic/analyze/', ToeicQuestionAnalysisView.as_view(), name='question-analyst'),
-    path('submit/list-history/<int:user_id>', ListResultToeicForUser.as_view(), name="get-list-history"),
+    path('submit/list-history/<int:user_id>/', ListResultToeicForUser.as_view(), name="get-list-history"),
 ]

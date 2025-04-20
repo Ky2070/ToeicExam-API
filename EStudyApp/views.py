@@ -1881,15 +1881,15 @@ class ChangeStateView(APIView):
 
 class ListResultToeicForUser(APIView):
     # Chỉ cho phép người dùng đã xác thực
-    permission_classes = [IsAuthenticated, IsTeacher]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
         # Nếu bạn muốn thêm bảo mật, chỉ cho phép teacher xem người khác, còn người khác chỉ được xem chính mình:
-        if request.user.role != 'teacher' and request.user.id != user_id:
-            return Response(
-                {"error": "Bạn không có quyền xem lịch sử của người dùng khác."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        # if request.user.role != 'teacher' and request.user.id != user_id:
+        #     return Response(
+        #         {"error": "Bạn không có quyền xem lịch sử của người dùng khác."},
+        #         status=status.HTTP_403_FORBIDDEN
+        #     )
 
         histories = (
             History.objects.filter(user_id=user_id, complete=True)
