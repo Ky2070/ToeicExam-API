@@ -5,6 +5,7 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV IN_DOCKER=True
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -12,13 +13,20 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     ffmpeg \
     tesseract-ocr \
-    libsm6 libxext6 libglib2.0-0 \
+    tesseract-ocr-eng \
+    tesseract-ocr-vie \
+    libtesseract-dev \
+    libsm6 \
+    libxext6 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Verify FFmpeg installation
+# Verify installations
 RUN ffmpeg -version && \
     which ffmpeg && \
-    which ffprobe
+    which ffprobe && \
+    tesseract --version && \
+    tesseract --list-langs
 
 # Create directories for audio processing
 RUN mkdir -p /app/audio /app/wav
