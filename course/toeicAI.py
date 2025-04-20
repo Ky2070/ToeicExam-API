@@ -98,56 +98,70 @@ Phân tích nhanh vừa đủ ý, phản hồi ngắn gọn: kỹ năng nào y�
     return result
 
 
-def create_toeic_question_prompt(question_text, answers, audio=None, image=None):
+def create_toeic_question_prompt(question_text, answers, audio=None, image=None, page=None):
     """
     Tạo prompt phân tích câu hỏi TOEIC và đưa ra đáp án đúng.
 
     Parameters:
         question_text (str): Nội dung câu hỏi.
-        answers (dict): Dictionary chứa các đáp án.
+        answers (dict): Dictionary chứa các đáp án (A, B, C, D).
         audio (list, optional): Danh sách URL file âm thanh (nếu có).
-        image (list, optional): Danh sách URL hình ảnh (nếu có).
+        image (list or str, optional): Danh sách URL hình ảnh (nếu có).
+        page (str, optional): Đoạn văn hoặc nội dung của bài đọc (nếu có).
 
     Returns:
         str: Phân tích từ AI về câu hỏi TOEIC và đáp án đúng.
     """
     if not answers or not isinstance(answers, dict):
-        raise ValueError("answers phải là một dictionary chứa đáp án theo dạng key-value.")
+        raise ValueError("answers phải là một dictionary chứa các đáp án theo dạng key-value.")
 
     formatted_answers = "\n".join([f"({key}) {value}" for key, value in answers.items()])
-    audio_text = "\n".join(audio) if isinstance(audio, list) and audio else "Không có"
+
+    # Chuẩn bị nội dung audio
+    audio_text = "\n".join(audio) if isinstance(audio, list) and audio else "Không có audio"
+
+    # Chuẩn bị nội dung hình ảnh
     if isinstance(image, list):
         image_text = "\n".join(image)
     elif isinstance(image, str):
         image_text = image
     else:
-        image_text = "Không có"
-
-    # Gắn tiêu đề rõ ràng để AI hiểu nội dung từ ảnh
+        image_text = "Không có hình ảnh"
     image_text = f"Nội dung trích xuất từ hình ảnh:\n{image_text}"
 
+    # Chuẩn bị phần đoạn văn (page)
+    page_text = f"Đoạn văn liên quan:\n{page}" if page else "Không có đoạn văn kèm theo."
+
+    # Tổng hợp nội dung câu hỏi
     toeic_question = f"""
-    Câu hỏi:
-    {question_text}
-    {formatted_answers}
+{page_text}
 
-    Transcript: {audio_text}
-    Mô tả: {image_text}
-    """
+Câu hỏi:
+{question_text}
+{formatted_answers}
 
+Transcript (nếu có audio):
+{audio_text}
+
+Mô tả hình ảnh:
+{image_text}
+"""
+
+    # Prompt cho AI
     prompt = f"""
-    Bạn là một chuyên gia TOEIC. Dưới đây là một câu hỏi trong bài thi TOEIC:
-    {toeic_question}
+Bạn là một chuyên gia TOEIC. Dưới đây là một câu hỏi trong bài thi TOEIC:
 
-    Hãy thực hiện các bước sau:
+{toeic_question}
 
-    1. Phân tích xem câu hỏi này thuộc **kỹ năng nào** (Listening hay Reading).
-    2. Xác định chính xác câu hỏi này thuộc **Part mấy** trong đề thi TOEIC (Part 1 đến Part 7).
-    3. **Chọn đáp án đúng nhất** trong các đáp án A, B, C, D.
-    4. **Giải thích chi tiết lý do chọn đáp án đó** và tại sao các đáp án còn lại không phù hợp.
+Hãy thực hiện các bước sau:
 
-    Trả lời rõ ràng, ngắn gọn nhưng súc tích và dễ hiểu.
-    """
+1. Phân tích xem câu hỏi này thuộc **kỹ năng nào** (Listening hay Reading).
+2. Xác định chính xác câu hỏi này thuộc **Part mấy** trong đề thi TOEIC (Part 1 đến Part 7).
+3. **Chọn đáp án đúng nhất** trong các đáp án A, B, C, D.
+4. **Giải thích chi tiết lý do chọn đáp án đó** và tại sao các đáp án còn lại không phù hợp.
+
+Trả lời rõ ràng, súc tích, dễ hiểu và theo thứ tự các bước.
+"""
     response = model.generate_content(prompt)
     return response.text
 
