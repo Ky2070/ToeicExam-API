@@ -1929,7 +1929,7 @@ class ToeicQuestionAnalysisView(APIView):
             page = request.data.get("page")
             if not answers:
                 return Response(
-                    {"error": "answers là bắt buộc"},
+                    {"error": "answers not found"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             audio_text = transcribe_audio_from_urls(audio)
