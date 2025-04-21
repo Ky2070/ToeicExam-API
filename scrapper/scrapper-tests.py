@@ -111,23 +111,56 @@ print(f"Test_id: {test_id}")
 current_date = datetime.now().strftime("%d-%m-%Y")  # Định dạng dd-mm-yyyy
 
 
+# def get_test_links():
+#     driver.get('https://study4.com/tests/toeic/')
+#     print(driver.title)
+#
+#     try:
+#         test_item = driver.find_element(By.ID, test_id)
+#
+#         # Lấy thẻ <a> trong test_item để lấy link
+#         # Lấy thẻ <a> cha của thẻ <h2> chứa test_id
+#         a_tag = test_item.find_element(By.XPATH, './ancestor::a')  # Tìm thẻ <a> cha
+#         link = a_tag.get_attribute('href')
+#
+#         print(f"Found link: {link}")
+#         return link
+#     except Exception as e:
+#         print(f"Error extracting test links: {e}")
+#         return []
+
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
 
-    try:
-        test_item = driver.find_element(By.ID, test_id)
+    while True:
+        try:
+            test_item = driver.find_element(By.ID, test_id)
+            a_tag = test_item.find_element(By.XPATH, './ancestor::a')
+            link = a_tag.get_attribute('href')
+            print(f"✅ Found link: {link}")
+            return link
 
-        # Lấy thẻ <a> trong test_item để lấy link
-        # Lấy thẻ <a> cha của thẻ <h2> chứa test_id
-        a_tag = test_item.find_element(By.XPATH, './ancestor::a')  # Tìm thẻ <a> cha
-        link = a_tag.get_attribute('href')
+        except Exception:
+            print("❌ Test ID not found on this page. Checking next page...")
 
-        print(f"Found link: {link}")
-        return link
-    except Exception as e:
-        print(f"Error extracting test links: {e}")
-        return []
+            try:
+                # Tìm nút next
+                next_button = driver.find_element(By.XPATH, '//a[contains(@class,"page-link")]/i[contains(@class,"fa-chevron-right")]/..')
+
+                # Scroll tới nút next để tránh bị che khuất
+                driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", next_button)
+                time.sleep(1)
+
+                # Click next
+                next_button.click()
+                time.sleep(2)
+            except Exception as e:
+                print("⚠️ Không tìm thấy nút Next hoặc không thể chuyển trang.")
+                print(f"Lỗi: {e}")
+                break
+
+    return None
 
 
 def handle_checkbox_selection():
@@ -643,8 +676,10 @@ def scrape_answers():
 
 def main():
     link = get_test_links()
-
-    driver.get(link)
+    if link:
+        driver.get(link)
+    else:
+        print("⛔ Không tìm thấy đề thi với test_id.")
     WebDriverWait(driver, 15).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'input.form-check-input[type="checkbox"]'))
     )
