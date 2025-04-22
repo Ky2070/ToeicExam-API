@@ -110,25 +110,6 @@ print(f"Test_id: {test_id}")
 # Tạo biến current_date một lần duy nhất
 current_date = datetime.now().strftime("%d-%m-%Y")  # Định dạng dd-mm-yyyy
 
-
-# def get_test_links():
-#     driver.get('https://study4.com/tests/toeic/')
-#     print(driver.title)
-#
-#     try:
-#         test_item = driver.find_element(By.ID, test_id)
-#
-#         # Lấy thẻ <a> trong test_item để lấy link
-#         # Lấy thẻ <a> cha của thẻ <h2> chứa test_id
-#         a_tag = test_item.find_element(By.XPATH, './ancestor::a')  # Tìm thẻ <a> cha
-#         link = a_tag.get_attribute('href')
-#
-#         print(f"Found link: {link}")
-#         return link
-#     except Exception as e:
-#         print(f"Error extracting test links: {e}")
-#         return []
-
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
