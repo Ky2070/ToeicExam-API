@@ -110,6 +110,7 @@ print(f"Test_id: {test_id}")
 # Tạo biến current_date một lần duy nhất
 current_date = datetime.now().strftime("%d-%m-%Y")  # Định dạng dd-mm-yyyy
 
+
 def get_test_links():
     driver.get('https://study4.com/tests/toeic/')
     print(driver.title)
@@ -648,7 +649,7 @@ def scrape_answers():
             data.append(part_data)
 
     # Lưu dữ liệu vào file
-    file_path = f"answers/{test_id}.json"
+    file_path = f"answers/answers-{test_id}.json"
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
