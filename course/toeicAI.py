@@ -20,15 +20,29 @@ import time
 
 executor = ThreadPoolExecutor(max_workers=10)  # tùy bạn điều chỉnh số lượng thread
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Kiểm tra hệ điều hành và cấu hình tương ứng
+if os.name == 'nt':  # Nếu đang chạy trên Windows
+    # Đặt đường dẫn cho Tesseract trên Windows
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-# ✅ Thêm ffmpeg vào PATH để subprocess tìm thấy
-os.environ["PATH"] += os.pathsep + r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin"
+    # ✅ Thêm ffmpeg vào PATH để subprocess tìm thấy
+    os.environ["PATH"] += os.pathsep + r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin"
 
-# 🔧 Đặt lại converter và ffprobe cho Pydub
-AudioSegment.converter = r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin\ffmpeg.exe"
-AudioSegment.ffprobe = r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin\ffprobe.exe"
+    # 🔧 Đặt lại converter và ffprobe cho Pydub (Windows)
+    AudioSegment.converter = r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin\ffmpeg.exe"
+    AudioSegment.ffprobe = r"D:\tools-upgraders\ffmpeg-2025-04-14-git-3b2a9410ef-essentials_build\bin\ffprobe.exe"
+else:  # Nếu đang chạy trên Linux/Ubuntu
+    # Đặt đường dẫn cho Tesseract trên Ubuntu
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # Đảm bảo đã cài đặt Tesseract trên Ubuntu
 
+    # ✅ Thêm ffmpeg vào PATH để subprocess tìm thấy
+    os.environ["PATH"] += os.pathsep + "/usr/bin"  # Thêm /usr/bin nếu ffmpeg nằm trong đó
+
+    # 🔧 Đặt lại converter và ffprobe cho Pydub (Ubuntu)
+    AudioSegment.converter = "/usr/bin/ffmpeg"
+    AudioSegment.ffprobe = "/usr/bin/ffprobe"
+
+# Kiểm tra ffmpeg và ffprobe có sẵn hay không
 print("✅ Kiểm tra FFmpeg:", os.path.isfile(AudioSegment.converter))
 print("✅ Kiểm tra FFprobe:", os.path.isfile(AudioSegment.ffprobe))
 # Load API Key từ file .env
