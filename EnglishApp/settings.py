@@ -124,6 +124,7 @@ INTERNAL_IPS = [
     'localhost',  # Dành cho localhost (cũng có thể sử dụng nếu bạn làm việc trên máy cục bộ)
     # Các IP khác nếu cần thiết
 ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -131,6 +132,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://englishapp-client.vercel.app",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
+    "http://192.168.10.189:3000",
+    "http://10.163.25.8:3000"
 ]
 LOGIN_REDIRECT_URL = '/admin'
 LOGOUT_REDIRECT_URL = '/'
