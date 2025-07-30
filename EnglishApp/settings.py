@@ -121,7 +121,8 @@ MIDDLEWARE = [
 ]
 INTERNAL_IPS = [
     '127.0.0.1',  # Localhost (dành cho máy chủ của bạn)
-    'localhost',  # Dành cho localhost (cũng có thể sử dụng nếu bạn làm việc trên máy cục bộ)
+    # Dành cho localhost (cũng có thể sử dụng nếu bạn làm việc trên máy cục bộ)
+    'localhost',
     # Các IP khác nếu cần thiết
 ]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -316,14 +317,15 @@ CKEDITOR_CONFIGS = {
             ['Source', '-', 'Bold', 'Italic']
         ],
         'toolbar_Full': [
-            ['Styles', 'Format', 'Bold', 'Italic', 'Underline', 'Strike', 'SpellChecker', 'Undo', 'Redo'],
+            ['Styles', 'Format', 'Bold', 'Italic', 'Underline',
+                'Strike', 'SpellChecker', 'Undo', 'Redo'],
             ['Link', 'Unlink', 'Anchor'],
             ['Image', 'Flash', 'Table', 'HorizontalRule'],
             ['TextColor', 'BGColor'],
             ['Smiley', 'SpecialChar'], ['Source'],
-            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-            ['NumberedList','BulletedList'],
-            ['Indent','Outdent'],
+            ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+            ['NumberedList', 'BulletedList'],
+            ['Indent', 'Outdent'],
             ['Maximize'],
             ['Media', 'Iframe'],
         ],

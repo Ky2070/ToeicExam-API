@@ -353,7 +353,7 @@ class TestListView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-        # Filter by skills if specified
+        # # Filter by skills if specified
         if skills:
             if skills.upper() == 'READING':
                 # Get tests where all parts are READING
@@ -378,33 +378,11 @@ class TestListView(APIView):
         # Final ordering
         tests = tests.order_by('id', 'name')
 
-        # Apply limit if specified
-        # if limit:
-        #     try:
-        #         limit = int(limit)
-        #         if limit > 0:
-        #             tests = tests[:limit]
-        #             # serializer = TestSerializer(tests, many=True)
-        #             # return Response({
-        #             #     'results': serializer.data,
-        #             #     'total_items': len(tests),
-        #             #     'limit': limit
-        #             # })
-        #         else:
-        #             return Response(
-        #                 {"error": "Limit must be a positive integer."},
-        #                 status=status.HTTP_400_BAD_REQUEST
-        #             )
-        #     except ValueError:
-        #         return Response(
-        #             {"error": "Invalid limit format. Please provide a valid integer."},
-        #             status=status.HTTP_400_BAD_REQUEST
-        #         )
-
         # If no limit specified, use pagination
         paginator = FixedTestPagination()
         paginated_tests = paginator.paginate_queryset(tests, request)
         serializer = TestSerializer(paginated_tests, many=True)
+        data = serializer.data
 
         # Calculate total pages
         total_items = tests.count()
@@ -414,6 +392,18 @@ class TestListView(APIView):
         # Get current page from request
         current_page = paginator.page.number if hasattr(
             paginator, 'page') else 1
+
+        for item in data:
+            related_parts = Part.objects.filter(
+                test=item['id']
+            )
+            filter_parts = [
+                part.id for part in related_parts
+            ]
+            question_total = Question.objects.filter(
+                part__in=filter_parts
+            ).count()
+            item['question_total'] = 200 if question_total > 200 else question_total
 
         # Create response data
         response_data = {
@@ -432,6 +422,7 @@ class TestListView(APIView):
 
 
 class TestPartDetailView(APIView):
+
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
         try:
@@ -453,9 +444,11 @@ class TestPartDetailView(APIView):
                         ),
                         Prefetch(
                             'question_part',  # Các câu hỏi trong Part
-                            queryset=Question.objects.filter(part_id__in=parts).order_by('question_number')
+                            queryset=Question.objects.filter(
+                                part_id__in=parts).order_by('question_number')
                         )
-                    ).order_by('part_description__part_number')  # Sắp xếp các phần theo `id`
+                        # Sắp xếp các phần theo `id`
+                    ).order_by('part_description__part_number')
                 ),
                 Prefetch(
                     'question_test',
@@ -491,7 +484,7 @@ class PartListView(APIView):
                 'question_set_part',  # Prefetch related question sets
                 'question_part'  # Prefetch related questions
             )
-                     .order_by('part_description__part_number'))
+                .order_by('part_description__part_number'))
 
             serializer = PartListSerializer(parts, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -846,7 +839,7 @@ class SubmitTrainingView(APIView):
                 # Tính toán điểm phần
                 total_questions = correct_answers + wrong_answers
                 percentage_score = (
-                                           correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                    correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
                 # Cập nhật kết quả tổng hợp
                 total_correct_answers += correct_answers
@@ -867,7 +860,7 @@ class SubmitTrainingView(APIView):
             # Tính toán tổng kết điểm
             total_questions = total_correct_answers + total_wrong_answers
             overall_percentage_score = (
-                                               total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
+                total_correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
             # Tính thời gian thực hiện
             time_taken = end_time - start_time
@@ -1006,7 +999,7 @@ class TestUpdateAPIView(APIView):
                             close_date, '%Y-%m-%dT%H:%M:%S%z')
                         # Only validate dates if both are provided and not null
                         if publish_date and publish_date != "null" and request.data['close_date'] <= request.data[
-                            'publish_date']:
+                                'publish_date']:
                             return Response(
                                 {'error': 'close_date must be after publish_date'},
                                 status=status.HTTP_400_BAD_REQUEST
@@ -1137,7 +1130,8 @@ class PartListQuestionsSetAPIView(APIView):
                     question_set.audio = audio
                     question_set.page = page
                     question_set.image = image
-                    question_set.from_ques = int(from_ques) if from_ques else None
+                    question_set.from_ques = int(
+                        from_ques) if from_ques else None
                     question_set.to_ques = int(to_ques) if to_ques else None
                     if test:
                         question_set.test = test
@@ -1474,7 +1468,7 @@ class CreatePartAutoAPIView(APIView):
                                 answers=question.answers,
                                 correct_answer=question.correct_answer,
                                 question_number=start_question_set +
-                                                (index * 4) + q_index + 1,
+                                (index * 4) + q_index + 1,
                                 difficulty_level=question.difficulty_level,
                             )
                     elif part_number == '3' or part_number == '4':
@@ -1503,7 +1497,7 @@ class CreatePartAutoAPIView(APIView):
                                 answers=question.answers,
                                 correct_answer=question.correct_answer,
                                 question_number=start_question_set +
-                                                (index * 3) + q_index + 1,
+                                (index * 3) + q_index + 1,
                                 difficulty_level=question.difficulty_level,
                             )
                     elif part_number == '7':
@@ -1825,7 +1819,8 @@ class GetPartDescriptionWithBlogID(APIView):
                                 status=status.HTTP_404_NOT_FOUND)
 
             qs = QuestionSet.objects.get(id=blog.questions_set.id)
-            print(f"QuestionSet ID: {qs.id}, Part: {qs.part}")  # Kiểm tra Part có tồn tại không
+            # Kiểm tra Part có tồn tại không
+            print(f"QuestionSet ID: {qs.id}, Part: {qs.part}")
 
             # Bước 3: Kiểm tra xem QuestionSet có Part không
             part = questions_set.part
@@ -1862,17 +1857,20 @@ class ChangeStateView(APIView):
         if not user or not test:
             return Response({"error": "User or test not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        state = State.objects.filter(user=user, test=test).order_by('-created_at').first()
+        state = State.objects.filter(
+            user=user, test=test).order_by('-created_at').first()
 
         if not state:
             return Response({"error": "State not found"}, status=status.HTTP_404_NOT_FOUND)
 
         if bonus_minute:
-            state.time_start = state.time_start + timedelta(minutes=bonus_minute)
+            state.time_start = state.time_start + \
+                timedelta(minutes=bonus_minute)
             state.save()
         elif minus_minute:
             print(state.time_start)
-            state.time_start = state.time_start - timedelta(minutes=minus_minute)
+            state.time_start = state.time_start - \
+                timedelta(minutes=minus_minute)
             print(state.time_start)
             state.save()
 
@@ -1936,7 +1934,8 @@ class ToeicQuestionAnalysisView(APIView):
 
             image_text = extract_text_from_image_urls(image)
 
-            result = create_toeic_question_prompt(question_text, answers, [audio_text], image_text, page)
+            result = create_toeic_question_prompt(
+                question_text, answers, [audio_text], image_text, page)
             return Response({"result": result}, status=status.HTTP_200_OK)
 
         except Exception as e:
