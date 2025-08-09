@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     # my app
     'course',
     'EStudyApp',
+    'chat_bot',
     'Authentication',
     'question_bank',
     'rest_framework',
