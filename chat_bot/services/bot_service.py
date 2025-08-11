@@ -1,9 +1,10 @@
 import random
 from typing import List, Dict, Optional
+from chat_bot.utils.ai_client import call_ai
 
 
 class BotService:
-    """Service for generating bot responses"""
+    """Service for generating bot responses using AI model"""
 
     def __init__(self):
         # Placeholder responses for demonstration
@@ -26,6 +27,7 @@ class BotService:
     ) -> str:
         """
         Generate a bot response based on user message and conversation history
+        using the Gemini AI model.
 
         Args:
             user_message: The user's message content
@@ -74,11 +76,18 @@ class BotService:
             return "Goodbye! It was nice chatting with you. Feel free to come back anytime if you have more questions!"
 
         elif "?" in user_message:
-            return "That's a great question! Based on what you've asked, I'd recommend looking into this topic further. Is there a specific aspect you'd like me to focus on?"
-
+            # Ưu tiên AI khi câu hỏi
+            try:
+                return call_ai(user_message)
+            except Exception:
+                return "That's a great question! Could you clarify a bit more?"
         else:
-            # Return a random response for other messages
-            return random.choice(self.responses)
+            # Không keyword, thử AI
+            try:
+                return call_ai(user_message)
+            except Exception:
+                # Fallback random nếu AI lỗi
+                return random.choice(self.responses)
 
     def analyze_sentiment(self, message: str) -> str:
         """

@@ -52,7 +52,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 # Cấu hình API Key
 genai.configure(api_key=api_key)
 # Chọn mô hình Gemini
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 
 def call_ai_sync(prompt):
