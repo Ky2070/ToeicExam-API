@@ -1,4 +1,7 @@
+# from django.urls import reverse
+# from django.conf import settings
 import random
+import requests
 from typing import List, Dict, Optional
 from chat_bot.utils.ai_client import call_ai
 
@@ -9,6 +12,10 @@ class BotService:
     def __init__(self):
         # Placeholder responses for demonstration
         # In a real implementation, this would integrate with an AI model
+        # reverse sẽ tạo ra path '/chat_bot/history/latest'
+        # self.history_latest_path = reverse("chat_bot:history_score")
+        # # BASE_API_URL lấy từ settings, ví dụ 'http://localhost:8000' hoặc production URL
+        # self.api_base_url = f"{settings.BASE_API_URL}{self.history_latest_path}"
         self.responses = [
             "I'm a helpful AI assistant. How can I help you today?",
             "That's an interesting question! Let me think about that.",
@@ -22,72 +29,115 @@ class BotService:
             "That's something I can definitely help you with!",
         ]
 
+    # def get_student_latest_results(self, token: str) -> List[Dict]:
+    #     """
+    #     Gọi API lấy 3 kết quả thi gần nhất.
+    #     """
+    #     try:
+    #         res = requests.get(
+    #             self.api_base_url,
+    #             headers={"Authorization": f"Bearer {token}"}
+    #         )
+    #         if res.status_code == 200:
+    #             return res.json()
+    #         return []
+    #     except Exception as e:
+    #         print("Lỗi gọi API điểm:", e)
+    #         return []
+
+
+    # def generate_response(
+    #     self, user_message: str, conversation_history: Optional[List[Dict]] = None
+    # ) -> str:
+    #     """
+    #     Generate a bot response based on user message and conversation history
+    #     using the Gemini AI model.
+    #
+    #     Args:
+    #         user_message: The user's message content
+    #         conversation_history: List of previous messages (optional)
+    #
+    #     Returns:
+    #         Bot response as a string
+    #     """
+    #     # Simple placeholder logic
+    #     # In a real implementation, this would:
+    #     # 1. Analyze the user message
+    #     # 2. Consider conversation context
+    #     # 3. Generate appropriate response using AI model
+    #
+    #     user_message_lower = user_message.lower().strip()
+    #
+    #     # Simple keyword-based responses
+    #     if any(
+    #         greeting in user_message_lower
+    #         for greeting in ["hello", "hi", "hey", "good morning", "good afternoon"]
+    #     ):
+    #         return "Hello! I'm your AI assistant. How can I help you today?"
+    #
+    #     elif any(
+    #         question in user_message_lower
+    #         for question in ["how are you", "how do you do"]
+    #     ):
+    #         return "I'm doing well, thank you for asking! I'm here and ready to help you with any questions you have."
+    #
+    #     elif any(
+    #         thanks in user_message_lower
+    #         for thanks in ["thank you", "thanks", "appreciate"]
+    #     ):
+    #         return "You're very welcome! I'm glad I could help. Is there anything else you'd like to know?"
+    #
+    #     elif any(
+    #         help_word in user_message_lower
+    #         for help_word in ["help", "assist", "support"]
+    #     ):
+    #         return "I'm here to help! Please let me know what specific question or topic you'd like assistance with."
+    #
+    #     elif any(
+    #         goodbye in user_message_lower
+    #         for goodbye in ["bye", "goodbye", "see you", "farewell"]
+    #     ):
+    #         return "Goodbye! It was nice chatting with you. Feel free to come back anytime if you have more questions!"
+    #
+    #     elif "?" in user_message:
+    #         # Ưu tiên AI khi câu hỏi
+    #         try:
+    #             return call_ai(user_message)
+    #         except Exception:
+    #             return "That's a great question! Could you clarify a bit more?"
+    #     else:
+    #         # Không keyword, thử AI
+    #         try:
+    #             return call_ai(user_message)
+    #         except Exception:
+    #             # Fallback random nếu AI lỗi
+    #             return random.choice(self.responses)
+
+
     def generate_response(
-        self, user_message: str, conversation_history: Optional[List[Dict]] = None
+            self, user_message: str, conversation_history: Optional[List[Dict]] = None
     ) -> str:
         """
-        Generate a bot response based on user message and conversation history
-        using the Gemini AI model.
-
-        Args:
-            user_message: The user's message content
-            conversation_history: List of previous messages (optional)
-
-        Returns:
-            Bot response as a string
+        Generate a bot response using AI instead of keyword matching.
         """
-        # Simple placeholder logic
-        # In a real implementation, this would:
-        # 1. Analyze the user message
-        # 2. Consider conversation context
-        # 3. Generate appropriate response using AI model
+        try:
+            # Nếu có lịch sử hội thoại thì nối lại thành 1 prompt
+            if conversation_history:
+                history_text = "\n".join(
+                    f"{msg.get('role', 'user')}: {msg.get('content', '')}"
+                    for msg in conversation_history
+                )
+                prompt = f"{history_text}\nuser: {user_message}"
+            else:
+                prompt = user_message
 
-        user_message_lower = user_message.lower().strip()
+            # Gọi AI
+            return call_ai(prompt)
 
-        # Simple keyword-based responses
-        if any(
-            greeting in user_message_lower
-            for greeting in ["hello", "hi", "hey", "good morning", "good afternoon"]
-        ):
-            return "Hello! I'm your AI assistant. How can I help you today?"
+        except Exception as e:
+            print("AI call failed:", e)
+            return "Xin lỗi, hiện tại tôi không thể phản hồi. Bạn có thể thử lại sau."
 
-        elif any(
-            question in user_message_lower
-            for question in ["how are you", "how do you do"]
-        ):
-            return "I'm doing well, thank you for asking! I'm here and ready to help you with any questions you have."
-
-        elif any(
-            thanks in user_message_lower
-            for thanks in ["thank you", "thanks", "appreciate"]
-        ):
-            return "You're very welcome! I'm glad I could help. Is there anything else you'd like to know?"
-
-        elif any(
-            help_word in user_message_lower
-            for help_word in ["help", "assist", "support"]
-        ):
-            return "I'm here to help! Please let me know what specific question or topic you'd like assistance with."
-
-        elif any(
-            goodbye in user_message_lower
-            for goodbye in ["bye", "goodbye", "see you", "farewell"]
-        ):
-            return "Goodbye! It was nice chatting with you. Feel free to come back anytime if you have more questions!"
-
-        elif "?" in user_message:
-            # Ưu tiên AI khi câu hỏi
-            try:
-                return call_ai(user_message)
-            except Exception:
-                return "That's a great question! Could you clarify a bit more?"
-        else:
-            # Không keyword, thử AI
-            try:
-                return call_ai(user_message)
-            except Exception:
-                # Fallback random nếu AI lỗi
-                return random.choice(self.responses)
 
     def analyze_sentiment(self, message: str) -> str:
         """
