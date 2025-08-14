@@ -2,7 +2,8 @@ from typing import List, Optional, Dict, Any, Tuple
 from ..models import Message
 from ..repositories.message_repository import MessageRepository
 from .bot_service import BotService
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class MessageService:
     """Service layer for Message business logic"""
@@ -187,12 +188,10 @@ class MessageService:
 
         return errors
 
-    def create_conversation(self, user_id: int, user_content: str) -> Dict[str, Any]:
+    def create_conversation(self, user: User, user_content: str) -> Dict[str, Any]:
         """
         Create a conversation by saving user message and generating bot response
-        Returns: Dict with 'success', 'user_message', 'bot_message', and 'errors' keys
         """
-        # Validate user message
         errors = self._validate_message_data("user", user_content)
         if errors:
             return {
@@ -203,24 +202,24 @@ class MessageService:
             }
 
         try:
-            # Get recent conversation history for context
+            # Lấy lịch sử hội thoại gần nhất
             recent_messages = self.message_repository.get_recent_messages(
-                user_id, limit=5
+                user.id, limit=5
             )
             conversation_history = [
                 {"role": msg.role, "content": msg.content} for msg in recent_messages
             ]
 
-            # Generate bot response
+            # Gọi bot, truyền luôn user để check role
             bot_response = self.bot_service.generate_response(
-                user_content, conversation_history
+                user=user,
+                user_message=user_content,
+                conversation_history=conversation_history
             )
 
-            # Create both messages in a transaction
-            user_message, bot_message = (
-                self.message_repository.create_conversation_pair(
-                    user_id, user_content, bot_response
-                )
+            # Lưu 2 tin nhắn
+            user_message, bot_message = self.message_repository.create_conversation_pair(
+                user.id, user_content, bot_response
             )
 
             return {

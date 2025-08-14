@@ -1,5 +1,5 @@
 from django.urls import path
-from .controllers import message_controller, history_controller
+from .controllers import message_controller
 
 app_name = "chat_bot"
 
@@ -32,7 +32,4 @@ urlpatterns = [
     path(
         "messages/count/", message_controller.message_count, name="message_count"
     ),  # GET /messages/count/
-    # path(
-    #     "history/latest/", history_controller.get_latest_results, name="history_score"
-    # ),
 ]
