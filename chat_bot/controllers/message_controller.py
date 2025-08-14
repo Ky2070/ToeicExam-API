@@ -59,7 +59,7 @@ def user_messages(request):
             content = serializer.validated_data["content"]
 
             # Create conversation (user message + bot response)
-            result = message_service.create_conversation(user_id, content)
+            result = message_service.create_conversation(request.user, content)
 
             if result["success"]:
                 # Serialize both messages

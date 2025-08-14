@@ -1,5 +1,6 @@
 from django.urls import path
 
+
 from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailTrainingView, EditQuestionsAPIView, \
     PartListQuestionsSetAPIView, TagListView, TestDetailView, \
     TestListView, TestPartDetailView, \
@@ -11,6 +12,8 @@ from EStudyApp.views import CreatePartAutoAPIView, DetailSubmitTestView, DetailT
     CreateQuestionAPIView, DetailQuestionAPIView, UpdateQuestionAPIView, DeleteQuestionAPIView, \
     StudentStatisticsAPIView, SystemStatisticsAPIView, StudentReportView, QuestionSetDeleteView, \
     GetPartDescriptionWithBlogID, ChangeStateView, ListResultToeicForUser, ToeicQuestionAnalysisView
+
+from EStudyApp.controller import history_controller
 
 urlpatterns = [
     # Tag for Test-list
@@ -90,4 +93,6 @@ urlpatterns = [
     # Toeic-AI
     path('toeic/analyze/', ToeicQuestionAnalysisView.as_view(), name='question-analyst'),
     path('submit/list-history/<int:user_id>/', ListResultToeicForUser.as_view(), name="get-list-history"),
+
+    path('history/results/', history_controller.get_latest_results, name="latest-result"),
 ]
