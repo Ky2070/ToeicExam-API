@@ -14,7 +14,7 @@ from pathlib import Path
 # Add these at the top of your settings.py
 import os
 from urllib.parse import urlparse
-
+from django.core.cache import caches
 from dotenv import load_dotenv
 
 # from dotenv import load_dotenv # type: ignore
@@ -144,7 +144,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'CONNECTION_POOL_KWARGS': {
