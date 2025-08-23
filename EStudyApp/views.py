@@ -296,7 +296,7 @@ class TestListView(APIView):
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
 
-    @method_decorator(cache_page(60 * 5, key_prefix="test_list"))
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="test_list"))
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         # get type from request and default is Practice
@@ -416,7 +416,7 @@ class TestListView(APIView):
 
 
 class TestPartDetailView(APIView):
-    @method_decorator(cache_page(60 * 5, key_prefix="test_part_detail"))
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="test_part_detail"))
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
         try:
