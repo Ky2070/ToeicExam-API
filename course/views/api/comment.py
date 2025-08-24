@@ -5,10 +5,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from course.models.blog import CommentBlog
 from course.serializer.comment import CommentBlogSerializer, CommentReplySerializer
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
+CACHE_TTL = 60 * 5
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@cache_page(CACHE_TTL, key_prefix="blog_comment")
 def get_blog_comments(request, blog_id):
     """Get all comments for a specific blog"""
     comments = CommentBlog.objects.filter(

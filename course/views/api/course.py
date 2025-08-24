@@ -34,6 +34,7 @@ class CourseListView(APIView):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@cache_page(CACHE_TTL, key_prefix="course_rating")
 def course_detail(request, id):
     course = Course.objects.prefetch_related('course_rating').get(id=id)
     serializer = CourseDetailSerializer(course).data
