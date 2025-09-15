@@ -1,8 +1,7 @@
 services:
   englishapp:
-    build: .
-    volumes:
-      - .:/app
+    image: k1ngj/toeicexam-api:v1.0.0
+    container_name: englishapp-api
     environment:
       ALLOWED_HOSTS: localhost,127.0.0.1
       DATABASE_NEON: ${DATABASE_NEON}
@@ -17,6 +16,20 @@ services:
       DATABASE_SSL_ENABLED: ${DATABASE_SSL_ENABLED}
       DATABASE_REJECT_UNAUTHORIZED: ${DATABASE_REJECT_UNAUTHORIZED}
       PORT: 8000
+      REDIS_URL: redis://redis:6379/0   # <-- thêm biến môi trường cho Django
     ports:
       - 8000:8000
+    depends_on:
+      - redis
     command: gunicorn --bind 0.0.0.0:8000 EnglishApp.wsgi:application
+
+  redis:   # service Redis
+    image: redis:7
+    container_name: englishapp-redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    restart: always
+volumes:
+  redis_data:

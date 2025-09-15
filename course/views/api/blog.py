@@ -15,6 +15,11 @@ from course.views.api.base import BaseCreateAPIView, BaseUpdateAPIView, BaseDele
 from Authentication.permissions import IsTeacher
 from question_bank.models import QuestionBank, QuestionSetBank
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
+CACHE_TTL = 60 * 5
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_blog(request):
@@ -69,6 +74,7 @@ def create_blog(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@cache_page(CACHE_TTL, key_prefix="blog_list")
 def blog_list(request):
     blogs = Blog.objects.filter(status='ACTIVE').order_by('-created_at')
     serializer = BlogSerializer(blogs, many=True).data
@@ -77,6 +83,7 @@ def blog_list(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@cache_page(CACHE_TTL, key_prefix="blog_detail")
 def blog_detail(request, id):
     blog = Blog.objects.prefetch_related(
         Prefetch(
@@ -162,6 +169,7 @@ def edit_blog(request, id):
 # panel blog list
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@cache_page(CACHE_TTL, key_prefix="blog_panel")
 def panel_blog_list(request):
     """
     Get list of blogs with filters and pagination
@@ -182,6 +190,7 @@ def panel_blog_list(request):
 # panel blog detail
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@cache_page(CACHE_TTL, key_prefix="blog_panel_detail")
 def panel_blog_detail(request, id):
     blog_service = BlogService()
     blog = blog_service.get_blog_detail(id)

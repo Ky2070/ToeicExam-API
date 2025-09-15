@@ -16,7 +16,7 @@ from pathlib import Path
 # Add these at the top of your settings.py
 import os
 from urllib.parse import urlparse
-
+from django.core.cache import caches
 from dotenv import load_dotenv
 
 # from dotenv import load_dotenv # type: ignore

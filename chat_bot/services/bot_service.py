@@ -48,6 +48,9 @@ class BotService:
             if user and user.is_authenticated:
                 print("Username:", user.username)
                 print("Role:", getattr(user, "role", None))
+                print("FirstName:", user.first_name)
+                print("LastName:", user.last_name)
+                print("Email:", user.email)
             else:
                 print("Người dùng chưa đăng nhập hoặc không xác thực.")
 

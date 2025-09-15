@@ -5,10 +5,14 @@ from rest_framework import status
 from course.models import Lesson, ReviewLesson
 from course.serializer.lesson import LessonSerializer, ReviewLessonSerializer
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
-# GET lesson list
+CACHE_TTL = 60 * 5
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@cache_page(CACHE_TTL, key_prefix="lesson_list")
 def lesson_list(request, course_id):
     try:
         lessons = Lesson.objects.filter(course_id=course_id)
@@ -21,6 +25,7 @@ def lesson_list(request, course_id):
 # GET lesson detail
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@cache_page(CACHE_TTL, key_prefix="lesson_detail")
 def lesson_detail(request, id):
     try:
         lesson = Lesson.objects.get(id=id)

@@ -3,6 +3,7 @@ from Authentication.models import User
 from EStudyApp.models import QuestionSet
 from course.models.base import BaseModel
 
+
 class Blog(BaseModel):
     title = models.CharField(
         max_length=50,
