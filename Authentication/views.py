@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenRefreshView
+from asgiref.sync import async_to_sync
+from .sse_views import notify_logout
 
 
 class UserRegistrationView(APIView):
@@ -56,8 +58,13 @@ class UserLoginView(APIView):
                 access_token = refresh.access_token
 
                 # Store the access token's JTI in the user model
+                old_jti = user.current_jti
                 user.current_jti = str(access_token["jti"])
                 user.save()
+
+                # If there was a previous session, notify it about the forced logout
+                if old_jti:
+                    async_to_sync(notify_logout)(user.id)
 
                 return Response(
                     {

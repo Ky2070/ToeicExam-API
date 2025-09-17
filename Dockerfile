@@ -1,50 +1,33 @@
-# Use official Python image
-FROM python:3.10-slim
+# Use Python 3.12
+FROM python:3.12-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV IN_DOCKER=True
-ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    ffmpeg \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    tesseract-ocr-vie \
-    libtesseract-dev \
-    libsm6 \
-    libxext6 \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Verify installations
-RUN ffmpeg -version && \
-    which ffmpeg && \
-    which ffprobe && \
-    tesseract --version && \
-    tesseract --list-langs
-
-# Create directories for audio processing
-RUN mkdir -p /app/audio /app/wav
+# Set work directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        build-essential \
+        libpq-dev \
+        tesseract-ocr \
+        tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy project
+COPY . /app/
 
-# Expose port
+# Make port 8000 available to the world outside this container
 EXPOSE 8000
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
 # Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "EnglishApp.wsgi:application"]
+# uvicorn EnglishApp.asgi:application --host 0.0.0.0 --port 8000
+CMD ["uvicorn", "EnglishApp.asgi:application", "--host", "0.0.0.0", "--port", "8000"]

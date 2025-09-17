@@ -9,6 +9,8 @@ blinker==1.9.0
 cachetools==5.5.2
 certifi==2024.12.14
 cffi==1.17.1
+channels==4.0.0
+channels-redis==4.1.0
 charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
@@ -109,3 +111,5 @@ whitenoise==6.8.2
 wsproto==1.2.0
 pydub==0.25.1
 SpeechRecognition==3.14.2
+aioredis==2.0.1
+uvicorn==0.32.1

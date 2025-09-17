@@ -1,22 +1,70 @@
+version: '3.8'
+
 services:
-  englishapp:
-    build: .
-    volumes:
-      - .:/app
-    environment:
-      ALLOWED_HOSTS: localhost,127.0.0.1
-      DATABASE_NEON: ${DATABASE_NEON}
-      DATABASE_TYPE: ${DATABASE_TYPE}
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE}
-      DATABASE_MAX_CONNECTIONS: ${DATABASE_MAX_CONNECTIONS}
-      DATABASE_SSL_ENABLED: ${DATABASE_SSL_ENABLED}
-      DATABASE_REJECT_UNAUTHORIZED: ${DATABASE_REJECT_UNAUTHORIZED}
-      PORT: 8000
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: toeic_api
     ports:
-      - 8000:8000
-    command: gunicorn --bind 0.0.0.0:8000 EnglishApp.wsgi:application
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./:/app
+      - /app/venv
+    environment:
+      - DEBUG=${DEBUG:-True}
+      - RENDER=True
+      # Database Configuration
+      - DATABASE_TYPE=${DATABASE_TYPE:-postgres}
+      - DATABASE_HOST=${DATABASE_HOST:-localhost}
+      - DATABASE_PORT=${DATABASE_PORT:-5437}
+      - DATABASE_USERNAME=${DATABASE_USERNAME:-root}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-1234}
+      - DATABASE_NAME=${DATABASE_NAME:-toeic-api}
+      - DATABASE_SYNCHRONIZE=${DATABASE_SYNCHRONIZE:-false}
+      - DATABASE_MAX_CONNECTIONS=${DATABASE_MAX_CONNECTIONS:-100}
+      - DATABASE_SSL_ENABLED=${DATABASE_SSL_ENABLED:-false}
+      - DATABASE_REJECT_UNAUTHORIZED=${DATABASE_REJECT_UNAUTHORIZED:-false}
+      - DATABASE_NEON=${DATABASE_NEON}
+      # Redis Configuration (Docker internal networking)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+      - REDIS_USE_SSL=false
+      - REDIS_URL=redis://redis:6379/1
+      - REDIS_CACHE_URL=redis://redis:6379/1
+      # API Keys
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - toeic_network
+    restart: unless-stopped
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: toeic_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --databases 16
+    healthcheck:
+      test: ["CMD", "redis-cli", "-n", "1", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - toeic_network
+
+networks:
+  toeic_network:
+    name: toeic_network
+    driver: bridge
+
+volumes:
+  redis_data:
+    name: toeic_redis_data
