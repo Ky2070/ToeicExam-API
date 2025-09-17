@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     # 'material',  # Thêm Material
     # 'grappelli',
     # 'admin_black.apps.AdminBlackConfig',
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -144,7 +145,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": os.environ.get("REDIS_CACHE_URL", "redis://127.0.0.1:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {
@@ -195,6 +196,29 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "EnglishApp.wsgi.application"
+ASGI_APPLICATION = "EnglishApp.asgi.application"
+
+# Redis Configuration
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
+REDIS_DB = os.environ.get("REDIS_DB", "1")
+REDIS_USE_SSL = os.environ.get("REDIS_USE_SSL", "false").lower() == "true"
+
+# Construct Redis URL
+REDIS_URL = os.environ.get(
+    "REDIS_URL",
+    f"redis{'s' if REDIS_USE_SSL else ''}://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}",
+)
+
+# Channel layer settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
 
 
 # Database
