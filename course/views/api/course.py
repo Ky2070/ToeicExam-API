@@ -5,8 +5,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework import status
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
 from course.serializer.course import CourseDetailSerializer, CourseSerializer
 
+CACHE_TTL = 60 * 5
 
 # post create course
 @api_view(['POST'])
@@ -18,7 +22,8 @@ def create_course(request):
 class CourseListView(APIView):    
     permission_classes = [AllowAny]
     authentication_classes = []
-    
+
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="course_list"))
     def get(self, request):
         courses = Course.objects.all()
         serializer = CourseSerializer(courses, many=True)
@@ -29,6 +34,7 @@ class CourseListView(APIView):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@cache_page(CACHE_TTL, key_prefix="course_rating")
 def course_detail(request, id):
     course = Course.objects.prefetch_related('course_rating').get(id=id)
     serializer = CourseDetailSerializer(course).data

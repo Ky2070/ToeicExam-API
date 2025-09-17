@@ -5,10 +5,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from course.models.lesson import ReviewLesson
 from course.serializer.review import ReviewLessonSerializer, ReviewLessonReplySerializer
 
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+
+CACHE_TTL = 60 * 5
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
+@cache_page(CACHE_TTL, key_prefix="lesson_review")
 def get_lesson_reviews(request, lesson_id):
     """Get all reviews for a specific lesson"""
     # Only get parent reviews (not replies)

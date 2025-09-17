@@ -42,7 +42,7 @@ services:
     networks:
       - toeic_network
     restart: unless-stopped
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    command: ["uvicorn", "EnglishApp.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
 
   redis:
     image: redis:7-alpine
@@ -68,3 +68,4 @@ networks:
 volumes:
   redis_data:
     name: toeic_redis_data
+

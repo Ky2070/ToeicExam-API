@@ -19,7 +19,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 # from collections import defaultdict
 # from EStudyApp.utils import get_cached_tests  # Import hàm cache từ utils.py
-
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
 # from Authentication.models import User
 from EStudyApp.calculate_toeic import calculate_toeic_score
 from EStudyApp.models import PartDescription, Test, Part, QuestionSet, Question, History, State, \
@@ -34,6 +36,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from EStudyApp.services.service_student import get_suggestions
 
+CACHE_TTL = 60 * 5
 
 class QuestionSkillAPIView(APIView):
     """
@@ -194,17 +197,12 @@ class SubmitTestView(APIView):
 
 
 class DetailHistoryView(APIView):
-    is_authenticated = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="history_detail"))
     def get(self, request, history_id):
-        user = request.user
-        user_id = user.id
-        if user is None:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        history = History.objects.filter(
-            id=history_id, user_id=user_id).first()
-
+        user_id = request.user.id
+        history = History.objects.filter(id=history_id, user_id=user_id).first()
         if history is None:
             return Response({"error": "History not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -213,42 +211,37 @@ class DetailHistoryView(APIView):
 
 
 class DetailSubmitTestView(APIView):
-    # Chỉ cho phép người dùng đã xác thực
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="submit_test"))
     def get(self, request):
-        user_id = request.user.id  # Lấy ID của người dùng hiện tại
-        test_id = request.GET.get('test_id')
+        user_id = request.user.id
+        test_id = request.GET.get("test_id")
         if test_id is None:
             return Response({"error": "Test ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        test = Test.objects.get(id=test_id)
-        if test is None:
+        try:
+            test = Test.objects.get(id=test_id)
+        except Test.DoesNotExist:
             return Response({"error": "Test not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Truy vấn dữ liệu History và chỉ lấy các trường cần thiết
         histories = (
             History.objects.filter(user_id=user_id, test=test)
-            .select_related('test')  # Join bảng Test
-            .only(
-                'id', 'user_id', 'score', 'start_time', 'end_time',
-                'listening_score', 'reading_score',  # Trường từ History
-                'complete', 'test__id', 'test__name'  # Chỉ lấy id và name từ Test
-            )
+            .select_related("test")
+            .only("id", "user_id", "score", "start_time", "end_time",
+                  "listening_score", "reading_score", "complete",
+                  "test__id", "test__name")
         )
 
         if not histories.exists():
-            return Response(
-                {"error": "No history found for this user"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "No history found for this user"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Serialize danh sách lịch sử
         serializer = HistorySerializer(histories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TestDetailView(APIView):
+    @method_decorator(cache_page(60 * 5, key_prefix="test_detail"))
     def get(self, request, pk, format=None):
         try:
             # Nạp đầy đủ các phần, bộ câu hỏi, và câu hỏi liên quan đến bài kiểm tra
@@ -303,6 +296,7 @@ class TestListView(APIView):
        API view để lấy danh sách các bài kiểm tra với phân trang cố định.
     """
 
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="test_list"))
     def get(self, request, format=None):
         # Lấy danh sách bài kiểm tra, tránh truy vấn toàn bộ cơ sở dữ liệu
         # get type from request and default is Practice
@@ -422,7 +416,7 @@ class TestListView(APIView):
 
 
 class TestPartDetailView(APIView):
-
+    @method_decorator(cache_page(CACHE_TTL, key_prefix="test_part_detail"))
     def get(self, request, test_id, format=None):
         parts = [int(part) for part in request.GET.get('parts').split(',')]
         try:
